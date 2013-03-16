@@ -1,59 +1,66 @@
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import net.jumperz.app.MMonjaDB.eclipse.MUtil;
+import net.jumperz.app.MMonjaDB.eclipse.dialog.MInsertJsonDialog;
+import net.jumperz.app.MMonjaDBCore.MOutputView;
+import net.jumperz.app.MMonjaDBCore.action.MFindAction;
+import net.jumperz.app.MMonjaDBCore.action.mj.MEditAction;
+import net.jumperz.app.MMonjaDBCore.event.MEvent;
+import net.jumperz.app.MMonjaDBCore.event.MEventManager;
+import net.jumperz.gui.MSwtUtil;
+import net.jumperz.mongo.MFindQuery;
+import net.jumperz.mongo.MMongoUtil;
+import net.jumperz.util.MHistory;
+
 import org.bson.types.BSONTimestamp;
 import org.bson.types.CodeWScope;
 import org.bson.types.MaxKey;
 import org.bson.types.MinKey;
-import org.bson.types.ObjectId;
-import org.eclipse.jface.action.*;
-import org.eclipse.jface.dialogs.DialogMessageArea;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.*;
-import org.eclipse.swt.widgets.Composite;
-
-import com.mongodb.*;
-import com.mongodb.util.JSON;
-
-import java.text.Collator;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.List;
-
-import net.jumperz.util.*;
-import java.io.*;
-import net.jumperz.gui.*;
-import net.jumperz.mongo.MFindQuery;
-import net.jumperz.mongo.MMongoUtil;
-
-import net.jumperz.app.MMonjaDB.eclipse.MUtil;
-import net.jumperz.app.MMonjaDB.eclipse.dialog.*;
-import net.jumperz.app.MMonjaDBCore.MDataManager;
-import net.jumperz.app.MMonjaDBCore.MOutputView;
-import net.jumperz.app.MMonjaDBCore.action.*;
-import net.jumperz.app.MMonjaDBCore.action.mj.MEditAction;
-import net.jumperz.app.MMonjaDBCore.action.mj.MShowAllDbStatsAction;
-import net.jumperz.app.MMonjaDBCore.event.*;
-import java.util.*;
-import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import java.util.regex.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
 
 public class MDocumentList
 extends MAbstractView

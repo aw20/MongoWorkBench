@@ -1,81 +1,70 @@
 package net.jumperz.net;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import net.jumperz.util.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class MResolver
-{
-private static long MAX_WAIT_TIME = 1000; // 1 second
+import net.jumperz.util.MSystemUtil;
+import net.jumperz.util.MThreadPool;
 
-private Map database = new HashMap( 128 );
-private MThreadPool threadPool;
-//--------------------------------------------------------------------------------
-public MResolver( MThreadPool t )
-{
-threadPool = t;
-}
-//--------------------------------------------------------------------------------
-public String lookup( String ip )
-throws IOException
-{
-return lookup( ip, MAX_WAIT_TIME );
-}
-//--------------------------------------------------------------------------------
-public String lookup( String ip, long waitTime )
-throws IOException
-{
-synchronized( database )
-	{
-	if( database.containsKey( ip ) )
-		{
-		return  ( String )database.get( ip );
-		}	
+public class MResolver {
+	private static long MAX_WAIT_TIME = 1000; // 1 second
+
+	private Map database = new HashMap(128);
+
+	private MThreadPool threadPool;
+
+	// --------------------------------------------------------------------------------
+	public MResolver(MThreadPool t) {
+		threadPool = t;
 	}
 
-Object mutex = new Object();
+	// --------------------------------------------------------------------------------
+	public String lookup(String ip) throws IOException {
+		return lookup(ip, MAX_WAIT_TIME);
+	}
 
-while( true )
-	{
-	boolean result = threadPool.forceCommand( new MResolverLookupCommand( this, ip, mutex ) );
-	if( result )
-		{
-		break;
+	// --------------------------------------------------------------------------------
+	public String lookup(String ip, long waitTime) throws IOException {
+		synchronized (database) {
+			if (database.containsKey(ip)) {
+				return (String) database.get(ip);
+			}
 		}
-	MSystemUtil.sleep( waitTime );
+
+		Object mutex = new Object();
+
+		while (true) {
+			boolean result = threadPool.forceCommand(new MResolverLookupCommand(this, ip, mutex));
+			if (result) {
+				break;
+			}
+			MSystemUtil.sleep(waitTime);
+		}
+
+		synchronized (mutex) {
+			try {
+				mutex.wait(waitTime);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		String name = "";
+		synchronized (database) {
+			if (database.containsKey(ip)) {
+				name = (String) database.get(ip);
+			}
+		}
+
+		return name;
 	}
 
-synchronized( mutex )
-	{
-	try
-		{
-		mutex.wait( waitTime );
-		}
-	catch( InterruptedException e )
-		{
-		e.printStackTrace();
+	// --------------------------------------------------------------------------------
+	public void addToDatabase(String ip, String name) {
+		synchronized (database) {
+			database.put(ip, name);
 		}
 	}
-
-String name = "";
-synchronized( database )
-	{
-	if( database.containsKey( ip ) )
-		{
-		name = ( String )database.get( ip );		
-		}
-	}
-
-return name;
-}
-//--------------------------------------------------------------------------------
-public void addToDatabase( String ip, String name )
-{
-synchronized( database )
-	{
-	database.put( ip, name );
-	}
-}
-//--------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------
 }

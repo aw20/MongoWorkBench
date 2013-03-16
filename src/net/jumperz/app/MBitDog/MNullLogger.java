@@ -1,20 +1,14 @@
 package net.jumperz.app.MBitDog;
 
-import java.io.*;
-import net.jumperz.util.*;
+import java.io.IOException;
 
-public class MNullLogger
-extends MAbstractLogger
-{
-//--------------------------------------------------------------------------------
-public final void logImpl( String line )
-throws IOException
-{
-	// do nothing :)
-}
-//--------------------------------------------------------------------------------
-protected final void reset()
-{
-}
-//--------------------------------------------------------------------------------
+public class MNullLogger extends MAbstractLogger {
+	
+	public final void logImpl(String line) throws IOException {
+	}
+
+	
+	protected final void reset() {
+	}
+	
 }

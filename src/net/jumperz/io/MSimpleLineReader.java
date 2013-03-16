@@ -1,41 +1,35 @@
 package net.jumperz.io;
 
-import java.io.*;
-import java.util.*;
-import net.jumperz.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
-public class MSimpleLineReader
-implements MLineReader
-{
-private InputStream is;
-private BufferedReader reader;
-// --------------------------------------------------------------------------------
-public String readLine()
-throws IOException
-{
-return reader.readLine();
-}
-// --------------------------------------------------------------------------------
-public void setInputStream( InputStream in )
-throws IOException
-{
-is = in;
-reader = new BufferedReader( new InputStreamReader( is, MCharset.CS_ISO_8859_1 ) );
-}
-// --------------------------------------------------------------------------------
-public int getLastDelimiterSize()
-{
-return 1;
-}
-// --------------------------------------------------------------------------------
-public int getLastDelimiter()
-{
-return UNKNOWN;
-}
-// --------------------------------------------------------------------------------
-public String getLastDelimiterString()
-{
-return "\n";
-}
-// --------------------------------------------------------------------------------
+import net.jumperz.util.MCharset;
+
+public class MSimpleLineReader implements MLineReader {
+	private InputStream is;
+
+	private BufferedReader reader;
+
+	public String readLine() throws IOException {
+		return reader.readLine();
+	}
+
+	public void setInputStream(InputStream in) throws IOException {
+		is = in;
+		reader = new BufferedReader(new InputStreamReader(is, MCharset.CS_ISO_8859_1));
+	}
+
+	public int getLastDelimiterSize() {
+		return 1;
+	}
+
+	public int getLastDelimiter() {
+		return UNKNOWN;
+	}
+
+	public String getLastDelimiterString() {
+		return "\n";
+	}
 }

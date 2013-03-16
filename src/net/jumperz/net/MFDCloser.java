@@ -1,22 +1,16 @@
 package net.jumperz.net;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import net.jumperz.util.*;
+import net.jumperz.util.MCommand;
 
-public class MFDCloser
-implements MCommand
-{
-// --------------------------------------------------------------------------------
-public void execute()
-{
+public class MFDCloser implements MCommand {
+	// --------------------------------------------------------------------------------
+	public void execute() {
 
-}
-// --------------------------------------------------------------------------------
-public void breakCommand()
-{
+	}
 
-}
-// --------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------
+	public void breakCommand() {
+
+	}
+	// --------------------------------------------------------------------------------
 }

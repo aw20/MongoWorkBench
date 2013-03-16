@@ -20,7 +20,15 @@
             class="net.jumperz.app.MMonjaDB.eclipse.view.MActionView"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MActionView"
-            name="Actions"
+            name="Cmd Console"
+            restorable="true">
+      </view>
+      <view
+            category="MonjaDB.category1"
+            class="net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView"
+            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
+            id="net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView"
+            name="History"
             restorable="true">
       </view>
       <view
@@ -76,7 +84,7 @@
             class="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_go.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
-            name="JavaScript on MongoDB Server"
+            name="JavaScript"
             restorable="true">
       </view>
    </extension>
