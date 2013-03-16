@@ -1,4 +1,4 @@
-MonjaDB
+NoSQL Workbench
 =======
 
 A powerful GPL Eclipse plugin MySQL/SQLServer Workbench style client tool for interacting with MongoDB.  Based and forked from the popular MonjaDB Eclipse plugin.
