@@ -1,3 +1,24 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import java.text.Collator;
@@ -40,12 +61,10 @@ public class MDBList extends MAbstractView implements MOutputView {
 
 	private int sortOrder = 0;
 
-	// --------------------------------------------------------------------------------
 	public MDBList() {
 		MEventManager.getInstance().register2(this);
 	}
 
-	// --------------------------------------------------------------------------------
 	public void init2() {
 		parent.setLayout(formLayout);
 
@@ -71,11 +90,9 @@ public class MDBList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	public void setFocus() {
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onShowDbs(MShowDBAction action) {
 		/*
 		 * //check Context if( action.getContext() != MDataManager.getInstance().getMongo() ) { debug( "invalid state" ); return; }
@@ -84,7 +101,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		actionManager.executeAction("mj show all db stats");
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableSelect(Event event) {
 		TableItem[] items = table.getSelection();
 		if (items.length != 1) {
@@ -97,7 +113,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	protected void handleEvent2(Event event) {
 		if (event.widget == table) {
 			switch (event.type) {
@@ -117,7 +132,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private double toDouble(Object value) {
 		if (value instanceof Integer) {
 			Integer intval = (Integer) value;
@@ -133,7 +147,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableColumnSelect(TableColumn column) {
 		final String columnName = column.getText();
 
@@ -180,9 +193,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 				return collator.compare(str1, str2) * _sortOrder;
 			}
 
-			public boolean equals(Object o1, Object o2) {
-				return o1.equals(o2);
-			}
 		};
 		/***************/
 
@@ -191,12 +201,10 @@ public class MDBList extends MAbstractView implements MOutputView {
 		drawTable(statsList);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableColumnResize() {
 		MSwtUtil.setTableColumnWidthToProperties(DBLIST_TABLE, table, prop);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void clearTable() {
 		// reset table
 		TableColumn[] columns = table.getColumns();
@@ -206,7 +214,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		table.removeAll();
 	}
 
-	// --------------------------------------------------------------------------------
 	private Map convertMap(Map data) {
 		Map sortedMap = null;
 		sortedMap = new LinkedHashMap();
@@ -218,7 +225,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		return sortedMap;
 	}
 
-	// --------------------------------------------------------------------------------
 	private void drawTable(final java.util.List list) {
 		final MDBList dbList = this;
 		shell.getDisplay().asyncExec(new Runnable() {
@@ -285,7 +291,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		});// *****
 	}
 
-	// --------------------------------------------------------------------------------
 	private synchronized void onShowAllDbStats(MShowAllDbStatsAction action) {
 		/*
 		 * //check Context if( action.getContext() != MDataManager.getInstance().getMongo() ) { debug( "invalid state" ); return; }
@@ -299,7 +304,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		drawTable(statsList);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void selectItem(String dbName) {
 		if (table.getItemCount() == 0) {
 			return;
@@ -318,7 +322,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onUse(MUseAction action) {
 		final String dbName = action.getDBName();
 
@@ -331,7 +334,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		});// *****
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onDisconnect() {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {// *****
@@ -344,17 +346,13 @@ public class MDBList extends MAbstractView implements MOutputView {
 
 	}
 
-	// --------------------------------------------------------------------------------
 	public void dispose() {
 		MEventManager.getInstance().removeObserver2(this);
 
 		super.dispose();
 	}
 
-	// --------------------------------------------------------------------------------
 	public void update(final Object e, final Object source) {
-		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
-
 		final MEvent event = (MEvent) e;
 		final String eventName = event.getEventName();
 
@@ -370,14 +368,6 @@ public class MDBList extends MAbstractView implements MOutputView {
 		} else if (event.getEventName().indexOf(event_disconnect + "_end") == 0) {
 			onDisconnect();
 		}
-
-		// } public void breakCommand(){} } ); //------------
 	}
-	// --------------------------------------------------------------------------------
-	/*
-	 * public void init(IViewSite site, IMemento memento) throws PartInitException {
-	 * 
-	 * debug( "--" ); debug( site ); debug( memento ); init(site); } //-------------------------------------------------------------------------------- public void saveState(IMemento memento) { debug( "--saveState--" ); debug( memento ); }
-	 */
-	// --------------------------------------------------------------------------------
+
 }

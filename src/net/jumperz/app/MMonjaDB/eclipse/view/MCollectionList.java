@@ -1,3 +1,24 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import java.text.Collator;
@@ -33,19 +54,14 @@ import com.mongodb.DB;
 
 public class MCollectionList extends MAbstractView implements MOutputView {
 	private Table table;
-
 	private Image image;
-
 	private java.util.List statsList;
-
 	private int sortOrder = 0;
 
-	// --------------------------------------------------------------------------------
 	public MCollectionList() {
 		MEventManager.getInstance().register2(this);
 	}
 
-	// --------------------------------------------------------------------------------
 	public void init2() {
 		parent.setLayout(formLayout);
 
@@ -71,16 +87,13 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	public void setFocus() {
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onShowCollections(MShowCollectionAction action) {
 		actionManager.executeAction("mj show all collection stats");
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableSelect(Event event) {
 		TableItem[] items = table.getSelection();
 		if (items.length != 1) {
@@ -99,7 +112,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	protected void handleEvent2(Event event) {
 		if (event.widget == table) {
 			switch (event.type) {
@@ -119,7 +131,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private double toDouble(Object value) {
 		if (value instanceof Integer) {
 			Integer intval = (Integer) value;
@@ -135,7 +146,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableColumnSelect(TableColumn column) {
 		final String columnName = column.getText();
 
@@ -149,7 +159,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		final int _sortOrder = sortOrder;
 
 		Comparator c = new Comparator() {
-			/**************/
 			public int compare(Object o1, Object o2) {
 				Map map1 = (Map) o1;
 				Map map2 = (Map) o2;
@@ -181,24 +190,17 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 				Collator collator = Collator.getInstance(Locale.getDefault());
 				return collator.compare(str1, str2) * _sortOrder;
 			}
-
-			public boolean equals(Object o1, Object o2) {
-				return o1.equals(o2);
-			}
 		};
-		/***************/
 
 		Collections.sort(statsList, c);
 
 		drawTable(statsList);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableColumnResize() {
 		MSwtUtil.setTableColumnWidthToProperties(DBLIST_TABLE, table, prop);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void clearTable() {
 		// reset table
 		TableColumn[] columns = table.getColumns();
@@ -208,7 +210,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		table.removeAll();
 	}
 
-	// --------------------------------------------------------------------------------
 	private Map convertMap(Map data) {
 		Map sortedMap = null;
 		sortedMap = new LinkedHashMap();
@@ -220,7 +221,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		return sortedMap;
 	}
 
-	// --------------------------------------------------------------------------------
 	private void drawTable(final java.util.List list) {
 		final MCollectionList dbList = this;
 		shell.getDisplay().asyncExec(new Runnable() {
@@ -287,7 +287,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		});// *****
 	}
 
-	// --------------------------------------------------------------------------------
 	private synchronized void onShowAllCollectionStats(MShowAllCollectionStatsAction action) {
 		/*
 		 * //check Context if( action.getContext() != MDataManager.getInstance().getMongo() ) { //debug( "invalid state" ); return; }
@@ -301,7 +300,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		drawTable(statsList);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void selectItem(String dbName) {
 		if (table.getItemCount() == 0) {
 			return;
@@ -320,7 +318,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onUse(MUseAction action) {
 		final String dbName = action.getDBName();
 
@@ -333,7 +330,6 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 		});// *****
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onDisconnect() {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {// *****
@@ -346,17 +342,13 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 
 	}
 
-	// --------------------------------------------------------------------------------
 	public void dispose() {
 		MEventManager.getInstance().removeObserver2(this);
 
 		super.dispose();
 	}
 
-	// --------------------------------------------------------------------------------
 	public void update(final Object e, final Object source) {
-		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
-
 		final MEvent event = (MEvent) e;
 		final String eventName = event.getEventName();
 
@@ -373,5 +365,5 @@ public class MCollectionList extends MAbstractView implements MOutputView {
 			onDisconnect();
 		}
 	}
-	// --------------------------------------------------------------------------------
+
 }

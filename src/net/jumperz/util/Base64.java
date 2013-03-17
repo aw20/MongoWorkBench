@@ -1,3 +1,24 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ */
 package net.jumperz.util;
 
 /**
@@ -74,8 +95,6 @@ public class Base64 {
 	 */
 	};
 
-	private final static byte BAD_ENCODING = -9; // Indicates error in encoding
-
 	private final static byte WHITE_SPACE_ENC = -5; // Indicates white space in encoding
 
 	private final static byte EQUALS_SIGN_ENC = -1; // Indicates equals sign in encoding
@@ -84,168 +103,6 @@ public class Base64 {
 	private Base64() {
 	}
 
-	/**
-	 * Testing. Feel free--in fact I encourage you--to throw out this entire "main" method when you actually deploy this code.
-	 */
-	public static void main(String[] args) {
-		try {
-			// Test encoding/decoding byte arrays
-			{
-				byte[] bytes1 = { (byte) 2, (byte) 2, (byte) 3, (byte) 0, (byte) 9 }; // My zip code
-				byte[] bytes2 = { (byte) 99, (byte) 2, (byte) 2, (byte) 3, (byte) 0, (byte) 9 };
-				System.out.println("Bytes 2,2,3,0,9 as Base64: " + encodeBytes(bytes1));
-				System.out.println("Bytes 2,2,3,0,9 w/ offset: " + encodeBytes(bytes2, 1, bytes2.length - 1));
-				byte[] dbytes = decode(encodeBytes(bytes1));
-				System.out.print(encodeBytes(bytes1) + " decoded: ");
-				for (int i = 0; i < dbytes.length; i++)
-					System.out.print(dbytes[i] + (i < dbytes.length - 1 ? "," : "\n"));
-			} // end testing byte arrays
-
-			// Test Input Stream
-			{
-
-				// Read GIF stored in base64 form.
-				java.io.FileInputStream fis = null;// new java.io.FileInputStream( "test.gif.b64" );
-				Base64.InputStream b64is = null;// new Base64.InputStream( fis, DECODE );
-
-				byte[] bytes = new byte[0];
-				int b = -1;
-				/*
-				 * while( (b = b64is.read()) >= 0 ){ byte[] temp = new byte[ bytes.length + 1 ]; System.arraycopy( bytes,0, temp,0,bytes.length ); temp[bytes.length] = (byte)b; bytes = temp; } // end while: terribly inefficient way to read data b64is.close();
-				 */
-				bytes = Base64.readFile("test.gif.b64", false);
-				javax.swing.ImageIcon iicon = new javax.swing.ImageIcon(bytes);
-				javax.swing.JLabel jlabel = new javax.swing.JLabel("Read from test.gif.b64", iicon, 0);
-				javax.swing.JFrame jframe = new javax.swing.JFrame();
-				jframe.getContentPane().add(jlabel);
-				jframe.pack();
-				jframe.show();
-
-				// Write raw bytes to file
-				java.io.FileOutputStream fos = new java.io.FileOutputStream("test.gif_out");
-				fos.write(bytes);
-				fos.close();
-
-				// Read raw bytes and encode
-				fis = new java.io.FileInputStream("test.gif_out");
-				b64is = new Base64.InputStream(fis, ENCODE);
-				byte[] ebytes = new byte[0];
-				b = -1;
-				while ((b = b64is.read()) >= 0) {
-					byte[] temp = new byte[ebytes.length + 1];
-					System.arraycopy(ebytes, 0, temp, 0, ebytes.length);
-					temp[ebytes.length] = (byte) b;
-					ebytes = temp;
-				} // end while: terribly inefficient way to read data
-				b64is.close();
-				String s = new String(ebytes);
-				javax.swing.JTextArea jta = new javax.swing.JTextArea(s);
-				javax.swing.JScrollPane jsp = new javax.swing.JScrollPane(jta);
-				jframe = new javax.swing.JFrame();
-				jframe.setTitle("Read from test.gif_out");
-				jframe.getContentPane().add(jsp);
-				jframe.pack();
-				jframe.show();
-
-				// Write encoded bytes to file
-				fos = new java.io.FileOutputStream("test.gif.b64_out");
-				fos.write(ebytes);
-
-				// Read GIF stored in base64 form.
-				fis = new java.io.FileInputStream("test.gif.b64_out");
-				b64is = new Base64.InputStream(fis, DECODE);
-				byte[] edbytes = new byte[0];
-				b = -1;
-				while ((b = b64is.read()) >= 0) {
-					byte[] temp = new byte[edbytes.length + 1];
-					System.arraycopy(edbytes, 0, temp, 0, edbytes.length);
-					temp[edbytes.length] = (byte) b;
-					edbytes = temp;
-				} // end while: terribly inefficient way to read data
-				b64is.close();
-				iicon = new javax.swing.ImageIcon(edbytes);
-				jlabel = new javax.swing.JLabel("Read from test.gif.b64_out", iicon, 0);
-				jframe = new javax.swing.JFrame();
-				jframe.getContentPane().add(jlabel);
-				jframe.pack();
-				jframe.show();
-			} // end: Test Input Stream
-
-			// Test Output Stream
-			{
-				// Read raw bytes
-				java.io.FileInputStream fis = new java.io.FileInputStream("test.gif_out");
-				byte[] rbytes = new byte[0];
-				int b = -1;
-				while ((b = fis.read()) >= 0) {
-					byte[] temp = new byte[rbytes.length + 1];
-					System.arraycopy(rbytes, 0, temp, 0, rbytes.length);
-					temp[rbytes.length] = (byte) b;
-					rbytes = temp;
-				} // end while: terribly inefficient way to read data
-				fis.close();
-
-				// Write raw bytes to encoded file
-
-				java.io.FileOutputStream fos = null;// new java.io.FileOutputStream("test.gif.b64_out2");
-				Base64.OutputStream b64os = null;// new Base64.OutputStream( fos, ENCODE );
-				// b64os.write( rbytes );
-				// b64os.close();
-				Base64.writeFile(rbytes, "test.gif.b64", ENCODE);
-
-				// Read raw bytes that are actually encoded (but we'll ignore that)
-				fis = new java.io.FileInputStream("test.gif.b64_out2");
-				byte[] rebytes = new byte[0];
-				b = -1;
-				while ((b = fis.read()) >= 0) {
-					byte[] temp = new byte[rebytes.length + 1];
-					System.arraycopy(rebytes, 0, temp, 0, rebytes.length);
-					temp[rebytes.length] = (byte) b;
-					rebytes = temp;
-				} // end while: terribly inefficient way to read data
-				fis.close();
-				String s = new String(rebytes);
-				javax.swing.JTextArea jta = new javax.swing.JTextArea(s);
-				javax.swing.JScrollPane jsp = new javax.swing.JScrollPane(jta);
-				javax.swing.JFrame jframe = new javax.swing.JFrame();
-				jframe.setTitle("Read from test.gif.b64_out2");
-				jframe.getContentPane().add(jsp);
-				jframe.pack();
-				jframe.show();
-
-				// Write encoded bytes to decoded raw file
-				fos = new java.io.FileOutputStream("test.gif_out2");
-				b64os = new Base64.OutputStream(fos, DECODE);
-				b64os.write(rebytes);
-				b64os.close();
-				javax.swing.ImageIcon iicon = new javax.swing.ImageIcon("test.gif_out2");
-				javax.swing.JLabel jlabel = new javax.swing.JLabel("Read from test.gif_out2", iicon, 0);
-				jframe = new javax.swing.JFrame();
-				jframe.getContentPane().add(jlabel);
-				jframe.pack();
-				jframe.show();
-
-			} // end: Test Output Stream
-
-		} // end try
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	} // end main
-
-	/* ******** E N C O D I N G M E T H O D S ******** */
-
-	/**
-	 * Encodes the first three bytes of array <var>threeBytes</var> and returns a four-byte array in Base64 notation.
-	 * 
-	 * @param threeBytes
-	 *          the array to convert
-	 * @return four byte array in Base64 notation.
-	 * @since 1.3
-	 */
-	private static byte[] encode3to4(byte[] threeBytes) {
-		return encode3to4(threeBytes, 3);
-	} // end encodeToBytes
 
 	/**
 	 * Encodes up to the first three bytes of array <var>threeBytes</var> and returns a four-byte array in Base64 notation. The actual number of significant bytes in your array is given by <var>numSigBytes</var>. The array <var>threeBytes</var> needs only be as big as <var>numSigBytes</var>.

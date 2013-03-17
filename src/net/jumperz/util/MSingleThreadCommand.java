@@ -1,48 +1,58 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ */
 package net.jumperz.util;
 
-import net.jumperz.util.*;
+public abstract class MSingleThreadCommand implements MCommand {
+	protected volatile boolean terminated = false;
 
-public abstract class MSingleThreadCommand
-implements MCommand
-{
-protected volatile boolean terminated = false;
-protected Thread myThread;
-protected Object mutex;
+	protected Thread myThread;
 
-protected abstract void execute2();
-//--------------------------------------------------------------------------------
-public void execute()
-{
-myThread = Thread.currentThread();
+	protected Object mutex;
 
-while( !terminated )
-	{
-	execute2();
-	
-	if( terminated )
-		{
-		break;
-		}
+	protected abstract void execute2();
 
-	synchronized( mutex )
-		{
-		try
-			{
-			mutex.wait();
+	public void execute() {
+		myThread = Thread.currentThread();
+
+		while (!terminated) {
+			execute2();
+
+			if (terminated) {
+				break;
 			}
-		catch( InterruptedException e )
-			{
-			e.printStackTrace();
-			break;
+
+			synchronized (mutex) {
+				try {
+					mutex.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					break;
+				}
 			}
 		}
+
+		cleanup();
 	}
 
-cleanup();
-}
-// --------------------------------------------------------------------------------
-protected void cleanup()
-{
-}
-//--------------------------------------------------------------------------------
+	protected void cleanup() {
+	}
 }

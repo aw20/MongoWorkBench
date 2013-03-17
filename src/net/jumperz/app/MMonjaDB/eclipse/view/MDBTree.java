@@ -1,3 +1,24 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import java.util.ArrayList;
@@ -43,18 +64,15 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 	private Action removeDbAction;
 
-	// --------------------------------------------------------------------------------
 	public MDBTree() {
 		MEventManager.getInstance().register2(this);
 	}
 
-	// --------------------------------------------------------------------------------
 	public void dispose() {
 		eventManager.removeObserver2(this);
 		super.dispose();
 	}
 
-	// --------------------------------------------------------------------------------
 	protected void handleEvent2(Event event) {
 		if (event.widget == tree) {
 			switch (event.type) {
@@ -67,7 +85,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTreeItemSelect() {
 		TreeItem[] selected = tree.getSelection();
 		if (selected != null && selected.length == 1) {
@@ -98,7 +115,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		updateGui();
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onConnect(final MConnectAction ca) {
 		drawRootItem(ca);
 
@@ -114,7 +130,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 	}
 
-	// --------------------------------------------------------------------------------
 	private void updateGui() {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {// ----
@@ -128,7 +143,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		});// ----
 	}
 
-	// --------------------------------------------------------------------------------
 	private void drawRootItem(final MConnectAction ca) {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {// ----
@@ -148,7 +162,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		});// ----
 	}
 
-	// --------------------------------------------------------------------------------
 	private boolean needUpdate(TreeItem parentItem, java.util.List dbNameList) {
 		if (parentItem == null) {
 			return false;
@@ -168,7 +181,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		return false;
 	}
 
-	// --------------------------------------------------------------------------------
 	private void drawDbItems(final java.util.List dbNameList) {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {// -----
@@ -196,14 +208,12 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		});// -----
 	}
 
-	// --------------------------------------------------------------------------------
 	private synchronized void onShowDbs(MShowDBAction action) {
 		// add tree items on the swt thread
 		final java.util.List dbNameList = action.getDBList();
 		drawDbItems(dbNameList);
 	}
 
-	// --------------------------------------------------------------------------------
 	private TreeItem createDbTreeItem(TreeItem mongoItem, String dbName) {
 		TreeItem item = new TreeItem(mongoItem, 0);
 		item.setText(dbName);
@@ -217,7 +227,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		return item;
 	}
 
-	// --------------------------------------------------------------------------------
 	private synchronized void onShowCollections(MShowCollectionAction action) {
 		final String activeDbName = MDataManager.getInstance().getDB().getName();
 
@@ -258,7 +267,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		});// *****
 	}
 
-	// --------------------------------------------------------------------------------
 	private void selectDbItem(String dbName) {
 
 		TreeItem[] selectedItems = tree.getSelection();
@@ -289,7 +297,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void selectItem(String dbName, String collName) {
 		TreeItem item = MUtil.getTreeItemByDbAndCollName(tree, dbName, collName);
 		if (item == null) {
@@ -301,7 +308,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onUse(MUseAction action) {
 		if (action.getOriginView() == this) {
 			return;
@@ -318,7 +324,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		});// *****
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onFind(MFindAction action) {
 		final String dbName = action.getDB().getName();
 		final String collName = action.getCollection().getName();
@@ -332,7 +337,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		});// *****
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onDisconnect() {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {// *****
@@ -347,7 +351,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 	}
 
-	// --------------------------------------------------------------------------------
 	public void update(final Object e, final Object source) {
 		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
 
@@ -376,7 +379,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		// } public void breakCommand(){} } ); //------------
 	}
 
-	// --------------------------------------------------------------------------------
 	public void init2() {
 		parent.setLayout(formLayout);
 
@@ -435,17 +437,14 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	public void onDisconnectSelect() {
 		MActionManager.getInstance().executeAction("mj disconnect");
 	}
 
-	// --------------------------------------------------------------------------------
 	public void onConnectSelect() {
 		(new MConnectDialog(parent.getShell())).open();
 	}
 
-	// --------------------------------------------------------------------------------
 	public void setFocus() {
 
 	}

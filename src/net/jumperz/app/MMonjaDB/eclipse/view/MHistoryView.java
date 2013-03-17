@@ -60,8 +60,9 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 	public MHistoryView() {
 		actionManager.register2(this);
 	}
-	
+
 	protected FormLayout formLayout;
+
 	private Table table;
 	private Action redoAction;
 	private Action clearAction;
@@ -69,7 +70,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 	private Action saveAction;
 	private List actionLogList;
 
-	// --------------------------------------------------------------------------------
 	public void dispose() {
 		actionManager.removeObserver2(this);
 
@@ -82,8 +82,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		super.dispose();
 	}
 
-
-	// --------------------------------------------------------------------------------
 	public void init2() {
 		parent.setLayout(new FormLayout());
 
@@ -124,7 +122,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		fd_text.top = new FormAttachment(0);
 		fd_text.left = new FormAttachment(0);
 
-
 		MSwtUtil.getTableColumnWidthFromProperties("actionListTable", table, prop, new int[] { 200, 100 });
 		MSwtUtil.addListenerToTableColumns2(table, this);
 
@@ -136,65 +133,57 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		table.setMenu(contextMenu);
 
 		// executeTableAction
-		{
-			redoAction = new Action() {
-				public void run() {// ------------
-					repeatActionsOnTable();
-				}
-			};// ------------
-			redoAction.setToolTipText("Redo Selected Actions");
-			redoAction.setText("Redo\tShift+Enter");
-			initAction(redoAction, "table_go.png", menuManager);
-			redoAction.setEnabled(false);
-		}
+		redoAction = new Action() {
+			public void run() {
+				repeatActionsOnTable();
+			}
+		};
+		redoAction.setToolTipText("Redo Selected Actions");
+		redoAction.setText("Redo\tShift+Enter");
+		initAction(redoAction, "table_go.png", menuManager);
+		redoAction.setEnabled(false);
 
 		dropDownMenu.add(new Separator());
 		menuManager.add(new Separator());
 
 		// copyAction
-		{
-			copyAction = new Action() {
-				public void run() {// ------------
-					copyActions();
-				}
-			};// ------------
-			copyAction.setToolTipText("Copy Actions to Clipboard");
-			copyAction.setText("Copy");
-			setActionImage(copyAction, "page_copy.png");
-			addActionToToolBar(copyAction);
-			copyAction.setEnabled(false);
-			dropDownMenu.add(copyAction);
-			menuManager.add(copyAction);
-		}
+		copyAction = new Action() {
+			public void run() {// ------------
+				copyActions();
+			}
+		};// ------------
+		copyAction.setToolTipText("Copy Actions to Clipboard");
+		copyAction.setText("Copy");
+		setActionImage(copyAction, "page_copy.png");
+		addActionToToolBar(copyAction);
+		copyAction.setEnabled(false);
+		dropDownMenu.add(copyAction);
+		menuManager.add(copyAction);
 
 		dropDownMenu.add(new Separator());
 		menuManager.add(new Separator());
 
 		// clearAction
-		{
-			clearAction = new Action() {
-				public void run() {// ------------
-					clearActions();
-				}
-			};// ------------
-			clearAction.setToolTipText("Clear All");
-			clearAction.setText("Clear All");
-			initAction(clearAction, "table_delete.png", menuManager);
-			clearAction.setEnabled(false);
-		}
+		clearAction = new Action() {
+			public void run() {// ------------
+				clearActions();
+			}
+		};// ------------
+		clearAction.setToolTipText("Clear All");
+		clearAction.setText("Clear All");
+		initAction(clearAction, "table_delete.png", menuManager);
+		clearAction.setEnabled(false);
 
 		// saveAction
-		{
-			saveAction = new Action() {
-				public void run() {// ------------
-					saveActions();
-				}
-			};// ------------
-			saveAction.setToolTipText("Save Action");
-			saveAction.setText("Save");
-			initAction(saveAction, "cog_add.png", menuManager);
-			saveAction.setEnabled(false);
-		}
+		saveAction = new Action() {
+			public void run() {// ------------
+				saveActions();
+			}
+		};// ------------
+		saveAction.setToolTipText("Save Action");
+		saveAction.setText("Save");
+		initAction(saveAction, "cog_add.png", menuManager);
+		saveAction.setEnabled(false);
 
 		// load actionLogList
 		if (prop.containsKey(ACTION_LOG_LIST)) {
@@ -209,7 +198,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void saveActions() {
 		// activate MSavedActionsView
 		try {
@@ -246,7 +234,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void copyActions() {
 		// copy selected actions on the table to clipboard
 		TableItem[] selectedItems = table.getSelection();
@@ -258,8 +245,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		MSwtUtil.copyToClipboard(buf.toString());
 	}
 
-	// --------------------------------------------------------------------------------
-	
 	private void clearActions() {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
@@ -286,22 +271,18 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		});// ********
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableDoubleClick(Event event) {
 		// repeatActionsOnTable();
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableColumnSelect(TableColumn column) {
 
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableColumnResize() {
 		MSwtUtil.setTableColumnWidthToProperties("actionListTable", table, prop);
 	}
 
-	// --------------------------------------------------------------------------------
 	protected void handleEvent2(Event event) {
 		if (event.widget == table) {
 			switch (event.type) {
@@ -321,7 +302,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void addActionToTable(Map actionLog) {
 		TableItem item = new TableItem(table, SWT.NONE);
 		item.setText(0, (String) actionLog.get("actionStr"));
@@ -330,7 +310,6 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		item.setData(actionLog);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onAction(final String actionStr) {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {// *****
@@ -348,20 +327,14 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		});// ********
 	}
 
-	// --------------------------------------------------------------------------------
 	public void update(final Object e, final Object source) {
-		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
-
 		if (e instanceof String) {
 			onAction((String) e);
 		} else if (e instanceof MEvent) {
 			debug("====" + e);
 		}
-
-		// } public void breakCommand(){} } ); //------------
 	}
 
-	// --------------------------------------------------------------------------------
 	public void setFocus() {
 
 	}

@@ -25,6 +25,9 @@
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
+import java.io.IOException;
+
+import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDBCore.MOutputView;
 import net.jumperz.app.MMonjaDBCore.action.MAction;
 import net.jumperz.app.MMonjaDBCore.action.MActionManager;
@@ -47,21 +50,10 @@ public class MActionView extends MAbstractView implements MOutputView {
 
 	public void dispose() {
 		actionManager.removeObserver2(this);
-
-		/*
-		if (actionLogList.size() > MAX_SAVED_ACTION_LOG) {
-			actionLogList = actionLogList.subList(0, MAX_SAVED_ACTION_LOG);
-		}
-		String savedStr = JSON.serialize(actionLogList);
-		prop.setProperty(ACTION_LOG_LIST, savedStr);
-
-	*/
-
 		super.dispose();
 	}
 
 	private void executeActionsOnText() {
-		
 		String cmdText = textArea.getSelectionText();
 		if ( cmdText.length() == 0 ){
 			cmdText = textArea.getText();
@@ -71,15 +63,17 @@ public class MActionView extends MAbstractView implements MOutputView {
 		if ( cmdText.length() == 0 )
 			return;
 
-
 		MAction maction = MActionManager.getInstance().getAction(cmdText);
 		if ( maction != null ){
 			MActionManager.getInstance().submitForExecution(maction, this);
 		}
 
 		prop.setProperty(ACTION_CMD_TEXT, textArea.getText() );
-		
-		System.out.println( maction );
+		try {
+			Activator.getDefault().saveConfig();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void init2() {

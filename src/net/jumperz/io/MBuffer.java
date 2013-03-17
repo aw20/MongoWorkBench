@@ -1,3 +1,24 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ */
 package net.jumperz.io;
 
 import java.io.ByteArrayInputStream;
@@ -40,8 +61,6 @@ public final class MBuffer extends OutputStream {
 
 	private boolean isSmall;
 
-	private boolean fileMode = false;
-
 	private File tmpFile;
 
 	private File file;
@@ -52,45 +71,34 @@ public final class MBuffer extends OutputStream {
 
 	private boolean isNull = false;
 
-	// --------------------------------------------------------------------------------
 	public static void setStaticMaxMemSize(int i) {
 		staticMaxMemSize = i;
 	}
 
-	/*
-	 * //-------------------------------------------------------------------------------- public static void deleteTmpFiles() { Iterator p = tmpFileSet.iterator(); while( p.hasNext() ) { File tmpFile = ( File )p.next(); tmpFile.delete(); } } // -------------------------------------------------------------------------------- public static void closeStreams() { Iterator p = streamSet.iterator();
-	 * while( p.hasNext() ) { OutputStream s = ( OutputStream )p.next(); MStreamUtil.closeStream( s ); } }
-	 */
-	// --------------------------------------------------------------------------------
 	public MBuffer(int size) {
 		maxMemSize = size;
 		init();
 	}
 
-	// ----------------------------------------------------------------------------------
 	public MBuffer() {
 		maxMemSize = staticMaxMemSize;
 		init();
 	}
 
-	// --------------------------------------------------------------------------------
 	public void write(int i) throws IOException {
 		activeStream.write(i);
 		totalSize++;
 	}
 
-	// --------------------------------------------------------------------------------
 	public boolean isClosed() {
 		return closed;
 	}
 
-	// --------------------------------------------------------------------------------
 	public void close() {
 		closed = true;
 		MStreamUtil.closeStream(activeStream);
 	}
 
-	// ----------------------------------------------------------------------------------
 	private void init() {
 		/*
 		 * if( bufStream != null ) { try { bufStream.close(); } catch( IOException e ) { e.printStackTrace(); } }
@@ -104,24 +112,20 @@ public final class MBuffer extends OutputStream {
 		activeStream = byteStream;
 	}
 
-	// --------------------------------------------------------------------------------
 	public void setNull() {
 		isSmall = false;
 		isNull = true;
 		activeStream = new MNullOutputStream();
 	}
 
-	// ----------------------------------------------------------------------------------
 	public void write(byte[] buffer, int len) throws IOException {
 		write(buffer, 0, len);
 	}
 
-	// --------------------------------------------------------------------------------
 	public int getSize() {
 		return totalSize;
 	}
 
-	// --------------------------------------------------------------------------------
 	public void write(byte[] buffer, int offset, int len) throws IOException {
 		if (isSmall && totalSize < maxMemSize && (totalSize + len) >= maxMemSize) {
 			changeStreamToTmpFile();
@@ -131,18 +135,15 @@ public final class MBuffer extends OutputStream {
 		totalSize += len;
 	}
 
-	// --------------------------------------------------------------------------------
 	public byte[] getBytes() throws IOException {
 		return MStreamUtil.streamToBytes(getInputStream());
 	}
 
-	// ----------------------------------------------------------------------------------
 	public void write(byte[] buffer) throws IOException {
 		int len = buffer.length;
 		write(buffer, len);
 	}
 
-	// ----------------------------------------------------------------------------------
 	private void changeStreamToTmpFile() throws IOException {
 		isSmall = false;
 
@@ -165,7 +166,6 @@ public final class MBuffer extends OutputStream {
 		}
 	}
 
-	// ----------------------------------------------------------------------------------
 	public InputStream getInputStream() {
 		InputStream inputStream = null;
 		if (isSmall) {
@@ -184,7 +184,6 @@ public final class MBuffer extends OutputStream {
 		return inputStream;
 	}
 
-	// --------------------------------------------------------------------------------
 	public void clear() {
 		try {
 			if (!closed) {
@@ -197,7 +196,6 @@ public final class MBuffer extends OutputStream {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void deleteTmpFile() {
 		if (!isSmall) {
 			if (debug) {
@@ -215,12 +213,9 @@ public final class MBuffer extends OutputStream {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	public void setFile(File f) throws IOException {
 		file = f;
-		fileMode = true;
 		isSmall = false;
 		activeStream = new FileOutputStream(f);
 	}
-	// ----------------------------------------------------------------------------------
 }

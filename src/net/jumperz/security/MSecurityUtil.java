@@ -1,3 +1,24 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ */
 package net.jumperz.security;
 
 import java.io.BufferedInputStream;
@@ -68,21 +89,15 @@ import net.jumperz.util.MSystemUtil;
 
 public class MSecurityUtil {
 	public static final String KEYSTORE_TYPE = "JKS";
-
 	public static final String KEYSTORE_ALIAS = "alias";
-
 	public static final String KEY_PASS = "keyPass";
 
 	// from jp.bitforest.framework1.MWebappUtil.java
 	private static final String CLIENT_SESSION_EXPIRE_KEY = "_CsEx_";
-
 	private static final String CLIENT_SESSION_KEY = "_CsSs_";
-
 	private static final int CLIENT_SESSION_COOKIE_COUNT = 15;
-
 	public static final int DEFAULT_SESSION_EXPIRE_MIN = 30;
 
-	// --------------------------------------------------------------------------------
 	public static boolean isValidChain(List chain) {
 		if (chain.size() < 2) {
 			return false;
@@ -126,7 +141,6 @@ public class MSecurityUtil {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	public static byte[] xor(byte[] b1, byte[] b2) {
 		byte[] buf = new byte[b1.length];
 		for (int i = 0; i < b1.length; ++i) {
@@ -135,7 +149,6 @@ public class MSecurityUtil {
 		return buf;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static X509TrustManager getDefaultTrustManager() throws KeyStoreException, NoSuchAlgorithmException {
 		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 		tmf.init((KeyStore) null);
@@ -143,13 +156,11 @@ public class MSecurityUtil {
 		return (X509TrustManager) tmArray[0];
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static Certificate[] loadCertificatesFromFile(String fileName) throws IOException, CertificateException {
 		FileInputStream fis = new FileInputStream(fileName);
 		return loadCertificatesFromStream(fis);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static X509Certificate loadCertificateFromPem(String pemStr) throws IOException, CertificateException {
 		if (pemStr == null) {
 			throw new IOException("pem str is null");
@@ -157,7 +168,6 @@ public class MSecurityUtil {
 		return (X509Certificate) loadCertificatesFromStream(MStreamUtil.stringToStream(pemStr))[0];
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Certificate[] loadCertificatesFromStream(InputStream fis) throws IOException, CertificateException {
 		CertificateFactory cf = CertificateFactory.getInstance("X.509");
 		Collection c = cf.generateCertificates(fis);
@@ -174,7 +184,6 @@ public class MSecurityUtil {
 		return certArray;
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static Certificate loadCertificateFromFile(String fileName) throws IOException, CertificateException {
 		FileInputStream fis = new FileInputStream(fileName);
 		BufferedInputStream bis = new BufferedInputStream(fis);
@@ -183,13 +192,11 @@ public class MSecurityUtil {
 		return cert;
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static PrivateKey loadPrivateKeyFromFile(String fileName, String algorithm) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		FileInputStream fs = new FileInputStream(fileName);
 		return loadPrivateKeyFromStream(fs, algorithm);
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static PrivateKey loadPrivateKeyFromStream(InputStream in, String algorithm) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		ByteArrayOutputStream bufStream = new ByteArrayOutputStream();
 		MStreamUtil.connectStream(in, bufStream);
@@ -200,7 +207,6 @@ public class MSecurityUtil {
 		return privateKey;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static PublicKey loadPublicKeyFromStream(InputStream in, String algorithm) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		ByteArrayOutputStream bufStream = new ByteArrayOutputStream();
 		MStreamUtil.connectStream(in, bufStream);
@@ -211,7 +217,6 @@ public class MSecurityUtil {
 		return publicKey;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static PublicKey loadPublicKeyFromFile(String fileName, String algorithm) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		FileInputStream fs = new FileInputStream(fileName);
 		PublicKey publicKey = loadPublicKeyFromStream(fs, algorithm);
@@ -219,17 +224,14 @@ public class MSecurityUtil {
 		return publicKey;
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static ServerSocketFactory getServerSocketFactory(String certificateFileName, String privateKeyFileName, String algorithm) throws KeyManagementException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, InvalidKeySpecException, CertificateException, IOException {
 		return MSecurityUtil.getServerSocketFactory(MSecurityUtil.generateKeyStore(certificateFileName, privateKeyFileName, algorithm));
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static ServerSocketFactory getServerSocketFactory(InputStream certificateIn, InputStream privateKeyIn, String algorithm) throws KeyManagementException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, InvalidKeySpecException, CertificateException, IOException {
 		return MSecurityUtil.getServerSocketFactory(MSecurityUtil.generateKeyStore(certificateIn, privateKeyIn, algorithm));
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static KeyStore generateKeyStore(String certificateFileName, String privateKeyFileName, String algorithm) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, KeyStoreException {
 		Certificate[] certList = MSecurityUtil.loadCertificatesFromFile(certificateFileName);
 		PrivateKey privateKey = MSecurityUtil.loadPrivateKeyFromFile(privateKeyFileName, algorithm);
@@ -241,7 +243,6 @@ public class MSecurityUtil {
 		return keyStore;
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static KeyStore generateKeyStore(InputStream certificateIn, InputStream privateKeyIn, String algorithm) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, KeyStoreException {
 		Certificate[] certList = MSecurityUtil.loadCertificatesFromStream(certificateIn);
 		PrivateKey privateKey = MSecurityUtil.loadPrivateKeyFromStream(privateKeyIn, algorithm);
@@ -253,7 +254,6 @@ public class MSecurityUtil {
 		return keyStore;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void initSslContextForServer(SSLContext ctx, KeyStore keyStore) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
 		KeyManagerFactory keyManagerFactory = null;
 		try {
@@ -265,21 +265,18 @@ public class MSecurityUtil {
 		ctx.init(keyManagerFactory.getKeyManagers(), null, null);
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static SSLSocketFactory getSSLSocketFactory(KeyStore keyStore) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
 		SSLContext ctx = getSslContext();
 		initSslContextForServer(ctx, keyStore);
 		return ctx.getSocketFactory();
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static ServerSocketFactory getServerSocketFactory(KeyStore keyStore) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
 		SSLContext ctx = getSslContext();
 		initSslContextForServer(ctx, keyStore);
 		return ctx.getServerSocketFactory();
 	}
 
-	// --------------------------------------------------------------------------------
 	public static SSLContext getSslContext() throws NoSuchAlgorithmException {
 		SSLContext ctx = null;
 		try {
@@ -292,13 +289,12 @@ public class MSecurityUtil {
 		return ctx;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Map getClientSessionImpl(MParameter[] cookies, MBlowfishCBCCipher cipher) throws IOException, ClassNotFoundException {
 		/*
 		 * Cookie[] cookies = request.getCookies(); if( cookies == null ) { return new HashMap(); }
 		 */
 
-		// -----COPY FROM jp.bitforest.framework1.MWebappUtil------->
+		// -----COPY FROM jp.bitforest.framework1.MWebappUtil>
 
 		String[] buffer = new String[CLIENT_SESSION_COOKIE_COUNT];
 		for (int i = 0; i < cookies.length; ++i) {
@@ -343,10 +339,9 @@ public class MSecurityUtil {
 		}
 
 		return new HashMap();
-		// -----COPY FROM jp.bitforest.framework1.MWebappUtil-------<
+		// -----COPY FROM jp.bitforest.framework1.MWebappUtil<
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Map getEncryptedDataFromCookie(MHttpRequest request, MBlowfishCBCCipher cipher) throws IOException, ClassNotFoundException {
 		List cookieList = request.getCookieList();
 		MParameter[] cookies = new MParameter[cookieList.size()];
@@ -362,7 +357,6 @@ public class MSecurityUtil {
 		return MSecurityUtil.getClientSessionImpl(cookies, cipher);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void disableCipherSuites(SSLServerSocket sSocket) {
 		disableCipherSuites(sSocket, "DHE");
 		disableCipherSuites(sSocket, "SSL_RSA_WITH_DES_CBC_SHA");
@@ -370,7 +364,6 @@ public class MSecurityUtil {
 		disableCipherSuites(sSocket, "SSL_RSA_EXPORT_WITH_DES40_CBC_SHA");
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void disableCipherSuites(SSLServerSocket sSocket, String name) {
 		String[] enabledList = sSocket.getEnabledCipherSuites();
 		List tempList = new ArrayList();
@@ -387,12 +380,10 @@ public class MSecurityUtil {
 		sSocket.setEnabledCipherSuites(newCipherSuites);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static SocketFactory getBogusSslSocketFactory() {
 		return getBogusSslSocketFactory(null);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static SocketFactory getBogusSslSocketFactory(KeyManager[] kmArray) {
 		SSLContext ctx = null;
 		try {
@@ -408,12 +399,10 @@ public class MSecurityUtil {
 		return ctx.getSocketFactory();
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket getBogusSslSocketViaProxy(String host, int port, String proxyHost, int proxyPort) throws IOException {
 		return getBogusSslSocketViaProxy(host, port, proxyHost, proxyPort);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket getBogusSslSocketViaProxy(String host, int port, String proxyHost, int proxyPort, KeyManager[] kmArray) throws IOException {
 		Socket rawSocket = new Socket(proxyHost, proxyPort);
 		OutputStream rawOut = rawSocket.getOutputStream();
@@ -428,6 +417,7 @@ public class MSecurityUtil {
 		while (true) {
 			int received = rawIn.read(buf);
 			if (received == -1) {
+				rawSocket.close();
 				throw new IOException("Proxy CONNECT failed.");
 			}
 			byteBuf.write(buf, 0, received);
@@ -435,6 +425,7 @@ public class MSecurityUtil {
 			if (bufStr.endsWith("\r\n\r\n")) {
 				MHttpResponse response = new MHttpResponse(bufStr);
 				if (response.getStatusCode() != 200) {
+					rawSocket.close();
 					throw new IOException(response.getStatusLine());
 				}
 				break;
@@ -445,18 +436,15 @@ public class MSecurityUtil {
 		return factory.createSocket(rawSocket, host, port, true);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void main(String[] args) throws Exception {
 		testSslConnect();
 		System.out.println("OK.");
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void p(Object o) {
 		System.out.println(o);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void testSslConnect() throws Exception {
 		// 127.0.0.1:443 must be closed
 		List ipList = Arrays.asList(new Object[] { "127.0.0.1", "www.gmail.com" });
@@ -467,12 +455,10 @@ public class MSecurityUtil {
 		s.close();
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket getBogusSslSocket(String host, int port, KeyManager[] kmArray) throws IOException {
 		return MSecurityUtil.getBogusSslSocketFactory(kmArray).createSocket(host, port);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket sslConnect(List hostList, int port) throws IOException {
 		List portList = new ArrayList(hostList.size());
 		for (int i = 0; i < hostList.size(); ++i) {
@@ -481,7 +467,6 @@ public class MSecurityUtil {
 		return sslConnect(hostList, portList);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket sslConnect(List hostList, List portList) throws IOException {
 		IOException ex = null;
 		for (int i = 0; i < hostList.size(); ++i) {
@@ -495,12 +480,10 @@ public class MSecurityUtil {
 		throw ex;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket sslConnect(String host, int connectPort) throws IOException {
 		return sslConnect(host, connectPort, 30);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket sslConnect(String host, int connectPort, int connectTimeOut) throws IOException {
 		Socket socket = null;
 		IOException ex = null;
@@ -518,17 +501,14 @@ public class MSecurityUtil {
 		throw ex;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Socket getBogusSslSocket(String host, int port) throws IOException {
 		return MSecurityUtil.getBogusSslSocketFactory().createSocket(host, port);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void checkServerTrusted(Certificate trusted, Certificate server) throws Exception {
 		checkServerTrusted(new Certificate[] { trusted }, server);
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void checkServerTrusted(Certificate[] trusted, Certificate server, List rootCertList) throws Exception {
 		KeyStore ks = KeyStore.getInstance("JKS");
 		ks.load(null, null);
@@ -551,7 +531,6 @@ public class MSecurityUtil {
 		x509tm.checkServerTrusted(new X509Certificate[] { x509 }, "RSA");
 	}
 
-	// --------------------------------------------------------------------------------
 	public static void checkServerTrusted(Certificate[] trusted, Certificate server) throws Exception {
 		KeyStore ks = KeyStore.getInstance("JKS");
 		ks.load(null, null);
@@ -569,12 +548,10 @@ public class MSecurityUtil {
 		x509tm.checkServerTrusted(new X509Certificate[] { x509 }, "RSA");
 	}
 
-	// --------------------------------------------------------------------------------
 	public static boolean isRoot(X509Certificate cert) {
 		return cert.getIssuerDN().equals(cert.getSubjectDN());
 	}
 
-	// --------------------------------------------------------------------------------
 	public static List getTrustedPrincipals() throws Exception {
 		List certList = getTrustedCerts();
 		List principalList = new ArrayList(certList.size());
@@ -586,7 +563,6 @@ public class MSecurityUtil {
 		return principalList;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static Map getTrustedCertMap() throws Exception {
 		Map map = new HashMap();
 		List l = getTrustedCerts();
@@ -597,7 +573,6 @@ public class MSecurityUtil {
 		return map;
 	}
 
-	// --------------------------------------------------------------------------------
 	public static List getTrustedCerts() throws Exception {
 		List l = new ArrayList();
 
@@ -630,7 +605,6 @@ public class MSecurityUtil {
 		 */
 	}
 
-	// ---------------------------------------------------------------------------------------
 	public static HostnameVerifier getBogusHostnameVerifier() {
 		return new HostnameVerifier() {
 			public boolean verify(String hostname, SSLSession session) {
@@ -638,6 +612,5 @@ public class MSecurityUtil {
 			}
 		};
 	}
-	// --------------------------------------------------------------------------------
 
 }

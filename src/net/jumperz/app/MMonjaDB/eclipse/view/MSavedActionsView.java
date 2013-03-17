@@ -1,8 +1,23 @@
-/*
- * Created on Mar 3, 2012
- *
- * To change the template for this generated file go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
@@ -53,21 +68,16 @@ import com.mongodb.util.JSON;
 
 public class MSavedActionsView extends MAbstractView implements MOutputView {
 	private Tree tree;
-
 	private Action newAction, newFolderAction, editAction, removeAction, executeAction;
-
 	private Display display;
 
 	// private
-	// --------------------------------------------------------------------------------
+
 	public MSavedActionsView() {
 		MEventManager.getInstance().register2(this);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onExecute() {
-		final MSavedActionsView view = this;
-
 		TreeItem[] selected = tree.getSelection();
 		if (selected == null || selected.length != 1) {
 		} else {
@@ -89,7 +99,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void editSavedAction(TreeItem item) {
 		MActionDialog dialog = new MActionDialog(shell, (Map) item.getData());
 		int result = dialog.open();
@@ -99,7 +108,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onEdit() {
 		TreeItem[] selected = tree.getSelection();
 		if (selected == null || selected.length != 1) {
@@ -119,7 +127,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onRemove() {
 		TreeItem[] selected = tree.getSelection();
 		if (selected == null || selected.length != 1 || isRootItem(selected[0])) {
@@ -134,7 +141,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTreeSelect() {
 		TreeItem[] selected = tree.getSelection();
 		boolean itemSelected = false;
@@ -162,7 +168,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		removeAction.setEnabled(itemSelected && !rootSelected);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onTableKeyDown(Event e) {
 		/*
 		 * if( ( ( e.stateMask & SWT.CTRL ) == SWT.CTRL ) ) {
@@ -183,7 +188,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	protected void handleEvent2(Event event) {
 		if (event.widget == tree) {
 			switch (event.type) {
@@ -201,7 +205,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	public void init2() {
 		parent.setLayout(new FormLayout());
 
@@ -307,7 +310,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		 */
 	}
 
-	// --------------------------------------------------------------------------------
 	private void setupDnd() {
 		Transfer[] types = new Transfer[] { TextTransfer.getInstance() };
 		int operations = DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK;
@@ -380,7 +382,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 				}
 			}
 
-			// --------------------------------------------------------------------------------
 			public void drop(DropTargetEvent event) {
 				if (event.data == null) {
 					debug("data is null");
@@ -394,7 +395,7 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 				} else {
 					TreeItem destItem = (TreeItem) event.item;
 					TreeItem sourceItem = dragSourceItem[0];
-					boolean srcIsFolder = isFolderItem(dragSourceItem[0]);
+					//boolean srcIsFolder = isFolderItem(dragSourceItem[0]);
 					boolean destIsFolder = isFolderItem(destItem);
 
 					if (dropOnChildOrSelf(sourceItem, destItem)) {
@@ -461,12 +462,11 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 					 */
 				}
 			}
-			// --------------------------------------------------------------------------------
+
 		});
 
 	}
 
-	// --------------------------------------------------------------------------------
 	private void drawItem(TreeItem item) {
 		Map data = (Map) item.getData();
 		if (data == null) {
@@ -487,12 +487,10 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 
 	}
 
-	// --------------------------------------------------------------------------------
 	private boolean isRootItem(TreeItem item) {
 		return item == tree.getItem(0);
 	}
 
-	// --------------------------------------------------------------------------------
 	private boolean isFolderItem(TreeItem item) {
 		Map data = (Map) item.getData();
 		if (data == null) {
@@ -505,7 +503,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		return false;
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onNewFolder() {
 		Set dataSet = new HashSet();
 		MPromptDialog dialog = new MPromptDialog(shell, dataSet, "New Folder", "Name :");
@@ -522,7 +519,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private TreeItem addTreeItem() {
 		TreeItem newItem = null;
 		TreeItem[] selected = tree.getSelection();
@@ -552,7 +548,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		return newItem;
 	}
 
-	// --------------------------------------------------------------------------------
 	private boolean dropOnChildOrSelf(TreeItem src, TreeItem dest) {
 		if (src == dest) {
 			return true;
@@ -569,7 +564,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		return false;
 	}
 
-	// --------------------------------------------------------------------------------
 	private void copyTreeItem(TreeItem src, TreeItem dest) {
 		Map data = (Map) src.getData();
 		dest.setData(data);
@@ -586,7 +580,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void onNewSavedAction() {
 		TreeItem newItem = addTreeItem();
 
@@ -609,11 +602,9 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	public void setFocus() {
 	}
 
-	// --------------------------------------------------------------------------------
 	private void loadSavedActions() {
 		String savedStr = prop.getProperty(SAVED_ACTION, null);
 		TreeItem root = new TreeItem(tree, SWT.NONE);
@@ -632,7 +623,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		root.setExpanded(true);
 	}
 
-	// --------------------------------------------------------------------------------
 	private void loadImpl(Map map, TreeItem treeItem) {
 		Map data = (Map) map.get("data");
 		treeItem.setData(data);
@@ -648,7 +638,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void saveImpl(java.util.List list, TreeItem treeItem) {
 		/*
 		 * { "data": data, "items": [ ... ] }
@@ -670,14 +659,12 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		}
 	}
 
-	// --------------------------------------------------------------------------------
 	private void saveSavedActions() {
 		java.util.List rootList = new ArrayList(1);
 		saveImpl(rootList, tree.getItem(0));
 		prop.setProperty(SAVED_ACTION, JSON.serialize(rootList));
 	}
 
-	// --------------------------------------------------------------------------------
 	public void dispose() {
 		// saveSavedActions();
 
@@ -686,7 +673,6 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 		super.dispose();
 	}
 
-	// --------------------------------------------------------------------------------
 	public void update(final Object e, final Object source) {
 		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
 
@@ -703,5 +689,5 @@ public class MSavedActionsView extends MAbstractView implements MOutputView {
 
 		// } public void breakCommand(){} } ); //------------
 	}
-	// --------------------------------------------------------------------------------
+
 }
