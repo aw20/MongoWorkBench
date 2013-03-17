@@ -4,11 +4,11 @@
    <extension
          point="org.eclipse.ui.views">
       <category
-            id="MonjaDB.category1"
-            name="MonjaDB">
+            id="MongoWorkBench.category1"
+            name="MongoWorkBench">
       </category>
       <view
-            category="MonjaDB.category1"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDBTree"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_gear.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MDBTree"
@@ -16,7 +16,7 @@
             restorable="true">
       </view>
       <view
-            category="MonjaDB.category1"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MActionView"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MActionView"
@@ -24,15 +24,16 @@
             restorable="true">
       </view>
       <view
-            category="MonjaDB.category1"
+            allowMultiple="false"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView"
-            name="History"
+            name="Cmd History"
             restorable="true">
       </view>
       <view
-            category="MonjaDB.category1"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDBList"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MDBList"
@@ -40,7 +41,7 @@
             restorable="true">
       </view>
       <view
-            category="MonjaDB.category1"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionList"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_multiple.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionList"
@@ -48,7 +49,7 @@
             restorable="true">
       </view>
       <view
-            category="MonjaDB.category1"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList"
@@ -56,7 +57,7 @@
             restorable="true">
       </view>
       <view
-            category="MonjaDB.category1"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_edit.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor"
@@ -64,23 +65,7 @@
             restorable="true">
       </view>
       <view
-            category="MonjaDB.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MSavedActionsView"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MSavedActionsView"
-            name="Saved Actions"
-            restorable="true">
-      </view>
-      <view
-            category="MonjaDB.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MJsonView"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/text_list_bullets.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MJsonView"
-            name="JSON"
-            restorable="true">
-      </view>
-      <view
-            category="MonjaDB.category1"
+            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_go.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
@@ -99,20 +84,20 @@
       <page
             class="net.jumperz.app.MMonjaDB.eclipse.pref.MPrefPage"
             id="net.jumperz.app.MMonjaDB.eclipse.pref.MPrefPage"
-            name="MonjaDB">
+            name="MongoWorkBench">
       </page>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <category
-            id="MonjaDB.TopMenu"
-            name="MonjaDB">
+            id="MongoWorkBench.TopMenu"
+            name="MongoWorkBench">
       </category>
       <command
-            categoryId="MonjaDB.TopMenu"
+            categoryId="MongoWorkBench.TopMenu"
             defaultHandler="net.jumperz.app.MMonjaDB.eclipse.handler.MActivationHandler"
-            id="MonjaDB.activateCommand"
-            name="Open MonjaDB Perspective">
+            id="MongoWorkBench.activateCommand"
+            name="Open MongoWorkBench Perspective">
       </command>
    </extension>
    <extension
@@ -121,9 +106,9 @@
             allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               label="MonjaDB">
+               label="MongoWorkBench">
             <command
-                  commandId="MonjaDB.activateCommand"
+                  commandId="MongoWorkBench.activateCommand"
                   style="push">
             </command>
          </menu>
@@ -133,9 +118,9 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="net.jumperz.app.MMonjaDB.eclipse.MPerspectiveFactory1"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/arrow_nsew.png"
+            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_gear.png"
             id="net.jumperz.app.MMonjaDB.eclipse.MPerspectiveFactory1"
-            name="MonjaDB">
+            name="MongoWorkbench">
       </perspective>
    </extension>
 

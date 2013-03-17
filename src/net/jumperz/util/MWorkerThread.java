@@ -1,138 +1,127 @@
+/* 
+ *  MongoWorkBench is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  Free Software Foundation,version 3.
+ *  
+ *  MongoWorkBench is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  If not, see http://www.gnu.org/licenses/
+ *  
+ *  Additional permission under GNU GPL version 3 section 7
+ *  
+ *  If you modify this Program, or any covered work, by linking or combining 
+ *  it with any of the JARS listed in the README.txt (or a modified version of 
+ *  (that library), containing parts covered by the terms of that JAR, the 
+ *  licensors of this Program grant you additional permission to convey the 
+ *  resulting work. 
+ *  
+ *  https://github.com/aw20/MonjaDB
+ *  Original fork: https://github.com/Kanatoko/MonjaDB
+ *  
+ */
 package net.jumperz.util;
 
-public final class MWorkerThread
-extends Thread
-{
-private MCommand command;
-private volatile boolean suspended;
-private volatile boolean terminated;
-private MThreadPool threadPool;
-private volatile long waitTime;
-private volatile long startTime = -1;
-//--------------------------------------------------------------------
-public MWorkerThread( MThreadPool in_threadPool )
-{
-threadPool	= in_threadPool;
-terminated	= false;
-suspended	= true;
-start();
-}
-// --------------------------------------------------------------------------------
-public long getStartTime()
-{
-return startTime;
-}
-//--------------------------------------------------------------------------------
-public MCommand getCommand()
-{
-return command;
-}
-//--------------------------------------------------------------------
-public final void run()
-{
-while( !terminated )
-	{
-	synchronized( this )
-		{
-		while( suspended )
-			{
-			try
-				{
-				wait();
-				}
-			catch( Exception e )
-				{
-				e.printStackTrace();
-				//break;
+public final class MWorkerThread extends Thread {
+	private MCommand command;
+
+	private volatile boolean suspended;
+	private volatile boolean terminated;
+	private MThreadPool threadPool;
+	private volatile long waitTime;
+	private volatile long startTime = -1;
+
+	public MWorkerThread(MThreadPool in_threadPool) {
+		threadPool = in_threadPool;
+		terminated = false;
+		suspended = true;
+		start();
+	}
+
+	public long getStartTime() {
+		return startTime;
+	}
+
+	public MCommand getCommand() {
+		return command;
+	}
+
+	public final void run() {
+		while (!terminated) {
+			synchronized (this) {
+				while (suspended) {
+					try {
+						wait();
+					} catch (Exception e) {}
 				}
 			}
-		}
-	
-	if( terminated )
-		{
-		break;
-		}
 
-	try
-		{
-		startTime = System.currentTimeMillis();
-		command.execute();
-		}
-	catch( Throwable e )
-		{
-		 // execute() throws no Exception
-		System.err.println( "Caught a throwable. The Command is : " + command );
-		e.printStackTrace();
-		command.breakCommand();
-		}
+			if (terminated) {
+				break;
+			}
 
-	command = null;
-	suspended = true;
-	waitTime = System.currentTimeMillis();
-	startTime = -1;
-	threadPool.setThreadWait( this );
-	}
-}
-//--------------------------------------------------------------------
-public final void setCommand( MCommand in_Command )
-{
-command = in_Command;
-}
-//--------------------------------------------------------------------
-public final void terminate()
-{
-terminated = true;
-}
-//--------------------------------------------------------------------
-public final synchronized void resumeThread()
-{
-suspended = false;
-notify();
-}
-//--------------------------------------------------------------------
-public final void breakThread()
-{
-if( command != null )
-	{
-	try
-		{
-		command.breakCommand();	
-		}
-	catch( Exception e )
-		{
-		e.printStackTrace();
+			try {
+				startTime = System.currentTimeMillis();
+				command.execute();
+			} catch (Throwable e) {
+				// execute() throws no Exception
+				System.err.println("Caught a throwable. The Command is : " + command);
+				e.printStackTrace();
+				command.breakCommand();
+			}
+
+			command = null;
+			suspended = true;
+			waitTime = System.currentTimeMillis();
+			startTime = -1;
+			threadPool.setThreadWait(this);
 		}
 	}
-}
-//--------------------------------------------------------------------
-public long getWaitTime()
-{
-return waitTime;
-}
-//--------------------------------------------------------------------------------
-public String getSuperThreadString()
-{
-return super.toString();
-}
-// --------------------------------------------------------------------------------
-public String toString()
-{
-if( command == null )
-	{
-	return "MWorkerThread:idle:" + super.toString();
+
+	public final void setCommand(MCommand in_Command) {
+		command = in_Command;
 	}
-else
-	{
-	if( startTime == -1 )
-		{
-		return "MWorkerThread:" + command + ":" + super.toString();
-		}
-	else
-		{
-		return "MWorkerThread:" + ( System.currentTimeMillis() - startTime ) + ":" + command + ":" + super.toString();
+
+	public final void terminate() {
+		terminated = true;
+	}
+
+	public final synchronized void resumeThread() {
+		suspended = false;
+		notify();
+	}
+
+	public final void breakThread() {
+		if (command != null) {
+			try {
+				command.breakCommand();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
-}
-// --------------------------------------------------------------------------------
+
+	public long getWaitTime() {
+		return waitTime;
+	}
+
+	public String getSuperThreadString() {
+		return super.toString();
+	}
+
+	public String toString() {
+		if (command == null) {
+			return "MWorkerThread:idle:" + super.toString();
+		} else {
+			if (startTime == -1) {
+				return "MWorkerThread:" + command + ":" + super.toString();
+			} else {
+				return "MWorkerThread:" + (System.currentTimeMillis() - startTime) + ":" + command + ":" + super.toString();
+			}
+		}
+	}
 
 }

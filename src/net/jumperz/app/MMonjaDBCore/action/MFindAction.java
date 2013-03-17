@@ -136,5 +136,4 @@ public class MFindAction extends MAbstractAction {
 			cursor = cursor.sort(findQuery.getSortArg());
 		}
 	}
-	// --------------------------------------------------------------------------------
 }

@@ -27,9 +27,15 @@ import java.util.Map;
 import net.jumperz.app.MMonjaDBCore.MAbstractLogAgent;
 
 public class MEvent extends MAbstractLogAgent {
-	private Map data = new HashMap();
-
+	
+	/**
+	 * Statics for controlling flow
+	 */
+	public static MEvent	MEVENT_EXECUTION_START 		= new MEvent("ExecutionStarted");
+	public static MEvent	MEVENT_EXECUTION_FINISHED = new MEvent("ExecutionFinished");
+	
 	private String eventName;
+	private Map data;
 
 	public MEvent(String eventName) {
 		this.eventName = eventName;
@@ -44,7 +50,9 @@ public class MEvent extends MAbstractLogAgent {
 	}
 
 	public Map getData() {
+		if ( data == null )
+			data	= new HashMap();
+		
 		return data;
 	}
-
 }

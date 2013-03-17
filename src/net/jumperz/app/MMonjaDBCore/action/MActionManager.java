@@ -89,6 +89,7 @@ public class MActionManager extends MAbstractLogAgent implements MConstants, MSu
 				Class clazz = (Class) actionMap.get(patternStr);
 				try {
 					MAction maction = (MAction) clazz.newInstance();
+					maction.setCmd( actionStr );
 					maction.parse( actionStr );
 					return maction;
 				} catch (Exception e) {
@@ -103,7 +104,7 @@ public class MActionManager extends MAbstractLogAgent implements MConstants, MSu
 	public void submitForExecution(MAction action, MInputView view){
 		action.setOriginView(view);
 		threadPool.addCommand(action);
-		//notify2( action.getActionStr(), action);
+		//notify2( action.getCmd(), action);
 	}
 	
 	public MAction executeAction(String actionStr, MInputView view) {
@@ -116,27 +117,22 @@ public class MActionManager extends MAbstractLogAgent implements MConstants, MSu
 		actionStr = actionStr.replaceAll("\\t+", " ");
 
 		MAction action = getAction(actionStr);
-
 		if (action == null) {
-			MParseException e = new MParseException("Action not found : " + actionStr);
-			MEventManager.getInstance().fireErrorEvent(e);
-			// MEventManager.getInstance().fireErrorEvent( e, event_error_parse );
+			MEventManager.getInstance().fireErrorEvent( new MParseException("Action not found : " + actionStr) );
 			return null;
 		}
 
 		action.setOriginView(view);
-		// action.setContext( context );
+		action.setCmd(actionStr);
 
 		if (!action.parse(actionStr)) {
 			debug(action);
-			MParseException e = new MParseException("Parse Error : " + actionStr);
-			MEventManager.getInstance().fireErrorEvent(e);
-			// MEventManager.getInstance().fireErrorEvent( e, event_error_parse );
+			MEventManager.getInstance().fireErrorEvent(new MParseException("Parse Error : " + actionStr));
 			return null;
 		}
 
 		threadPool.addCommand(action);
-		notify2(actionStr, action);
+		//notify2(action.getCmd(), action);
 		return action;
 	}
 

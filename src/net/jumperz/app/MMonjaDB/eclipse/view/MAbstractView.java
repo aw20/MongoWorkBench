@@ -187,4 +187,5 @@ public abstract class MAbstractView extends ViewPart implements MConstants, List
 	protected void handleEvent2(Event event) {
 	}
 	
+	public void setFocus(){}
 }

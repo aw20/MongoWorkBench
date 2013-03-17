@@ -31,30 +31,68 @@ public abstract class MAbstractAction extends MAbstractLogAgent implements MActi
 	protected MDataManager dataManager = MDataManager.getInstance();
 
 	public abstract void executeFunction() throws Exception;
-
 	public abstract int getActionCondition();
-
 	public abstract String getEventName();
 
 	// protected Object context;
 	private MInputView originView;
-
+	private String		cmdStr = null;
+	private String		message = null;
+	private Exception	execException = null;
+	private long execTime = 0, startTime = 0;
 	
-	public final void setContextImpl(Object context) {
+	public void setCmd( String _cmdstr ){
+		this.cmdStr = _cmdstr;
 	}
+	
+	public String getCmd(){
+		return cmdStr;
+	}
+	
+	public void setMessage(String m){
+		message = m;
+	}
+	
+	public String getMessage(){
+		return message;
+	}
+	
+	public void setException(Exception e){
+		execException = e;
+	}
+	
+	public Exception getExecException(){
+		return execException;
+	}
+	
+	public long getTimeMS(){
+		return execTime;
+	}
+	
+	public final void setContextImpl(Object context) {}
 
 	public void breakCommand() {
 	}
 
 	public final void execute() {
+		MActionManager.getInstance().notify2( MEvent.MEVENT_EXECUTION_START, this );
+
+		startTime	= System.currentTimeMillis();
+		
 		try {
+			
 			if (checkCondition()) {
 				eventManager.fireEvent(new MEvent(getEventName() + "_start"), this);
 				executeFunction();
 				eventManager.fireEvent(new MEvent(getEventName() + "_end"), this);
 			}
+
 		} catch (Exception e) {
+			this.setException( e );
 			eventManager.fireErrorEvent(e, this);
+		} finally {
+			execTime = System.currentTimeMillis() - startTime;
+			MActionManager.getInstance().notify2( MEvent.MEVENT_EXECUTION_FINISHED, this );
 		}
 	}
 

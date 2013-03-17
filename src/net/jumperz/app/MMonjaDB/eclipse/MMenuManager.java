@@ -66,7 +66,7 @@ public class MMenuManager extends MAbstractLogAgent implements MConstants, Liste
 
 		for (int i = 0; i < items.length; ++i) {
 			MenuItem item = items[i];
-			if (item.getText().indexOf("MonjaDB") > -1) {
+			if (item.getText().indexOf("MongoWorkBench") > -1) {
 				CascadeItem = item;
 			}
 		}

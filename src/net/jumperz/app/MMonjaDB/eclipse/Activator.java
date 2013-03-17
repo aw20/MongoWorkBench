@@ -58,7 +58,7 @@ import org.osgi.framework.BundleContext;
  * The activator class controls the plug-in life cycle
  */
 public class Activator extends AbstractUIPlugin implements MConstants {
-	public static final String PLUGIN_ID = "MonjaDB"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "MongoWorkBench"; //$NON-NLS-1$
 
 	private static Activator plugin;
 	private File configFile;
