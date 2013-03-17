@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>MonjaDB</name>
+	<name>MongoWorkBench</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -12,13 +12,11 @@
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.pde.ManifestBuilder</name>
-			<arguments>
-			</arguments>
+			<arguments></arguments>
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.pde.SchemaBuilder</name>
-			<arguments>
-			</arguments>
+			<arguments></arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
