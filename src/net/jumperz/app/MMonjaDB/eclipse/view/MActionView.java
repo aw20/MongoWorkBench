@@ -19,13 +19,11 @@
  *  licensors of this Program grant you additional permission to convey the 
  *  resulting work. 
  *  
- *  https://github.com/aw20/MonjaDB
+ *  https://github.com/aw20/MongoWorkBench
  *  Original fork: https://github.com/Kanatoko/MonjaDB
  *  
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
-
-import java.io.IOException;
 
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDBCore.MOutputView;
@@ -68,12 +66,7 @@ public class MActionView extends MAbstractView implements MOutputView {
 			MActionManager.getInstance().submitForExecution(maction, this);
 		}
 
-		prop.setProperty(ACTION_CMD_TEXT, textArea.getText() );
-		try {
-			Activator.getDefault().saveConfig();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Activator.getDefault().saveWorkBench(textArea.getText());
 	}
 
 	public void init2() {
@@ -89,7 +82,7 @@ public class MActionView extends MAbstractView implements MOutputView {
 			}
 		});
 		
-		String txt = prop.getProperty(ACTION_CMD_TEXT);
+		String txt = Activator.getDefault().getWorkBench();
 		if ( txt != null )
 			textArea.setText(txt);
 		

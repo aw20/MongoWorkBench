@@ -19,7 +19,7 @@
  *  licensors of this Program grant you additional permission to convey the 
  *  resulting work. 
  *  
- *  https://github.com/aw20/MonjaDB
+ *  https://github.com/aw20/MongoWorkBench
  *  Original fork: https://github.com/Kanatoko/MonjaDB
  *  
  */
@@ -132,7 +132,6 @@ public class MActionManager extends MAbstractLogAgent implements MConstants, MSu
 		}
 
 		threadPool.addCommand(action);
-		//notify2(action.getCmd(), action);
 		return action;
 	}
 

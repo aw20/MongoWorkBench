@@ -18,6 +18,9 @@
  *  (that library), containing parts covered by the terms of that JAR, the 
  *  licensors of this Program grant you additional permission to convey the 
  *  resulting work. 
+ *    
+ *  https://github.com/aw20/MongoWorkBench
+ *  Original fork: https://github.com/Kanatoko/MonjaDB
  */
 package net.jumperz.app.MMonjaDB.eclipse;
 
@@ -43,6 +46,7 @@ import net.jumperz.util.MProperties;
 import net.jumperz.util.MStreamUtil;
 import net.jumperz.util.MSystemUtil;
 
+import org.aw20.util.FileUtil;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.widgets.Shell;
@@ -61,7 +65,7 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 	public static final String PLUGIN_ID = "MongoWorkBench"; //$NON-NLS-1$
 
 	private static Activator plugin;
-	private File configFile;
+	private File configFile, commandFile;
 	private volatile Shell shell;
 
 	public Activator() {
@@ -123,6 +127,9 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 				File platformDir = new File(configURL.getFile(), Activator.PLUGIN_ID);
 				MSystemUtil.createDir(platformDir.getAbsolutePath());
 				String configFileName = platformDir.getAbsolutePath() + "/" + DEFAULT_CONFIG_FILE_NAME;
+				
+				commandFile	= new File( platformDir.getAbsolutePath(), "command.txt" );
+				
 				loadConfig(configFileName);
 			}
 		} else {
@@ -169,6 +176,22 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 
 	public static Activator getDefault() {
 		return plugin;
+	}
+
+	public void saveWorkBench(String text) {
+		try {
+			FileUtil.writeToFile(commandFile, text);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String getWorkBench() {
+		try {
+			return FileUtil.readToString(commandFile);
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
 }
