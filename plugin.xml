@@ -72,6 +72,14 @@
             name="JavaScript"
             restorable="true">
       </view>
+      <view
+            category="MongoWorkBench.category1"
+            class="net.jumperz.app.MMonjaDB.eclipse.view.MJsonView"
+            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_edit.png"
+            id="net.jumperz.app.MMonjaDB.eclipse.view.MJsonView"
+            name="JSON View"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">

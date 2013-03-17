@@ -18,6 +18,9 @@
  *  (that library), containing parts covered by the terms of that JAR, the 
  *  licensors of this Program grant you additional permission to convey the 
  *  resulting work. 
+ *  
+ *  https://github.com/aw20/MongoWorkBench
+ *  Original fork: https://github.com/Kanatoko/MonjaDB
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
@@ -86,10 +89,6 @@ public class MJsonView extends MAbstractView implements MOutputView, MInputView 
 	public void dispose() {
 		eventManager.removeObserver2(this);
 		super.dispose();
-	}
-
-	
-	public void setFocus() {
 	}
 
 	

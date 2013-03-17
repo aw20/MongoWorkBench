@@ -18,6 +18,9 @@
  *  (that library), containing parts covered by the terms of that JAR, the 
  *  licensors of this Program grant you additional permission to convey the 
  *  resulting work. 
+ *  
+ *  https://github.com/aw20/MongoWorkBench
+ *  Original fork: https://github.com/Kanatoko/MonjaDB
  */
 package net.jumperz.app.MMonjaDBCore.action;
 
@@ -32,10 +35,7 @@ public class MShowDBAction extends MAbstractAction {
 	}
 
 	public boolean parse(String action) {
-		if (MRegEx.containsIgnoreCase(action, "^show\\s+dbs$")) {
-			return true;
-		}
-		return false;
+		return MRegEx.containsIgnoreCase(action, "^show\\s+dbs$");
 	}
 
 	public String getEventName() {
@@ -48,6 +48,7 @@ public class MShowDBAction extends MAbstractAction {
 
 	public void executeFunction() throws Exception {
 		dbList = dataManager.getMongo().getDatabaseNames();
+		setMessage("databases=" + dbList.size() );
 	}
 
 	public List getDBList() {

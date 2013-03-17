@@ -18,6 +18,9 @@
  *  (that library), containing parts covered by the terms of that JAR, the 
  *  licensors of this Program grant you additional permission to convey the 
  *  resulting work. 
+ *  
+ *  https://github.com/aw20/MongoWorkBench
+ *  Original fork: https://github.com/Kanatoko/MonjaDB
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
@@ -87,53 +90,29 @@ public class MDocumentList extends MAbstractView implements MOutputView {
 	private Table table;
 
 	private Image image;
-
 	private String dbName;
-
 	private String collName;
-
 	private Action copyAction;
-
 	private Action pasteAction;
-
 	private Action editDocumentAction;
-
 	private Action editFieldAction;
-
 	private Action copyFieldAction;
-
 	private Action copyAsJsonAction;
-
 	private Action copyAsStringAction;
-
 	private Action removeAction;
-
 	private Action insertBlankAction;
-
 	private Action insertJsonAction;
-
 	private Action reloadAction;
-
 	private Action forwardAction;
-
 	private Action backAction;
-
 	private Action prevItemsAction;
-
 	private Action nextItemsAction;
-
 	private Combo historyCombo;
-
 	private Combo grepCombo;
-
 	private Button prevItemsButton;
-
 	private Button nextItemsButton;
-
 	private Label naviLabel;
-
 	private int mouseUpX;
-
 	private int mouseUpY;
 
 	private Set grepStrSet = new LinkedHashSet();

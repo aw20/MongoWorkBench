@@ -25,6 +25,7 @@
  */
 package net.jumperz.app.MMonjaDBCore.action;
 
+import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDBCore.MDataManager;
 import net.jumperz.mongo.MFindQuery;
 import net.jumperz.mongo.MMongoUtil;
@@ -101,6 +102,8 @@ public class MFindAction extends MAbstractAction {
 		// check skip & limit
 		int skip = (int) findQuery.getSkipArg();
 		int limit = (int) findQuery.getLimitArg();
+		if ( limit == -1 )
+			limit = Activator.getDefault().getPreferenceStore().getInt(PREF_MAX_FIND_RESULTS);
 
 		if (findArgList.size() == 0) { // db.test.find()
 			cursor = coll.find();
@@ -135,5 +138,7 @@ public class MFindAction extends MAbstractAction {
 		if (findQuery.getInvokedFunctionNameList().contains("sort")) {
 			cursor = cursor.sort(findQuery.getSortArg());
 		}
+		
+		setMessage( "db=" + db.getName() + "; count=" + cursor.count() + ((skip > -1) ? ("; skip=" + skip) : "" ) + ((limit > -1) ? ("; limit=" + limit) : "" )  );
 	}
 }

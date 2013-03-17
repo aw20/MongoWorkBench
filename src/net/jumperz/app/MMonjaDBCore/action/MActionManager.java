@@ -104,7 +104,6 @@ public class MActionManager extends MAbstractLogAgent implements MConstants, MSu
 	public void submitForExecution(MAction action, MInputView view){
 		action.setOriginView(view);
 		threadPool.addCommand(action);
-		//notify2( action.getCmd(), action);
 	}
 	
 	public MAction executeAction(String actionStr, MInputView view) {

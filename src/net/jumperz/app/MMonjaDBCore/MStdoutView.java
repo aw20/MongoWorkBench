@@ -21,8 +21,6 @@
  */
 package net.jumperz.app.MMonjaDBCore;
 
-import java.util.List;
-
 import net.jumperz.app.MMonjaDBCore.action.MConnectAction;
 import net.jumperz.app.MMonjaDBCore.action.MShowCollectionAction;
 import net.jumperz.app.MMonjaDBCore.action.MShowDBAction;
@@ -59,12 +57,7 @@ public class MStdoutView extends MAbstractLogAgent implements MOutputView, MComm
 			MUseAction action = (MUseAction) source;
 			debug("switched to db " + action.getDBName());
 		} else if (event.getEventName().indexOf(event_find + "_end") == 0) {
-			if (MMonjaDB.invoked) {
-				List l = MDataManager.getInstance().getDocumentDataList();
-				for (int i = 0; i < l.size(); ++i) {
-					debug(l.get(i));
-				}
-			}
+			
 		}
 	}
 
