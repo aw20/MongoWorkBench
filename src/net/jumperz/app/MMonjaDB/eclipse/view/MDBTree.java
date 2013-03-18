@@ -18,6 +18,11 @@
  *  (that library), containing parts covered by the terms of that JAR, the 
  *  licensors of this Program grant you additional permission to convey the 
  *  resulting work. 
+ *  
+ *  https://github.com/aw20/MongoWorkBench
+ *  Original fork: https://github.com/Kanatoko/MonjaDB
+ *  
+ *  March 2013
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
@@ -26,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
-import net.jumperz.app.MMonjaDB.eclipse.dialog.MConnectDialog;
+import net.jumperz.app.MMonjaDB.eclipse.dialog.ServerDialog;
 import net.jumperz.app.MMonjaDBCore.MDataManager;
 import net.jumperz.app.MMonjaDBCore.MOutputView;
 import net.jumperz.app.MMonjaDBCore.action.MActionManager;
@@ -54,15 +59,13 @@ import com.mongodb.DB;
 public class MDBTree extends MAbstractView implements MOutputView {
 	private Tree tree;
 
-	private Action connectAction;
-
+	private Action editAction;
 	private Action disconnectAction;
-
 	private Action reloadAction;
-
 	private Action createDbAction;
-
 	private Action removeDbAction;
+	
+	private Image imageServer, imageDatabase, imageCollection;
 
 	public MDBTree() {
 		MEventManager.getInstance().register2(this);
@@ -132,34 +135,32 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 	private void updateGui() {
 		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {// ----
+			public void run() {
 				boolean hasItem = false;
 				if (tree.getItemCount() > 0) {
 					hasItem = true;
 				}
-
 				reloadAction.setEnabled(hasItem);
 			}
-		});// ----
+		});
 	}
 
 	private void drawRootItem(final MConnectAction ca) {
 		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {// ----
+			public void run() {
 				if (tree.getItemCount() == 0) {
 					TreeItem item = new TreeItem(tree, SWT.NONE);
 					item.setText(ca.getName());
-					Image image = MUtil.getImage(parent.getShell().getDisplay(), "server.png");
-					item.setImage(image);
+					item.setImage(imageServer);
 					Map data = new HashMap();
 					data.put(data_type, data_type_mongo);
 					item.setData(data);
 
-					connectAction.setEnabled(false);
+					editAction.setEnabled(false);
 					disconnectAction.setEnabled(true);
 				}
 			}
-		});// ----
+		});
 	}
 
 	private boolean needUpdate(TreeItem parentItem, java.util.List dbNameList) {
@@ -183,7 +184,8 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 	private void drawDbItems(final java.util.List dbNameList) {
 		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {// -----
+			public void run() {
+				
 				try {
 					TreeItem mongoItem = tree.getItem(0);
 					if (needUpdate(mongoItem, dbNameList)) {
@@ -199,13 +201,14 @@ public class MDBTree extends MAbstractView implements MOutputView {
 					} else {
 						debug("no need to update");
 					}
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 					MEventManager.getInstance().fireErrorEvent(e);
 				}
 
 			}
-		});// -----
+		});
 	}
 
 	private synchronized void onShowDbs(MShowDBAction action) {
@@ -217,28 +220,25 @@ public class MDBTree extends MAbstractView implements MOutputView {
 	private TreeItem createDbTreeItem(TreeItem mongoItem, String dbName) {
 		TreeItem item = new TreeItem(mongoItem, 0);
 		item.setText(dbName);
-		tree.showItem(item);
-		Image image = MUtil.getImage(parent.getShell().getDisplay(), "database.png");
-		item.setImage(image);
+		item.setImage(imageDatabase);
 
 		Map data = new HashMap();
 		data.put(data_type, data_type_db);
 		item.setData(data);
+
+		tree.showItem(item);
 		return item;
 	}
 
 	private synchronized void onShowCollections(MShowCollectionAction action) {
 		final String activeDbName = MDataManager.getInstance().getDB().getName();
 
-		/*
-		 * //check Context if( !action.getContext().toString().equals( MDataManager.getInstance().getDB().toString() ) ) { debug( "action:" + action.getContext() ); debug( "db:" + MDataManager.getInstance().getDB() ); debug( "invalid context" ); return; }
-		 */
 
 		// add tree items on the swt thread
 		final java.util.List collNameList = new ArrayList(action.getCollSet());
 
 		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {// *****
+			public void run() {
 				try {
 					TreeItem parentItem = MUtil.getTreeItemByDbName(tree, activeDbName);
 					if (needUpdate(parentItem, collNameList)) {
@@ -248,8 +248,7 @@ public class MDBTree extends MAbstractView implements MOutputView {
 							TreeItem item = new TreeItem(parentItem, 0);
 							item.setText(dbName);
 							tree.showItem(item);
-							Image image = MUtil.getImage(parent.getShell().getDisplay(), "table_multiple.png");
-							item.setImage(image);
+							item.setImage(imageCollection);
 
 							Map data = new HashMap();
 							data.put(data_type, data_type_collection);
@@ -264,7 +263,8 @@ public class MDBTree extends MAbstractView implements MOutputView {
 				}
 
 			}
-		});// *****
+		});
+		
 	}
 
 	private void selectDbItem(String dbName) {
@@ -342,7 +342,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			public void run() {// *****
 
 				tree.removeAll();
-				connectAction.setEnabled(true);
 				disconnectAction.setEnabled(false);
 
 				updateGui();
@@ -352,8 +351,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 	}
 
 	public void update(final Object e, final Object source) {
-		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
-
 		final MEvent event = (MEvent) e;
 		final String eventName = event.getEventName();
 		if (eventName.indexOf(event_connect + "_end") == 0) {
@@ -375,14 +372,17 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		} else if (event.getEventName().indexOf(event_disconnect + "_end") == 0) {
 			onDisconnect();
 		}
-
-		// } public void breakCommand(){} } ); //------------
 	}
 
 	public void init2() {
+		imageServer			= MUtil.getImage(parent.getShell().getDisplay(), "server.png");
+		imageDatabase 	= MUtil.getImage(parent.getShell().getDisplay(), "database.png");
+		imageCollection	= MUtil.getImage(parent.getShell().getDisplay(), "table_multiple.png");
+		
 		parent.setLayout(formLayout);
 
 		tree = new Tree(parent, SWT.BORDER);
+		
 		FormData d1 = new FormData();
 		d1.top = new FormAttachment(0, 1);
 		d1.left = new FormAttachment(0, 1);
@@ -396,32 +396,33 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 		final MDBTree dbTree = this;
 
-		connectAction = new Action() {
+		editAction = new Action() {
 			public void run() {// -----------
 				dbTree.onConnectSelect();
 			}
 		};// -----------
-		connectAction.setToolTipText("Connecting to MongoDB");
-		connectAction.setText("Connect");
+		editAction.setToolTipText("Add/Edit MongoDB Connection");
+		editAction.setText("Add/Edit");
+		editAction.setEnabled(true);
 
 		disconnectAction = new Action() {
-			public void run() {// -----------
+			public void run() {
 				dbTree.onDisconnectSelect();
 			}
-		};// -----------
+		};
 		disconnectAction.setToolTipText("Disconnect from MongoDB");
 		disconnectAction.setText("Disconnect");
 
-		initAction(connectAction, "server_lightning.png", menuManager);
+		initAction(editAction, "server_lightning.png", menuManager);
 		initAction(disconnectAction, "server_delete.png", menuManager);
 
 		disconnectAction.setEnabled(false);
 
 		reloadAction = new Action() {
-			public void run() {// -----------
+			public void run() {
 				executeAction("show dbs");
 			}
-		};// -----------
+		};
 		reloadAction.setToolTipText("Reload Databases ( show dbs  )");
 		reloadAction.setText("Reload Databases");
 		initAction(reloadAction, "arrow_refresh.png", menuManager);
@@ -442,10 +443,17 @@ public class MDBTree extends MAbstractView implements MOutputView {
 	}
 
 	public void onConnectSelect() {
-		(new MConnectDialog(parent.getShell())).open();
-	}
-
-	public void setFocus() {
-
+		Map serverProps	= new HashMap();
+		
+		ServerDialog	serverDialog	= new ServerDialog(parent.getShell());
+		
+		Object result = serverDialog.open(serverProps);
+		if ( (result instanceof Boolean) && (boolean)result ){
+			Map	newProps	= serverDialog.getAttributes();
+			
+			System.out.println( newProps );
+			
+		}
+		
 	}
 }
