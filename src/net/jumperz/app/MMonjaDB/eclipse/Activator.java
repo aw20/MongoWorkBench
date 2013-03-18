@@ -32,6 +32,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import net.jumperz.app.MMonjaDB.eclipse.action.MSshConnectAction;
 import net.jumperz.app.MMonjaDB.eclipse.pref.MPrefManager;
@@ -65,7 +68,7 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 	public static final String PLUGIN_ID = "MongoWorkBench"; //$NON-NLS-1$
 
 	private static Activator plugin;
-	private File configFile, commandFile;
+	private File configFile, commandFile, serverListFile;
 	private volatile Shell shell;
 
 	public Activator() {
@@ -129,6 +132,7 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 				String configFileName = platformDir.getAbsolutePath() + "/" + DEFAULT_CONFIG_FILE_NAME;
 				
 				commandFile	= new File( platformDir.getAbsolutePath(), "command.txt" );
+				serverListFile	= new File( platformDir.getAbsolutePath(), "serverlist.bin" );
 				
 				loadConfig(configFileName);
 			}
@@ -194,4 +198,15 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 		}
 	}
 
+	public List<Map> getServerList() {
+		List<Map> serverList	= (List<Map>)FileUtil.loadClass(serverListFile);
+		if ( serverList == null )
+			return new ArrayList<Map>();
+		else
+			return serverList;
+	}
+
+	public void saveServerList(List<Map> serverList){
+		FileUtil.saveClass(serverListFile, serverList);
+	}
 }

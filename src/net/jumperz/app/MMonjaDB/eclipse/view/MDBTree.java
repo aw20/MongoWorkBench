@@ -28,8 +28,11 @@ package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
 import net.jumperz.app.MMonjaDB.eclipse.dialog.ServerDialog;
 import net.jumperz.app.MMonjaDBCore.MDataManager;
@@ -66,8 +69,10 @@ public class MDBTree extends MAbstractView implements MOutputView {
 	private Action removeDbAction;
 	
 	private Image imageServer, imageDatabase, imageCollection;
+	private List<Map>		serverList;
 
 	public MDBTree() {
+		serverList	= Activator.getDefault().getServerList();
 		MEventManager.getInstance().register2(this);
 	}
 
@@ -81,7 +86,7 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			switch (event.type) {
 				case SWT.KeyDown:
 					break;
-				case SWT.Selection:
+				case SWT.MouseDoubleClick:
 					onTreeItemSelect();
 					break;
 			}
@@ -90,19 +95,27 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 	private void onTreeItemSelect() {
 		TreeItem[] selected = tree.getSelection();
+
 		if (selected != null && selected.length == 1) {
+			
 			TreeItem selectedItem = selected[0];
 			Map data = (Map) selectedItem.getData();
 			String treeType = (String) data.get(data_type);
+			
 			if (treeType.equals(data_type_mongo)) {
+				
 				executeAction("show dbs");
+				
 			} else if (treeType.equals(data_type_db)) {
+				
 				if (isActive()) {
 					String dbName = selectedItem.getText();
 					executeAction("use " + dbName);
 				}
 				executeAction("show collections");
+				
 			} else if (treeType.equals(data_type_collection)) {
+				
 				if (isActive()) {
 					String collName = selectedItem.getText();
 					TreeItem dbItem = selectedItem.getParentItem();
@@ -113,6 +126,7 @@ public class MDBTree extends MAbstractView implements MOutputView {
 					}
 					actionManager.executeAction("db." + collName + ".find()");
 				}
+				
 			}
 		}
 		updateGui();
@@ -381,15 +395,32 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		
 		parent.setLayout(formLayout);
 
-		tree = new Tree(parent, SWT.BORDER);
+		tree = new Tree(parent, SWT.BORDER | SWT.SINGLE );
 		
 		FormData d1 = new FormData();
-		d1.top = new FormAttachment(0, 1);
-		d1.left = new FormAttachment(0, 1);
-		d1.right = new FormAttachment(100, -1);
+		d1.top 		= new FormAttachment(0, 1);
+		d1.left 	= new FormAttachment(0, 1);
+		d1.right 	= new FormAttachment(100, -1);
 		d1.bottom = new FormAttachment(100, -1);
 		tree.setLayoutData(d1);
 
+		// Add in the servers
+		Iterator<Map>	it	= serverList.iterator();
+		while ( it.hasNext() ){
+			Map	map	= it.next();
+			
+			TreeItem item = new TreeItem(tree, SWT.NONE);
+			item.setText( (String)map.get("name") );
+			item.setImage(imageServer);
+
+			Map data = new HashMap();
+			data.put(data_type, data_type_mongo);
+			data.put( "map", map );
+			item.setData(data );
+		}
+		
+		
+		// Set the menu up
 		menuManager = new MenuManager();
 		Menu contextMenu = menuManager.createContextMenu(tree);
 		tree.setMenu(contextMenu);
@@ -430,7 +461,7 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 		// listeners
 		tree.addListener(SWT.MouseDoubleClick, this);
-		tree.addListener(SWT.Selection, this);
+		//tree.addListener(SWT.Selection, this);
 		tree.addListener(SWT.KeyDown, this);
 
 		if (dataManager.isConnected()) {
@@ -449,11 +480,38 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		
 		Object result = serverDialog.open(serverProps);
 		if ( (result instanceof Boolean) && (boolean)result ){
-			Map	newProps	= serverDialog.getAttributes();
+			final Map	newProps	= serverDialog.getAttributes();
 			
-			System.out.println( newProps );
+			// Run around to see if this is a new one
+			String newName = (String)newProps.get("name");
+			boolean bFound = false;
+			for ( int x=0; x < serverList.size(); x++ ){
+				if ( serverList.get(x).get("name").equals(newName) ){
+					serverList.set( x, newProps );
+					bFound = true;
+				}
+			}
 			
+			if ( !bFound ){
+				serverList.add(newProps);
+
+				shell.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						TreeItem item = new TreeItem(tree, SWT.NONE);
+						item.setText( (String)newProps.get("name") );
+						item.setImage(imageServer);
+
+						Map data = new HashMap();
+						data.put(data_type, data_type_mongo);
+						data.put( "map", newProps );
+						item.setData(data );
+					}
+				});
+
+			}
+			
+			// Save the serverList
+			Activator.getDefault().saveServerList(serverList);
 		}
-		
 	}
 }
