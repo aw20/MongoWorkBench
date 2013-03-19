@@ -53,7 +53,7 @@
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList"
-            name="Document List"
+            name="Query Output"
             restorable="true">
       </view>
       <view

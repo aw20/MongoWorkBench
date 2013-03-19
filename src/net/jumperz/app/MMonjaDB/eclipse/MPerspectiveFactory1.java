@@ -37,45 +37,29 @@ public class MPerspectiveFactory1 extends MAbstractLogAgent implements IPerspect
 		String editorArea = layout.getEditorArea();
 		layout.setEditorAreaVisible(false);
 
-		layout.createFolder("bottom", IPageLayout.BOTTOM, 0.35f, editorArea);
-		IFolderLayout leftFolder 		= layout.createFolder("left", IPageLayout.LEFT, 0.22f, editorArea);
-		IFolderLayout centerFolder 	= layout.createFolder("center", IPageLayout.LEFT, 0.68f, editorArea);
-		//IFolderLayout rightFolder 	= layout.createFolder("right", IPageLayout.LEFT, 0.10f, editorArea);
-
-		//IFolderLayout bottomLeftFolder 		= layout.createFolder("bottomLeft", IPageLayout.LEFT, 0.35f, "bottom");
-		IFolderLayout bottomCenterFolder 	= layout.createFolder("bottomCenter", IPageLayout.LEFT, 0.75f, "bottom");
-		IFolderLayout bottomRightFolder 	= layout.createFolder("bottomRight", IPageLayout.LEFT, 0.25f, "bottom");
-
-		// IFolderLayout rightBottomFolder = layout.createFolder( "rightBottom", IPageLayout.BOTTOM, 0.75f, "right" );
-
-		/*
-		leftFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDBTree.class.getName());
-		centerFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList.class.getName());
-		rightFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor.class.getName());
-
-		bottomLeftFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MActionView.class.getName());
-
-		bottomCenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MSavedActionsView.class.getName());
-
-		bottomFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView.class.getName());
-		bottomFolder.addView(IConsoleConstants.ID_CONSOLE_VIEW);
-
-		rightFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJsonView.class.getName());
-
-		centerFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDBList.class.getName());
-		centerFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MCollectionList.class.getName());
-		*/
+		layout.createFolder("top", 		IPageLayout.TOP, 0.3f, editorArea);
+		layout.createFolder("middle", IPageLayout.TOP, 0.75f, editorArea);
+		layout.createFolder("bottom", IPageLayout.TOP, 0.1f, editorArea);
 		
-		leftFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDBTree.class.getName());
-		centerFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView.class.getName());
-		centerFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MActionView.class.getName());
-		centerFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView.class.getName());
-	
-		bottomCenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList.class.getName());
-		bottomCenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDBList.class.getName());
-		bottomCenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MCollectionList.class.getName());
+		IFolderLayout topleftFolder 		= layout.createFolder("topleft", 		IPageLayout.LEFT, 0.2f, 	"top");
+		IFolderLayout topcenterFolder 	= layout.createFolder("topcenter", 	IPageLayout.LEFT, 0.8f, 	"top");
+		
+		IFolderLayout bodyleft 		= layout.createFolder("bodyleft", 	IPageLayout.LEFT, 0.75f, 	"middle" );
+		IFolderLayout bodyright 	= layout.createFolder("bodyright", 	IPageLayout.LEFT, 0.3f, 	"middle" );
+		IFolderLayout bottomleft 	= layout.createFolder("bottomleft", IPageLayout.BOTTOM,	0.2f, "bottom"  );
 
-		bottomRightFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor.class.getName());
-		bottomRightFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJsonView.class.getName());
+		topleftFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDBTree.class.getName());
+
+		topcenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MActionView.class.getName());
+		topcenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView.class.getName());
+
+		bodyright.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor.class.getName());
+		bodyright.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJsonView.class.getName());
+
+		bodyleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList.class.getName());
+		bottomleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView.class.getName());
+
+		bodyleft.addPlaceholder( net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList.class.getName() + ":*" );
+	
 	}
 }

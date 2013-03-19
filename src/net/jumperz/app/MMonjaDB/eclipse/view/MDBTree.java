@@ -56,6 +56,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.mongodb.DB;
 
@@ -103,9 +108,7 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			String treeType = (String) data.get(data_type);
 			
 			if (treeType.equals(data_type_mongo)) {
-				
-				executeAction("show dbs");
-				
+				//executeAction("show dbs");
 			} else if (treeType.equals(data_type_db)) {
 				
 				if (isActive()) {

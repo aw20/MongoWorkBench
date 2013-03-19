@@ -108,7 +108,7 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		int columnWidths[] = new int[]{20,35,60,400,300,60};
+		int columnWidths[] = new int[]{20,35,60,300,500,60};
 		createColumn( table, SWT.CENTER, 	columnWidths[COLUMN_STATUS],	"" );
 		createColumn( table, SWT.RIGHT, 	columnWidths[COLUMN_ORDER], 	"#" );
 		createColumn( table, SWT.LEFT, 		columnWidths[COLUMN_TIME], 		"Time" );
