@@ -22,46 +22,33 @@
  *  https://github.com/aw20/MongoWorkBench
  *  Original fork: https://github.com/Kanatoko/MonjaDB
  */
-package net.jumperz.app.MMonjaDBCore.action.mj;
+package org.aw20.mongoworkbench.command;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import net.jumperz.app.MMonjaDBCore.action.MAbstractAction;
+import org.aw20.mongoworkbench.MongoFactory;
 
-import com.mongodb.DB;
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 
-public class MShowAllDbStatsAction extends MAbstractAction {
-	private List statsList = new ArrayList();
+public class ShowDbsMongoCommand extends MongoCommand {
 
-	public MShowAllDbStatsAction() {
+	private List<String>	dbNames = null;
+	
+	@Override
+	public void execute() {
+		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
+		dbNames = mdb.getDatabaseNames();
+
+		setMessage("# Databases=" + dbNames.size() );
 	}
 
-	public boolean parse(String action) {
-		return action.equals("mj show all db stats");
+	@Override
+	public String getCommandString() {
+		return "show dbs";
 	}
-
-	public void executeFunction() throws Exception {
-		Mongo mongo = dataManager.getMongo();
-		List dbNameList = mongo.getDatabaseNames();
-		for (int i = 0; i < dbNameList.size(); ++i) {
-			String dbName = (String) dbNameList.get(i);
-			DB db = mongo.getDB(dbName);
-			statsList.add(db.getStats().toMap());
-		}
-	}
-
-	public List getStatsList() {
-		return statsList;
-	}
-
-	public int getActionCondition() {
-		return action_cond_connected;
-	}
-
-	public String getEventName() {
-		return event_mj_all_db_stats;
+	
+	public List<String>	getDBNames(){
+		return dbNames;
 	}
 
 }

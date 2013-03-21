@@ -27,12 +27,13 @@
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
-import net.jumperz.app.MMonjaDBCore.MOutputView;
 import net.jumperz.app.MMonjaDBCore.action.MAction;
 import net.jumperz.app.MMonjaDBCore.action.MActionManager;
-import net.jumperz.app.MMonjaDBCore.event.MEvent;
 import net.jumperz.gui.MSwtUtil;
 
+import org.aw20.mongoworkbench.MongoCommandListener;
+import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.util.DateUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
@@ -57,10 +58,10 @@ import org.eclipse.swt.widgets.TableItem;
  * @author alan
  *
  */
-public class MHistoryView extends MAbstractView implements MOutputView {
+public class MHistoryView extends MAbstractView implements MongoCommandListener {
 
 	public MHistoryView() {
-		actionManager.register2(this);
+		MongoFactory.getInst().registerListener(this);
 	}
 
 	private Table table;
@@ -77,7 +78,7 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 	
 	
 	public void dispose() {
-		actionManager.removeObserver2(this);
+		MongoFactory.getInst().deregisterListener(this);
 		super.dispose();
 	}
 
@@ -226,7 +227,7 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 	 * @param event
 	 * @param maction
 	 */
-	private void updateTable(MEvent event, MAction maction) {
+	private void updateTable(MongoCommand mcmd, boolean bStart) {
 		
 		// Enable the action icons
 		if ( table.getItemCount() == 1 ){
@@ -236,26 +237,26 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 		
 		
 		// Process the events
-		if ( event == MEvent.MEVENT_EXECUTION_START ){
+		if ( bStart ){
 			
 			TableItem item = new TableItem(table, SWT.NONE);
 			
 			item.setText( COLUMN_ORDER, String.valueOf( table.getItemCount() ) );
 			item.setText( COLUMN_TIME, DateUtil.getDateString( System.currentTimeMillis(), "HH:mm:ss") );
-			item.setText( COLUMN_ACTION, maction.getCmd() );
+			item.setText( COLUMN_ACTION, mcmd.getCommandString() );
 			item.setText( COLUMN_MESSAGE, "executing..." );
 			item.setText( COLUMN_MS, "" );
 			
-			item.setData( maction.hashCode() );
+			item.setData( mcmd.hashCode() );
 			table.showItem(item);
 			
-		} else if ( event == MEvent.MEVENT_EXECUTION_FINISHED ){
+		} else {
 
 			// find the entry
 			TableItem item = null;
 			for ( int x=0; x < table.getItemCount(); x++ ){
 				TableItem row = table.getItem(x);
-				if ( (int)row.getData() == maction.hashCode() ){
+				if ( (int)row.getData() == mcmd.hashCode() ){
 					item = row;
 					break;
 				}
@@ -264,45 +265,39 @@ public class MHistoryView extends MAbstractView implements MOutputView {
 			if ( item == null ) // we didn't find the row; this should never happen
 				return;
 			
-			if ( maction.getExecException() != null ){
-				item.setImage(COLUMN_STATUS, imgBad);
-				item.setText( COLUMN_MESSAGE, maction.getExecException().getMessage() );
+			if ( !mcmd.isSuccess() ){
+				item.setImage(COLUMN_STATUS, 	imgBad);
+				item.setText( COLUMN_MESSAGE, mcmd.getException().getMessage() );
 			}else{
-				item.setImage(COLUMN_STATUS, imgGood);
-				item.setText( COLUMN_MESSAGE, maction.getMessage() == null ? "" : maction.getMessage() );
+				item.setImage(COLUMN_STATUS, 	imgGood);
+				item.setText( COLUMN_MESSAGE, mcmd.getMessage() );
 			}
 
-			item.setText( COLUMN_MS, String.valueOf(maction.getTimeMS()) + " ms" );
-			
+			item.setText( COLUMN_MS, String.valueOf(mcmd.getExecTime()) + " ms" );
+
 			table.showItem(item);
 		}
 
 	}
-	
 
-	
-	/**
-	 * An event has been triggered, so we must now update our table with this data
-	 */
-	public void update(final Object e, final Object source) {
+	@Override
+	public void onMongoCommandStart(final MongoCommand mcmd) {
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				updateTable( mcmd, true );
+			}
+		});
+	}
 
-		if ( e == MEvent.MEVENT_EXECUTION_START ){
-			
-			shell.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					updateTable( MEvent.MEVENT_EXECUTION_START, (MAction)source );
-				}
-			});
+	@Override
+	public void onMongoCommandFinished(final MongoCommand mcmd) {
 
-		}else if ( e == MEvent.MEVENT_EXECUTION_FINISHED ){
-
-			shell.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					updateTable( MEvent.MEVENT_EXECUTION_FINISHED, (MAction)source );
-				}
-			});
-
-		}
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				updateTable( mcmd, false );
+			}
+		});
+		
 	}
 
 }

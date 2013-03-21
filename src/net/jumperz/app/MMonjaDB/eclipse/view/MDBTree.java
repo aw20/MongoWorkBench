@@ -26,7 +26,7 @@
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,17 +35,15 @@ import java.util.Map;
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
 import net.jumperz.app.MMonjaDB.eclipse.dialog.ServerDialog;
-import net.jumperz.app.MMonjaDBCore.MDataManager;
-import net.jumperz.app.MMonjaDBCore.MOutputView;
 import net.jumperz.app.MMonjaDBCore.action.MActionManager;
-import net.jumperz.app.MMonjaDBCore.action.MConnectAction;
 import net.jumperz.app.MMonjaDBCore.action.MFindAction;
-import net.jumperz.app.MMonjaDBCore.action.MShowCollectionAction;
-import net.jumperz.app.MMonjaDBCore.action.MShowDBAction;
 import net.jumperz.app.MMonjaDBCore.action.MUseAction;
-import net.jumperz.app.MMonjaDBCore.event.MEvent;
-import net.jumperz.app.MMonjaDBCore.event.MEventManager;
 
+import org.aw20.mongoworkbench.MongoCommandListener;
+import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.ShowCollectionsMongoCommand;
+import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
@@ -56,33 +54,46 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
-import com.mongodb.DB;
-
-public class MDBTree extends MAbstractView implements MOutputView {
+public class MDBTree extends MAbstractView implements MongoCommandListener {
 	private Tree tree;
 
+	private static 	String KEY_TYPE = "_datakey";
+	private enum NodeType {
+		SERVER,
+		DATABASE,
+		METADATA,
+		COLLECTION,
+		GRIDFS,
+		INDEX
+	};
+	
 	private Action editAction;
 	private Action disconnectAction;
 	private Action reloadAction;
 	private Action createDbAction;
 	private Action removeDbAction;
 	
-	private Image imageServer, imageDatabase, imageCollection;
+	private Image imageServer, imageDatabase, imageCollection, imageMetaFolder;
 	private List<Map>		serverList;
 
 	public MDBTree() {
 		serverList	= Activator.getDefault().getServerList();
-		MEventManager.getInstance().register2(this);
+		
+		Iterator<Map>	it	= serverList.iterator();
+		while ( it.hasNext() ){
+			try {
+				MongoFactory.getInst().registerMongo( it.next() );
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
+
+		MongoFactory.getInst().registerListener(this);
 	}
 
 	public void dispose() {
-		eventManager.removeObserver2(this);
+		MongoFactory.getInst().deregisterListener(this);
 		super.dispose();
 	}
 
@@ -105,10 +116,20 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			
 			TreeItem selectedItem = selected[0];
 			Map data = (Map) selectedItem.getData();
-			String treeType = (String) data.get(data_type);
+			NodeType nodeType = (NodeType)data.get(KEY_TYPE);
 			
-			if (treeType.equals(data_type_mongo)) {
-				//executeAction("show dbs");
+			if ( nodeType == NodeType.SERVER ) {
+				
+				String sName	= (String)data.get("name");
+				MongoFactory.getInst().submitExecution( new ShowDbsMongoCommand().setConnection(sName) );
+				
+			} else if ( nodeType == NodeType.METADATA && selectedItem.getText().equals("Collections") ) {
+				
+				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getData()).get("name");
+				String sDb		=	selectedItem.getParentItem().getText();
+				MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
+
+				/*
 			} else if (treeType.equals(data_type_db)) {
 				
 				if (isActive()) {
@@ -129,25 +150,10 @@ public class MDBTree extends MAbstractView implements MOutputView {
 					}
 					actionManager.executeAction("db." + collName + ".find()");
 				}
-				
+				*/
 			}
 		}
 		updateGui();
-	}
-
-	private void onConnect(final MConnectAction ca) {
-		drawRootItem(ca);
-
-		actionManager.executeAction("show dbs");
-
-		String dbName = dataManager.getDB().getName();
-		java.util.List dbNameList = new ArrayList();
-		dbNameList.add(dbName);
-		drawDbItems(dbNameList);
-
-		updateGui();
-		// actionManager.executeAction( "use " + dbName );
-
 	}
 
 	private void updateGui() {
@@ -161,7 +167,9 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			}
 		});
 	}
-
+	
+	
+/*
 	private void drawRootItem(final MConnectAction ca) {
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
@@ -179,16 +187,15 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			}
 		});
 	}
-
+*/
+	
 	private boolean needUpdate(TreeItem parentItem, java.util.List dbNameList) {
-		if (parentItem == null) {
+		if (parentItem == null)
 			return false;
-		}
 
 		TreeItem[] dbItems = parentItem.getItems();
-		if (dbItems.length != dbNameList.size()) {
+		if (dbItems.length != dbNameList.size())
 			return true;
-		}
 
 		for (int i = 0; i < dbNameList.size(); ++i) {
 			if (!dbNameList.get(i).equals(dbItems[i].getText())) {
@@ -199,90 +206,6 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		return false;
 	}
 
-	private void drawDbItems(final java.util.List dbNameList) {
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				
-				try {
-					TreeItem mongoItem = tree.getItem(0);
-					if (needUpdate(mongoItem, dbNameList)) {
-						mongoItem.removeAll();
-						for (int i = 0; i < dbNameList.size(); ++i) {
-							createDbTreeItem(mongoItem, (String) dbNameList.get(i));
-						}
-
-						DB db = MDataManager.getInstance().getDB();
-						if (db != null) {
-							selectDbItem(db.getName());
-						}
-					} else {
-						debug("no need to update");
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-					MEventManager.getInstance().fireErrorEvent(e);
-				}
-
-			}
-		});
-	}
-
-	private synchronized void onShowDbs(MShowDBAction action) {
-		// add tree items on the swt thread
-		final java.util.List dbNameList = action.getDBList();
-		drawDbItems(dbNameList);
-	}
-
-	private TreeItem createDbTreeItem(TreeItem mongoItem, String dbName) {
-		TreeItem item = new TreeItem(mongoItem, 0);
-		item.setText(dbName);
-		item.setImage(imageDatabase);
-
-		Map data = new HashMap();
-		data.put(data_type, data_type_db);
-		item.setData(data);
-
-		tree.showItem(item);
-		return item;
-	}
-
-	private synchronized void onShowCollections(MShowCollectionAction action) {
-		final String activeDbName = MDataManager.getInstance().getDB().getName();
-
-
-		// add tree items on the swt thread
-		final java.util.List collNameList = new ArrayList(action.getCollSet());
-
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				try {
-					TreeItem parentItem = MUtil.getTreeItemByDbName(tree, activeDbName);
-					if (needUpdate(parentItem, collNameList)) {
-						parentItem.removeAll();
-						for (int i = 0; i < collNameList.size(); ++i) {
-							String dbName = (String) collNameList.get(i);
-							TreeItem item = new TreeItem(parentItem, 0);
-							item.setText(dbName);
-							tree.showItem(item);
-							item.setImage(imageCollection);
-
-							Map data = new HashMap();
-							data.put(data_type, data_type_collection);
-							item.setData(data);
-						}
-					} else {
-						debug("no need to update");
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					MEventManager.getInstance().fireErrorEvent(e);
-				}
-
-			}
-		});
-		
-	}
 
 	private void selectDbItem(String dbName) {
 
@@ -367,7 +290,9 @@ public class MDBTree extends MAbstractView implements MOutputView {
 
 	}
 
+	/*
 	public void update(final Object e, final Object source) {
+	
 		final MEvent event = (MEvent) e;
 		final String eventName = event.getEventName();
 		if (eventName.indexOf(event_connect + "_end") == 0) {
@@ -390,11 +315,13 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			onDisconnect();
 		}
 	}
+	*/
 
 	public void init2() {
 		imageServer			= MUtil.getImage(parent.getShell().getDisplay(), "server.png");
 		imageDatabase 	= MUtil.getImage(parent.getShell().getDisplay(), "database.png");
 		imageCollection	= MUtil.getImage(parent.getShell().getDisplay(), "table_multiple.png");
+		imageMetaFolder	= MUtil.getImage(parent.getShell().getDisplay(), "folder.png");
 		
 		parent.setLayout(formLayout);
 
@@ -417,8 +344,8 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			item.setImage(imageServer);
 
 			Map data = new HashMap();
-			data.put(data_type, data_type_mongo);
-			data.put( "map", map );
+			data.put( KEY_TYPE, NodeType.SERVER);
+			data.putAll( map );
 			item.setData(data );
 		}
 		
@@ -468,7 +395,7 @@ public class MDBTree extends MAbstractView implements MOutputView {
 		tree.addListener(SWT.KeyDown, this);
 
 		if (dataManager.isConnected()) {
-			onConnect(dataManager.getConnectAction());
+			//onConnect(dataManager.getConnectAction());
 		}
 	}
 
@@ -505,8 +432,8 @@ public class MDBTree extends MAbstractView implements MOutputView {
 						item.setImage(imageServer);
 
 						Map data = new HashMap();
-						data.put(data_type, data_type_mongo);
-						data.put( "map", newProps );
+						data.put( KEY_TYPE, NodeType.SERVER );
+						data.putAll( newProps );
 						item.setData(data );
 					}
 				});
@@ -517,4 +444,155 @@ public class MDBTree extends MAbstractView implements MOutputView {
 			Activator.getDefault().saveServerList(serverList);
 		}
 	}
+
+
+	@Override
+	public void onMongoCommandStart(MongoCommand mcmd) {}
+
+	@Override
+	public void onMongoCommandFinished(MongoCommand mcmd) {
+		if ( mcmd instanceof ShowDbsMongoCommand )
+			onShowDbs( (ShowDbsMongoCommand)mcmd );
+		else if ( mcmd instanceof ShowCollectionsMongoCommand )
+			onShowCollections( (ShowCollectionsMongoCommand)mcmd );
+	}
+	
+	private TreeItem createDbTreeItem(TreeItem mongoItem, String dbName) {
+		TreeItem dbitem = new TreeItem(mongoItem, 0);
+		dbitem.setText(dbName);
+		dbitem.setImage(imageDatabase);
+
+		Map data = new HashMap();
+		data.put( KEY_TYPE, NodeType.DATABASE );
+		dbitem.setData(data);
+
+		// Add the subfolders
+		TreeItem	coll	= new TreeItem( dbitem, 0 );
+		coll.setText("Collections");
+		coll.setImage(imageMetaFolder);
+		data = new HashMap();
+		data.put( KEY_TYPE, NodeType.METADATA );
+		coll.setData(data);
+		
+		/*
+		 * Not Yet Implemented; but when i do it will rock!
+		coll	= new TreeItem( dbitem, 0 );
+		coll.setText("Stored Javascript");
+		coll.setImage(imageMetaFolder);
+		data = new HashMap();
+		data.put( KEY_TYPE, NodeType.METADATA );
+		coll.setData(data);
+		
+		coll	= new TreeItem( dbitem, 0 );
+		coll.setText("GridFS");
+		coll.setImage(imageMetaFolder);
+		data = new HashMap();
+		data.put( KEY_TYPE, NodeType.METADATA );
+		coll.setData(data);
+		*/
+		
+		tree.showItem(dbitem);
+		return dbitem;
+	}
+
+
+	private void onShowDbs( final ShowDbsMongoCommand mcmd ) {
+		
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+
+				TreeItem	item	= findTreeItem( tree.getParentItem(), NodeType.SERVER, mcmd.getName() );
+				List<String>	dbList = mcmd.getDBNames();
+				
+				try {
+					if (needUpdate(item, dbList)) {
+						item.removeAll();
+
+						for (int i = 0; i < dbList.size(); ++i) {
+							createDbTreeItem(item, (String)dbList.get(i) );
+						}
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
+
+		updateGui();
+	}
+
+	
+	private TreeItem findTreeItem(TreeItem treeitem, NodeType nodetype, String id) {
+		if ( treeitem != null && treeitem.getItemCount() == 0 )
+			return null;
+		
+		TreeItem[] items = (treeitem != null ) ? treeitem.getItems() : tree.getItems();
+		if ( items == null )
+			return null;
+		
+		for (int i = 0; i < items.length; ++i) {
+			Map data	= (Map)items[i].getData();
+			
+			if ( (NodeType)data.get(KEY_TYPE) == nodetype ){
+				if ( nodetype == NodeType.SERVER ){
+					if ( data.get("name").equals(id) )
+						return items[i];
+				}else if ( nodetype == NodeType.DATABASE || nodetype == NodeType.COLLECTION ){
+					if ( items[i].getText().equals(id) )
+						return items[i];
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	private void onShowCollections( final ShowCollectionsMongoCommand mcmd ) {
+		
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+
+				TreeItem	serverItem	= findTreeItem( tree.getParentItem(), NodeType.SERVER, mcmd.getName() );
+				if (serverItem == null)
+					return;
+
+				TreeItem	dbItem	= findTreeItem( serverItem, NodeType.DATABASE, mcmd.getDB() );
+				if (dbItem == null)
+					return;
+				
+				TreeItem	collectionsItem	= dbItem.getItem(0);
+				
+				List<String>	colList = mcmd.getCollectionNames();
+				
+				try {
+					if (needUpdate(collectionsItem, colList)) {
+						collectionsItem.removeAll();
+
+						for (int i = 0; i < colList.size(); ++i) {
+							
+							TreeItem item = new TreeItem(collectionsItem, 0);
+							item.setText( (String)colList.get(i) );
+							tree.showItem(item);
+							item.setImage(imageCollection);
+
+							Map data = new HashMap();
+							data.put( KEY_TYPE, NodeType.COLLECTION );
+							item.setData(data);
+
+						}
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
+
+		updateGui();
+	}
+	
 }
