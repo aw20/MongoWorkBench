@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.util.StringUtil;
 
@@ -53,13 +54,21 @@ public class MongoFactory extends Thread {
 	private Map<String,MongoClient>	mongoMap;
 	private Set<MongoCommandListener>	mongoListeners;
 	private List<MongoCommand>	commandQueue;
+	private Map<String, Class>	commandMap;
 	private boolean bRun = true;
+
+	
+	private String activeServer = null, activeDB = null;
 	
 	public MongoFactory(){
 		mongoMap				= new HashMap<String,MongoClient>();
 		commandQueue		=	new ArrayList<MongoCommand>(); 
 		mongoListeners	= new HashSet<MongoCommandListener>();
+		commandMap			= new HashMap<String,Class>();
 
+		// Register the Commands
+		commandMap.put("^db\\.[^\\(]+\\.find\\(.*", FindMongoCommand.class);
+		
 		setName( "MongoFactory" );
 		start();
 	}
@@ -87,7 +96,42 @@ public class MongoFactory extends Thread {
 		bRun = false;
 	}
 	
+	public String getActiveServer(){
+		return activeServer;
+	}
+	
+	public String getActiveDB(){
+		return activeDB;
+	}
+	
+	public void setActiveDB(String db){
+		this.activeDB = db;
+	}
+	
 	public MongoCommand	createCommand( String cmd ) throws Exception {
+		
+		// remove line breaks
+		cmd = cmd.replaceAll("(\\r|\\n)", "");
+		cmd = cmd.replaceAll("\\t+", " ");
+
+		Iterator p = commandMap.keySet().iterator();
+		while (p.hasNext()) {
+			String patternStr = (String) p.next();
+			if (cmd.matches(patternStr)) {
+				Class clazz = (Class) commandMap.get(patternStr);
+				try {
+					MongoCommand mcmd = (MongoCommand)clazz.newInstance();
+					mcmd.setConnection(activeServer, activeDB);
+					mcmd.setCommandStr( cmd );
+					mcmd.parseCommandStr();
+					return mcmd;
+				} catch (Exception e) {
+					System.out.println(e);
+					return null;
+				}
+			}
+		}
+		
 		return null;
 	}
 	
@@ -99,6 +143,7 @@ public class MongoFactory extends Thread {
 	}
 
 	public MongoClient getMongo(String sName) {
+		activeServer = sName;
 		return mongoMap.get(sName);
 	}
 	

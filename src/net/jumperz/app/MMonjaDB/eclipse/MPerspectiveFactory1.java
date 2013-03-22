@@ -56,10 +56,10 @@ public class MPerspectiveFactory1 extends MAbstractLogAgent implements IPerspect
 		bodyright.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor.class.getName());
 		bodyright.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJsonView.class.getName());
 
-		bodyleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList.class.getName());
+		bodyleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.class.getName());
 		bottomleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView.class.getName());
 
-		bodyleft.addPlaceholder( net.jumperz.app.MMonjaDB.eclipse.view.MDocumentList.class.getName() + ":*" );
+		bodyleft.addPlaceholder( net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.class.getName() + ":*" );
 	
 	}
 }

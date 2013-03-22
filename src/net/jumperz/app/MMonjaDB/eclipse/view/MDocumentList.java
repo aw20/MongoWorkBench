@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
 import net.jumperz.app.MMonjaDB.eclipse.dialog.MInsertJsonDialog;
-import net.jumperz.app.MMonjaDBCore.MOutputView;
 import net.jumperz.app.MMonjaDBCore.action.MFindAction;
 import net.jumperz.app.MMonjaDBCore.action.mj.MEditAction;
 import net.jumperz.app.MMonjaDBCore.event.MEvent;
@@ -45,6 +44,10 @@ import net.jumperz.mongo.MFindQuery;
 import net.jumperz.mongo.MMongoUtil;
 import net.jumperz.util.MHistory;
 
+import org.aw20.mongoworkbench.MongoCommandListener;
+import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.FindMongoCommand;
+import org.aw20.mongoworkbench.command.MongoCommand;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.CodeWScope;
 import org.bson.types.MaxKey;
@@ -86,7 +89,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 
-public class MDocumentList extends MAbstractView implements MOutputView {
+public class MDocumentList extends MAbstractView implements MongoCommandListener {
 	private Table table;
 
 	private Image image;
@@ -118,11 +121,11 @@ public class MDocumentList extends MAbstractView implements MOutputView {
 	private Set grepStrSet = new LinkedHashSet();
 
 	public MDocumentList() {
-		MEventManager.getInstance().register2(this);
+		MongoFactory.getInst().registerListener(this);
 	}
 
 	public void dispose() {
-		eventManager.removeObserver2(this);
+		MongoFactory.getInst().deregisterListener(this);
 		super.dispose();
 	}
 
@@ -1146,6 +1149,7 @@ public class MDocumentList extends MAbstractView implements MOutputView {
 		onUse();
 	}
 
+	/*
 	public void update(final Object e, final Object source) {
 		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
 
@@ -1171,5 +1175,18 @@ public class MDocumentList extends MAbstractView implements MOutputView {
 			onDisconnect();
 		}
 		// } public void breakCommand(){} } ); //------------
+	}
+	*/
+
+	@Override
+	public void onMongoCommandStart(MongoCommand mcmd) {}
+
+	@Override
+	public void onMongoCommandFinished(MongoCommand mcmd) {
+
+		if ( mcmd instanceof FindMongoCommand ){
+			
+		}
+		
 	}
 }

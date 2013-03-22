@@ -41,6 +41,7 @@ public class ShowCollectionsMongoCommand extends MongoCommand {
 	@Override
 	public void execute() {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
+		MongoFactory.getInst().setActiveDB(sDb);
 		
 		DB db	= mdb.getDB(sDb);
 		Set<String>	colSet	= db.getCollectionNames();

@@ -72,9 +72,10 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener 
 	private static int	COLUMN_STATUS = 0;
 	private static int	COLUMN_ORDER = 1;
 	private static int	COLUMN_TIME = 2;
-	private static int	COLUMN_ACTION = 3;
-	private static int	COLUMN_MESSAGE = 4;
-	private static int	COLUMN_MS = 5;
+	private static int	COLUMN_DATABASE = 3;
+	private static int	COLUMN_ACTION = 4;
+	private static int	COLUMN_MESSAGE = 5;
+	private static int	COLUMN_MS = 6;
 	
 	
 	public void dispose() {
@@ -109,10 +110,11 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener 
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		int columnWidths[] = new int[]{20,35,60,300,500,60};
+		int columnWidths[] = new int[]{20,35,60,90,300,500,60};
 		createColumn( table, SWT.CENTER, 	columnWidths[COLUMN_STATUS],	"" );
 		createColumn( table, SWT.RIGHT, 	columnWidths[COLUMN_ORDER], 	"#" );
 		createColumn( table, SWT.LEFT, 		columnWidths[COLUMN_TIME], 		"Time" );
+		createColumn( table, SWT.LEFT, 		columnWidths[COLUMN_DATABASE],"DB" );
 		createColumn( table, SWT.LEFT, 		columnWidths[COLUMN_ACTION], 	"Command" );
 		createColumn( table, SWT.LEFT, 		columnWidths[COLUMN_MESSAGE], "Message" );
 		createColumn( table, SWT.RIGHT,		columnWidths[COLUMN_MS], 			"ExeTime" );
@@ -243,6 +245,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener 
 			
 			item.setText( COLUMN_ORDER, String.valueOf( table.getItemCount() ) );
 			item.setText( COLUMN_TIME, DateUtil.getDateString( System.currentTimeMillis(), "HH:mm:ss") );
+			item.setText( COLUMN_DATABASE, (mcmd.getDB() != null) ? mcmd.getDB() : "" );
 			item.setText( COLUMN_ACTION, mcmd.getCommandString() );
 			item.setText( COLUMN_MESSAGE, "executing..." );
 			item.setText( COLUMN_MS, "" );

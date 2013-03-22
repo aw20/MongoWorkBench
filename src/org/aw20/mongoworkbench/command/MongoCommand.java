@@ -25,7 +25,7 @@
 package org.aw20.mongoworkbench.command;
 
 public abstract class MongoCommand extends Object {
-	protected	String sName = null, sDb = null, sColl = null, rteMessage = "";
+	protected	String sName = null, sDb = null, sColl = null, rteMessage = "", cmd = null;
 	protected Exception lastException = null;
 	protected boolean hasRun = false;
 	private long execTime = -1;
@@ -117,4 +117,10 @@ public abstract class MongoCommand extends Object {
 	public void setExecTime(long l) {
 		execTime = l;
 	}
+
+	public void setCommandStr(String cmd) {
+		this.cmd = cmd;
+	}
+
+	public void parseCommandStr() throws Exception {}
 }

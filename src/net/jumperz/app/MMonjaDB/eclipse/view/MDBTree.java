@@ -129,6 +129,21 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 				String sDb		=	selectedItem.getParentItem().getText();
 				MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
 
+				
+			} else if ( nodeType == NodeType.COLLECTION ){
+				
+				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
+				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+				String sColl	= selectedItem.getText();
+				try {
+					MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db." + sColl + ".find()");
+					if ( mcmd != null )
+						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
+				}catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				/*
 			} else if (treeType.equals(data_type_db)) {
 				
