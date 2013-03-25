@@ -24,6 +24,11 @@
  */
 package org.aw20.mongoworkbench.command;
 
+import java.util.Map;
+
+import com.mongodb.MongoException;
+import com.mongodb.util.JSON;
+
 public abstract class MongoCommand extends Object {
 	protected	String sName = null, sDb = null, sColl = null, rteMessage = "", cmd = null;
 	protected Exception lastException = null;
@@ -82,6 +87,24 @@ public abstract class MongoCommand extends Object {
 		lastException = e;
 	}
 	
+	public String getExceptionMessage(){
+		if ( lastException == null ) return "";
+		
+		if ( lastException instanceof MongoException ){
+			String e = lastException.getMessage();
+			if ( e.startsWith("command failed [$eval]: {") && e.endsWith("}") ){
+				try{
+					Map m = (Map)JSON.parse( e.substring( e.indexOf("{") ) );
+					return (String)m.get("errmsg");
+				}catch(Exception ee){
+					return lastException.getMessage();
+				}
+			}
+		}
+		
+		return lastException.getMessage();
+	}
+	
 	public long getExecTime(){
 		return execTime;
 	}
@@ -110,9 +133,11 @@ public abstract class MongoCommand extends Object {
 	/**
 	 * Override this function to provide the body of the command
 	 */
-	public abstract void execute();
+	public abstract void execute() throws Exception;
 	
-	public abstract String getCommandString();
+	public String getCommandString(){
+		return this.cmd;
+	}
 
 	public void setExecTime(long l) {
 		execTime = l;

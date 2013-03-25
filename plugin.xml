@@ -80,6 +80,14 @@
             name="JSON View"
             restorable="true">
       </view>
+     <view
+            category="MongoWorkBench.category1"
+            class="net.jumperz.app.MMonjaDB.eclipse.view.MEditor"
+            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_edit.png"
+            id="net.jumperz.app.MMonjaDB.eclipse.view.MEditor"
+            name="Editor"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">

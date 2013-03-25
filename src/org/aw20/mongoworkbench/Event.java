@@ -29,6 +29,8 @@ package org.aw20.mongoworkbench;
 public enum Event {
 
 	DOCUMENT_VIEW,
-	ELEMENT_VIEW
+	ELEMENT_VIEW,
+	
+	EXCEPTION
 	
 }

@@ -26,16 +26,25 @@ package net.jumperz.app.MMonjaDB.eclipse.view.table;
 
 import java.util.Map;
 
+import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.EventWrapper;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-public class TableManager {
+public class TableManager implements Listener {
 	private Table table; 
+	private QueryData queryData;
 	
 	public TableManager( Table table ){
 		this.table = table;
+		
+		table.addListener(SWT.MouseDoubleClick, this);
+		table.addListener(SWT.Selection, this);
+		table.addListener(SWT.KeyDown, this);
 	}
 	
 
@@ -48,6 +57,7 @@ public class TableManager {
 			columns[i].dispose();
 		}
 		table.removeAll();
+		queryData	= null;
 	}
 
 
@@ -59,7 +69,9 @@ public class TableManager {
 		table.setVisible(false);
 
 		clear();
-		
+
+		this.queryData = queryData;
+
 		if ( queryData.size() == 0 )
 			return;
 		
@@ -87,6 +99,30 @@ public class TableManager {
 		}
 
 		table.setVisible(true);
+	}
+
+
+	@Override
+	public void handleEvent(Event event) {
+		switch (event.type) {
+			case SWT.KeyDown:
+				break;
+			case SWT.Selection:
+
+				Map	rowMap	= queryData.get(table.getSelectionIndex());
+				if ( rowMap != null ){
+					Map eventMap	= EventWrapper.createMap( 
+							EventWrapper.ACTIVE_NAME, queryData.getActiveName(), 
+							EventWrapper.ACTIVE_DB, queryData.getActiveDB(),
+							EventWrapper.ACTIVE_COLL, queryData.getActiveColl(),
+							EventWrapper.DOC_DATA, rowMap
+							);
+					
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.DOCUMENT_VIEW, eventMap );
+				}
+
+				break;
+		}
 	}
 	
 }

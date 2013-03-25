@@ -36,8 +36,11 @@ import java.util.Set;
 
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.SaveMongoCommand;
+import org.aw20.mongoworkbench.command.UseMongoCommand;
 import org.aw20.util.StringUtil;
 
+import com.mongodb.DB;
 import com.mongodb.MongoClient;
 
 public class MongoFactory extends Thread {
@@ -68,7 +71,9 @@ public class MongoFactory extends Thread {
 
 		// Register the Commands
 		commandMap.put("^db\\.[^\\(]+\\.find\\(.*", FindMongoCommand.class);
-		
+		commandMap.put("^db\\.[^\\(]+\\.save\\(.*", SaveMongoCommand.class);
+		commandMap.put("^use\\s+.*", UseMongoCommand.class);
+
 		setName( "MongoFactory" );
 		start();
 	}
@@ -145,6 +150,14 @@ public class MongoFactory extends Thread {
 	public MongoClient getMongo(String sName) {
 		activeServer = sName;
 		return mongoMap.get(sName);
+	}
+
+	public MongoClient getMongoActive() {
+		return mongoMap.get(activeServer);
+	}
+
+	public DB getMongoActiveDB() {
+		return mongoMap.get(activeServer).getDB(activeDB);
 	}
 	
 	public void run(){

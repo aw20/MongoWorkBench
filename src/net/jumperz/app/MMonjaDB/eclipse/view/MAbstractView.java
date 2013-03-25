@@ -143,19 +143,14 @@ public abstract class MAbstractView extends ViewPart implements MConstants, List
 
 	
 	protected void initAction(Action action, String imageFileName, MenuManager menuManager) {
-		try {
-			if (imageFileName != null) {
-				setActionImage(action, imageFileName);
-			}
-			addActionToDropDownMenu(action);
-			addActionToToolBar(action);
+		if (imageFileName != null)
+			setActionImage(action, imageFileName);
 
-			if (menuManager != null) {
-				menuManager.add(action);
-			}
-		} catch (Exception e) {
-			eventManager.fireErrorEvent(e);
-		}
+		addActionToDropDownMenu(action);
+		addActionToToolBar(action);
+
+		if (menuManager != null)
+			menuManager.add(action);
 	}
 
 	

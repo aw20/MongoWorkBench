@@ -39,10 +39,16 @@ public class ShowCollectionsMongoCommand extends MongoCommand {
 	private List<String>	colNames = null;
 	
 	@Override
-	public void execute() {
+	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
-		MongoFactory.getInst().setActiveDB(sDb);
+
+		if ( mdb == null )
+			throw new Exception("no server selected");
 		
+		if ( sDb == null )
+			throw new Exception("no database selected");
+
+		MongoFactory.getInst().setActiveDB(sDb);
 		DB db	= mdb.getDB(sDb);
 		Set<String>	colSet	= db.getCollectionNames();
 		
@@ -51,7 +57,7 @@ public class ShowCollectionsMongoCommand extends MongoCommand {
 		while ( it.hasNext() )
 			colNames.add( it.next() );
 		
-		setMessage("# collections=" + colNames.size() );
+		setMessage("# Collections=" + colNames.size() );
 	}
 
 	@Override

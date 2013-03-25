@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.NAVITEM;
+
+import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.util.DateUtil;
 
 import com.mongodb.DBCursor;
@@ -42,12 +45,19 @@ public class QueryData extends Object {
 	
 	private static String BLANK = "";
 	private String[]	columns;
-	private	List<Map>	data;
+	private	List<Map>	data = null;
+	
+	private FindMongoCommand	findCommand;
+	
+	public QueryData( FindMongoCommand fmcmd ){
+		if ( !fmcmd.isSuccess() )
+			return;
 		
-	public QueryData(DBCursor cursor){
+		findCommand	= fmcmd;
 		
 		Set<String>	columnSet = new HashSet<String>();
 		data	= new ArrayList<Map>();
+		DBCursor	cursor	= fmcmd.getCursor();
 		
 		while ( cursor.hasNext() ){
 			DBObject dbo	= cursor.next();
@@ -55,6 +65,8 @@ public class QueryData extends Object {
 			data.add( dbo.toMap() );
 		}
 
+		findCommand.close();
+		
 		columns	= columnSet.toArray( new String[0] );
 		Arrays.sort(columns);
 		
@@ -71,7 +83,7 @@ public class QueryData extends Object {
 	}
 
 	public int size() {
-		return data.size();
+		return (data == null) ? 0 : data.size();
 	}
 
 	public String[] getColumns() {
@@ -105,5 +117,88 @@ public class QueryData extends Object {
 				return s;
 		}
 	}
+
+	public String getActiveName() {
+		return findCommand.getName();
+	}
+
+	public String getActiveDB() {
+		return findCommand.getDB();
+	}
+
+	public String getActiveColl() {
+		return findCommand.getCollection();
+	}
+
 	
+	/**
+	 * Gets a new command to run
+	 * 
+	 * @param refresh
+	 * @return
+	 */
+	public String getCommand(NAVITEM action) {
+		
+		StringBuilder	cmd	= new StringBuilder(128);
+		cmd.append( "db." )
+			.append( findCommand.getCollection() )
+			.append( ".find(" )
+			.append( findCommand.getQuery() )
+			.append( ")");
+			;
+
+		if ( action == NAVITEM.PAGE_BACK ){
+			
+			int skip = findCommand.getExecutedSkip() - findCommand.getExecutedLimit();
+			if ( skip < 0 )
+				skip = 0;
+			
+			if ( skip > 0 ){
+				cmd.append( ".skip(" ).append( skip ).append( ")" );
+			}
+			
+		}else if ( action == NAVITEM.PAGE_FORWARD ){
+
+			int skip = findCommand.getExecutedLimit() + findCommand.getExecutedSkip();
+			if ( skip > findCommand.getCount() )
+				skip	= findCommand.getCount() - (findCommand.getCount() % findCommand.getExecutedLimit());
+			
+			if ( skip > 0 ){
+				cmd.append( ".skip(" ).append( skip ).append( ")" );
+			}
+			
+		}else if ( action == NAVITEM.REFRESH ){
+
+			if (  findCommand.getExecutedSkip() > 0 ){
+				cmd.append( ".skip(" ).append( findCommand.getExecutedSkip() ).append( ")" );
+			}
+
+		}else if ( action == NAVITEM.PAGE_END ){
+
+			int skip	= findCommand.getCount() - (findCommand.getCount() % findCommand.getExecutedLimit());
+			if ( skip < 0 )
+				skip = 0;
+			
+			if ( skip > 0 ){
+				cmd.append( ".skip(" ).append( skip ).append( ")" );
+			}
+
+		} 
+		
+		// Append the limit
+		cmd.append(".limit(")
+			.append( findCommand.getExecutedLimit() )
+			.append( ")" );
+		
+		// Append in the sort
+		String sort	= findCommand.getSort();
+		if ( sort.length() > 0 ){
+			cmd.append(".sort(" )
+				.append( sort )
+				.append( ")" );
+		}
+			
+		
+		return cmd.toString();
+	}
 }

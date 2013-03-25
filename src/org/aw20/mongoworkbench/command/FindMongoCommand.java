@@ -46,12 +46,19 @@ public class FindMongoCommand extends MongoCommand {
 
 	private DBCursor cursor;
 	private	BasicDBObject cmdMap;
+	private int skip, limit, count;
 	
 	@Override
-	public void execute() {
+	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
-		MongoFactory.getInst().setActiveDB(sDb);
+		if ( mdb == null )
+			throw new Exception("no server selected");
 		
+		if ( sDb == null )
+			throw new Exception("no database selected");
+		
+		MongoFactory.getInst().setActiveDB(sDb);
+
 		DB db	= mdb.getDB(sDb);
 		try {
 			parseFindQuery(db);
@@ -65,8 +72,8 @@ public class FindMongoCommand extends MongoCommand {
 		// Construct the query
 		int argSize	= ((List)cmdMap.get("findArg")).size();
 		
-		int skip	= getSkip();
-		int	limit	= getLimit();
+		skip	= getSkip();
+		limit	= getLimit();
 
 		if ( argSize == 0 ){
 			cursor = collection.find();
@@ -91,9 +98,25 @@ public class FindMongoCommand extends MongoCommand {
 			cursor = cursor.sort( (BasicDBObject)cmdMap.get("sortArg") );
 		}
 		
-		setMessage( "count=" + cursor.count() + ((skip > -1) ? ("; skip=" + skip) : "" ) + ((limit > -1) ? ("; limit=" + limit) : "" )  );
+		count	= cursor.count();
+		
+		setMessage( "count=" + count + ((skip > -1) ? ("; skip=" + skip) : "" ) + ((limit > -1) ? ("; limit=" + limit) : "" )  );
 	}
 
+	public String getQuery(){
+		if (((List)cmdMap.get("findArg")).size() == 0)
+			return "";
+		else
+			return ((List)cmdMap.get("findArg")).get(0).toString();
+	}
+	
+	public String getSort(){
+		if (cmdMap.containsField("sortArg")) 
+			return cmdMap.get("sortArg").toString();
+		else
+			return "";
+	}
+	
 	private int getLimit() {
 		int limit = StringUtil.toInteger( cmdMap.get("limitArg"), -1);
 		if ( limit == -1 )
@@ -104,11 +127,6 @@ public class FindMongoCommand extends MongoCommand {
 
 	private int getSkip() {
 		return StringUtil.toInteger( cmdMap.get("skipArg"), -1);
-	}
-
-	@Override
-	public String getCommandString() {
-		return cmd;
 	}
 	
 	public DBCursor getCursor(){
@@ -136,6 +154,26 @@ public class FindMongoCommand extends MongoCommand {
 		cmdMap.remove("sort");
 	}
 
+	public int getExecutedLimit(){
+		return limit;
+	}
+	
+	public int getExecutedSkip(){
+		return skip;
+	}
+
+	public int getCount(){
+		return count;
+	}
+	
+	public BasicDBObject getDbObject(){
+		return cmdMap;
+	}
+	
+	public void close(){
+		cursor.close();
+		cursor = null;
+	}
 	
 	/**
 	 * db.service.find() -> service

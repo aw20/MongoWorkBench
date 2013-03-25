@@ -21,38 +21,48 @@
  *  
  *  https://github.com/aw20/MongoWorkBench
  *  Original fork: https://github.com/Kanatoko/MonjaDB
+ *  
+ *  March 2013
  */
 package org.aw20.mongoworkbench.command;
 
-import java.util.List;
-
 import org.aw20.mongoworkbench.MongoFactory;
 
+import com.mongodb.DB;
 import com.mongodb.MongoClient;
 
-public class ShowDbsMongoCommand extends MongoCommand {
 
-	private List<String>	dbNames = null;
-	
+public class SaveMongoCommand extends FindMongoCommand {
+
 	@Override
 	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
 		
 		if ( mdb == null )
 			throw new Exception("no server selected");
-
-		dbNames = mdb.getDatabaseNames();
-
-		setMessage("# Databases=" + dbNames.size() );
-	}
-
-	@Override
-	public String getCommandString() {
-		return "show dbs";
+		
+		if ( sDb == null )
+			throw new Exception("no database selected");
+		
+		MongoFactory.getInst().setActiveDB(sDb);
+		
+		DB db	= mdb.getDB(sDb);
+		try {
+			db.eval(cmd, (Object[]) null);
+		} catch (Exception e){
+			setException(e);
+		}
+		
+		setMessage( "document saved" );
 	}
 	
-	public List<String>	getDBNames(){
-		return dbNames;
+	@Override
+	public void parseCommandStr() throws Exception {
+		sColl = getCollNameFromAction(cmd, "save");
+		
+		if ( sColl == null || sColl.length() == 0 )
+			throw new Exception("failed to determine collection from command");
 	}
 
+	
 }

@@ -39,6 +39,7 @@ import net.jumperz.app.MMonjaDBCore.action.MActionManager;
 import net.jumperz.app.MMonjaDBCore.action.MFindAction;
 import net.jumperz.app.MMonjaDBCore.action.MUseAction;
 
+import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -127,9 +128,9 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 				
 				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getData()).get("name");
 				String sDb		=	selectedItem.getParentItem().getText();
+				MongoFactory.getInst().setActiveDB(sDb);
 				MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
 
-				
 			} else if ( nodeType == NodeType.COLLECTION ){
 				
 				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
@@ -140,8 +141,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					if ( mcmd != null )
 						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
 				}catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 				}
 				
 				/*
@@ -341,6 +341,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		parent.setLayout(formLayout);
 
 		tree = new Tree(parent, SWT.BORDER | SWT.SINGLE );
+		tree.setLinesVisible(true);
 		
 		FormData d1 = new FormData();
 		d1.top 		= new FormAttachment(0, 1);

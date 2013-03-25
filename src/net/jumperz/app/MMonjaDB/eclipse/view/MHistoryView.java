@@ -31,6 +31,8 @@ import net.jumperz.app.MMonjaDBCore.action.MAction;
 import net.jumperz.app.MMonjaDBCore.action.MActionManager;
 import net.jumperz.gui.MSwtUtil;
 
+import org.aw20.mongoworkbench.EventWorkBenchListener;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -54,14 +56,12 @@ import org.eclipse.swt.widgets.TableItem;
 
 /**
  * Manages the Command History
- * 
- * @author alan
- *
  */
-public class MHistoryView extends MAbstractView implements MongoCommandListener {
+public class MHistoryView extends MAbstractView implements MongoCommandListener, EventWorkBenchListener {
 
 	public MHistoryView() {
 		MongoFactory.getInst().registerListener(this);
+		EventWorkBenchManager.getInst().registerListener(this);
 	}
 
 	private Table table;
@@ -80,6 +80,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener 
 	
 	public void dispose() {
 		MongoFactory.getInst().deregisterListener(this);
+		EventWorkBenchManager.getInst().deregisterListener(this);
 		super.dispose();
 	}
 
@@ -270,7 +271,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener 
 			
 			if ( !mcmd.isSuccess() ){
 				item.setImage(COLUMN_STATUS, 	imgBad);
-				item.setText( COLUMN_MESSAGE, mcmd.getException().getMessage() );
+				item.setText( COLUMN_MESSAGE, mcmd.getExceptionMessage() );
 			}else{
 				item.setImage(COLUMN_STATUS, 	imgGood);
 				item.setText( COLUMN_MESSAGE, mcmd.getMessage() );
@@ -298,6 +299,34 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener 
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				updateTable( mcmd, false );
+			}
+		});
+		
+	}
+
+	@Override
+	public void onEventWorkBench(org.aw20.mongoworkbench.Event event, Object data) {
+		
+		if ( event != org.aw20.mongoworkbench.Event.EXCEPTION )
+			return;
+		
+		final Exception exception = (Exception)data;
+		
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				
+				TableItem item = new TableItem(table, SWT.NONE);
+				
+				item.setImage(COLUMN_STATUS, 	imgBad);
+				item.setText( COLUMN_ORDER, String.valueOf( table.getItemCount() ) );
+				item.setText( COLUMN_TIME, DateUtil.getDateString( System.currentTimeMillis(), "HH:mm:ss") );
+				item.setText( COLUMN_DATABASE, "" );
+				item.setText( COLUMN_ACTION, exception.getMessage() );
+				item.setText( COLUMN_MESSAGE, "Exception" );
+				item.setText( COLUMN_MS, "" );
+				
+				item.setData(0);
+				table.showItem(item);
 			}
 		});
 		

@@ -27,9 +27,11 @@ package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDBCore.MOutputView;
-import net.jumperz.app.MMonjaDBCore.action.MAction;
-import net.jumperz.app.MMonjaDBCore.action.MActionManager;
 
+import org.aw20.mongoworkbench.Event;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.MongoCommand;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -61,9 +63,17 @@ public class MActionView extends MAbstractView implements MOutputView {
 		if ( cmdText.length() == 0 )
 			return;
 
-		MAction maction = MActionManager.getInstance().getAction(cmdText);
-		if ( maction != null ){
-			MActionManager.getInstance().submitForExecution(maction, this);
+		try {
+			
+			MongoCommand cmd = MongoFactory.getInst().createCommand(cmdText);
+			if ( cmd != null ){
+				cmd.setConnection( MongoFactory.getInst().getActiveServer(), MongoFactory.getInst().getActiveDB() );
+				MongoFactory.getInst().submitExecution(cmd);
+			}else
+				throw new Exception( "command not found" );
+			
+		} catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e );
 		}
 
 		Activator.getDefault().saveWorkBench(textArea.getText());

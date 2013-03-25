@@ -21,38 +21,30 @@
  *  
  *  https://github.com/aw20/MongoWorkBench
  *  Original fork: https://github.com/Kanatoko/MonjaDB
+ *  
+ *  March 2013
  */
-package org.aw20.mongoworkbench.command;
+package org.aw20.mongoworkbench;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.aw20.mongoworkbench.MongoFactory;
 
-import com.mongodb.MongoClient;
+public class EventWrapper {
 
-public class ShowDbsMongoCommand extends MongoCommand {
-
-	private List<String>	dbNames = null;
+	public static String	ACTIVE_NAME = "sname";
+	public static String	ACTIVE_DB 	= "sdb";
+	public static String	ACTIVE_COLL = "scoll";
+	public static String	DOC_DATA 		= "data";
 	
-	@Override
-	public void execute() throws Exception {
-		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
+	
+	public static	Map createMap( Object... args ){
+		HashMap	map	= new HashMap();
 		
-		if ( mdb == null )
-			throw new Exception("no server selected");
-
-		dbNames = mdb.getDatabaseNames();
-
-		setMessage("# Databases=" + dbNames.size() );
+		for ( int x=0; x < args.length; x += 2 ){
+			map.put( args[x], args[x+1] );
+		}
+		
+		return map;
 	}
-
-	@Override
-	public String getCommandString() {
-		return "show dbs";
-	}
-	
-	public List<String>	getDBNames(){
-		return dbNames;
-	}
-
 }

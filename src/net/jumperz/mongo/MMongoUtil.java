@@ -70,13 +70,14 @@ import com.mongodb.util.JSON;
 
 public class MMongoUtil {
 	public static final String INC = "$inc";
-	public static final String SET = "$set";
-	public static final String OR = "$or";
-	public static final String ADDTOSET = "$addToSet";
-	private static final int MAX_COUNT = 320000;
 
-	// private static final String skipMatch = "\\.\\s*(skip\\s*\\(\\s*[0-9]+\\s*\\))(:?\\W+limit[^a-zA-Z]*)*$";
-	// private static final String limitMatch = "\\.\\s*(limit\\s*\\(\\s*[0-9]+\\s*\\))(:?\\W+skip[^a-zA-Z]*)*$";
+	public static final String SET = "$set";
+
+	public static final String OR = "$or";
+
+	public static final String ADDTOSET = "$addToSet";
+
+	private static final int MAX_COUNT = 320000;
 
 	public static BasicDBObject parseFindQuery2(DB db, String findQueryStr) throws IOException {
 		String collName = getCollNameFromAction(findQueryStr, "find");
@@ -85,7 +86,7 @@ public class MMongoUtil {
 		String jsStr = MStreamUtil.streamToString(MStreamUtil.getResourceStream("net/jumperz/mongo/parseFindQuery.txt"));
 		jsStr = jsStr.replaceFirst("//_QUERY_", findQueryStr);
 
-		BasicDBObject result = (BasicDBObject) db.eval(jsStr, (Object[])null);
+		BasicDBObject result = (BasicDBObject) db.eval(jsStr, (Object[]) null);
 
 		result.remove("find");
 		result.remove("limit");
@@ -132,7 +133,6 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static BasicDBList parseJsonToArray(DB db, String jsonStr) {
 		int index1 = jsonStr.indexOf('{');
 		int index2 = jsonStr.indexOf('[');
@@ -152,11 +152,10 @@ public class MMongoUtil {
 		}
 
 		jsonStr = jsonStr.replaceAll("\n|\r|\t", "");
-		Object o = db.eval(jsonStr, (Object[])null);
+		Object o = db.eval(jsonStr, (Object[]) null);
 		return (BasicDBList) o;
 	}
 
-	
 	public static MFindQuery parseFindQuery(DB db, String findQueryStr) throws IOException {
 		final String _origStr = findQueryStr;
 		String collName = getCollNameFromAction(findQueryStr, "find");
@@ -165,7 +164,7 @@ public class MMongoUtil {
 		String jsStr = MStreamUtil.streamToString(MStreamUtil.getResourceStream("net/jumperz/mongo/parseFindQuery.txt"));
 		jsStr = MStringUtil.replaceFirst(jsStr, "//_QUERY_", findQueryStr);
 
-		BasicDBObject result = (BasicDBObject) db.eval(jsStr, (Object[])null);
+		BasicDBObject result = (BasicDBObject) db.eval(jsStr, (Object[]) null);
 
 		result.remove("find");
 		result.remove("limit");
@@ -179,7 +178,6 @@ public class MMongoUtil {
 		return fq;
 	}
 
-	
 	public static String findQueryToString(DB db, MFindQuery fq) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("db.");
@@ -211,7 +209,6 @@ public class MMongoUtil {
 		return buf.toString();
 	}
 
-	
 	public static String toJson(DB db, Object obj, boolean removeCRLFandTAG) {
 		String s = toJson(db, obj);
 		if (removeCRLFandTAG) {
@@ -222,7 +219,6 @@ public class MMongoUtil {
 		return s;
 	}
 
-	
 	public static String toJson(DB db, Object obj) {
 		// check class
 		if (obj instanceof Map || obj instanceof List) {
@@ -232,7 +228,6 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static int[] getPrevValue(int skip, int limit) {
 		/*
 		 * db.test.find().skip( 100 ).limit( 30 ); db.test.find().skip( 70 ).limit( 30 ); db.test.find().skip( 40 ).limit( 30 ); db.test.find().skip( 10 ).limit( 30 ); db.test.find().limit( 30 );
@@ -248,18 +243,7 @@ public class MMongoUtil {
 		return array;
 	}
 
-	/*
-	 * //-------------------------------------------------------------------------------- public static String setSkipValue( String actionStr, int skip ) { String match = MRegEx.getMatch( skipMatch , actionStr ); if( match.length() == 0 ) { return actionStr; } return "";
-	 * 
-	 * } //-------------------------------------------------------------------------------- public static int getSkipFromFindQuery( String actionStr ) { String match = MRegEx.getMatch( skipMatch , actionStr ); if( match.length() > 0 ) { return MStringUtil.parseInt( MRegEx.getMatch( "[0-9]+", match ) ); } return -1; }
-	 */
-	/*
-	 * //-------------------------------------------------------------------------------- public static int getLimitFromFindQuery( String actionStr ) { String match = MRegEx.getMatch( limitMatch, actionStr ); if( match.length() > 0 ) { return MStringUtil.parseInt( MRegEx.getMatch( "[0-9]+", match ) ); } return -1; }
-	 */
-	
-	public static Object getValueByCurrentType(String value, Class currentType)
-	// throws Exception
-	{
+	public static Object getValueByCurrentType(String value, Class currentType) {
 		// test code is in net.jumperz.app.MMonjaDBCore.test
 		try {
 			if (currentType == Double.class) {
@@ -307,7 +291,6 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	private static Object parseValue(String value) {
 		if (value.matches("^-?[0-9]+$")) {
 			try {
@@ -330,7 +313,6 @@ public class MMongoUtil {
 		}
 	}
 
-	// ---------------------------------------------------j-----------------------------
 	public static java.util.List getNameListFromDataList(java.util.List dataList) {
 		java.util.List nameList = new ArrayList();
 		for (int i = 0; i < dataList.size(); ++i) {
@@ -346,20 +328,11 @@ public class MMongoUtil {
 		return nameList;
 	}
 
-	
 	public static String getCollNameFromAction(String actionStr, String actionName) {
 		// db.service.find() -> service
 		return MRegEx.getMatchIgnoreCase("^db\\.([^\\(]+)\\." + actionName + "\\(", actionStr);
 	}
 
-	/*
-	 * //-------------------------------------------------------------------------------- public static String getArgStrFromAction( String actionStr, String actionName ) { //check skip String skipStr = MRegEx.getMatch( skipMatch, actionStr ); if( skipStr.length() > 0 ) { actionStr = actionStr.replaceFirst( skipMatch, "" ); } String limitStr = MRegEx.getMatch( limitMatch, actionStr ); if(
-	 * limitStr.length() > 0 ) { actionStr = actionStr.replaceFirst( limitMatch, "" ); } return MRegEx.getMatchIgnoreCase( "^db\\.[^\\(]+\\." + actionName + "\\((.*)\\)$", actionStr ); }
-	 */
-	/*
-	 * //-------------------------------------------------------------------------------- public static BasicDBList getListFromAction( String actionStr, String actionName ) { String queryStr = getArgStrFromAction( actionStr, actionName ); BasicDBObject data = ( BasicDBObject ) JSON.parse( "{'dummy':[" + queryStr + "]}"); return ( BasicDBList )data.get( "dummy" ); }
-	 */
-	
 	public static Mongo getMongo(File file, String prefix) throws IOException {
 		MProperties prop = new MProperties();
 		prop.load(new FileInputStream(file));
@@ -367,7 +340,6 @@ public class MMongoUtil {
 		return getReplMongo(configStr);
 	}
 
-	
 	private static Map dbo2jsm(DBObject data) {
 		Map jsMap = new MJSMap();
 		Iterator p = data.keySet().iterator();
@@ -391,10 +363,6 @@ public class MMongoUtil {
 		return jsMap;
 	}
 
-	
-	/*
-	 * MSqlUtilの出力であるMJSMapと同じようなデータを出力するための関数 _idは削除される
-	 */
 	public static List getJSList(DBCursor cursor) {
 		List list = getList(cursor);
 		List list2 = new ArrayList();
@@ -405,7 +373,6 @@ public class MMongoUtil {
 		return list2;
 	}
 
-	
 	public static List getList(DBCursor cursor) {
 
 		try {
@@ -424,7 +391,6 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static void close(DBCursor cursor) {
 		if (cursor != null) {
 			try {
@@ -434,7 +400,6 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static Connection copyToTable(Connection conn, DBCursor cursor, String tableName) throws SQLException {
 		/*
 		 * cursorのデータを元にインメモリのデータベースを作る cursorが0件の場合は作成されない
@@ -459,7 +424,6 @@ public class MMongoUtil {
 		return conn;
 	}
 
-	
 	private static Object dateToTs(Object value) {
 		if (value instanceof java.util.Date) {
 			java.util.Date date = (java.util.Date) value;
@@ -470,13 +434,11 @@ public class MMongoUtil {
 		return value;
 	}
 
-	
 	public static Connection copyToTable(DBCursor cursor, String tableName) throws SQLException {
 		Connection conn = MSqlUtil.getConnection("jdbc:h2:mem:", "sa", "");
 		return copyToTable(conn, cursor, tableName);
 	}
 
-	
 	private static List createTable(Connection conn, DBObject data, String tableName) throws SQLException {
 		List columnNameList = new ArrayList();
 		StringBuffer buf = new StringBuffer();
@@ -523,34 +485,28 @@ public class MMongoUtil {
 		return columnNameList;
 	}
 
-	
 	public static DBCursor asc(DBCursor cursor, String orderBy) {
 		return cursor.sort(new BasicDBObject(orderBy, new Integer(1)));
 	}
 
-	
 	public static DBCursor desc(DBCursor cursor, String orderBy) {
 		return cursor.sort(new BasicDBObject(orderBy, new Integer(-1)));
 	}
 
-	
 	public static List getJSList(DBCollection coll) {
 		return getJSList(coll.find());
 	}
 
-	
 	public static List getList(DBCollection coll) {
 		return getList(coll.find());
 	}
 
-	
 	public static List getJSList(DBCollection coll, String key, Object value) {
 		DBObject query = new BasicDBObject(key, value);
 		DBCursor cursor = coll.find(query);
 		return getJSList(cursor);
 	}
 
-	
 	public static List getSimpleList(DBCollection coll, String key, Object value, String fieldName) {
 		DBObject query = new BasicDBObject(key, value);
 		DBCursor cursor = coll.find(query);
@@ -562,7 +518,6 @@ public class MMongoUtil {
 		return list;
 	}
 
-	
 	public static List getList(DBCollection coll, String key, Object value, String fieldName) {
 		DBObject query = new BasicDBObject(key, value);
 		DBObject keys = new BasicDBObject(fieldName, new Integer(1));
@@ -574,7 +529,6 @@ public class MMongoUtil {
 		return list;
 	}
 
-	
 	public static List getList(DBCollection coll, String key, Object value) {
 		DBObject query = new BasicDBObject(key, value);
 		DBCursor cursor = coll.find(query);
@@ -585,7 +539,6 @@ public class MMongoUtil {
 		return list;
 	}
 
-	
 	public static String getOneString(DBCollection coll, String key, Object value, String fieldName) {
 		DBObject obj = getOne(coll, key, value);
 		if (obj.containsField(fieldName)) {
@@ -595,12 +548,10 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static Map getOneJSMap(DBCollection coll, String key, Object value) {
 		return dbo2jsm(getOne(coll, key, value));
 	}
 
-	
 	public static DBObject getOne(DBCollection coll, String key, Object value) {
 		DBObject query = new BasicDBObject(key, value);
 		DBObject result = coll.findOne(query);
@@ -611,7 +562,6 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static List getJoinResult(String joinKey, DBCursor cursor1, DBCursor cursor2) {
 		try {
 			DBCursor cursor = cursor1;
@@ -639,7 +589,6 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static List getJoinResult(String joinKey, DBCollection coll1, DBCollection coll2) {
 		List resultList = new ArrayList();
 		Map tmpMap = new HashMap();
@@ -662,12 +611,10 @@ public class MMongoUtil {
 		return resultList;
 	}
 
-	
 	public static int getFirstInt(DBCollection coll, String key) {
 		return getFirstInt(coll, key, 0);
 	}
 
-	
 	public static int getFirstInt(DBCollection coll, String key, int defaultValue) {
 		Object obj = coll.findOne();
 		if (obj == null) {
@@ -688,12 +635,10 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static Mongo getReplMongo(String mongoStr) throws UnknownHostException {
 		return getReplMongo(mongoStr, null);
 	}
 
-	
 	public static Mongo getReplMongo(String mongoStr, MongoOptions options) throws UnknownHostException {
 		if (mongoStr == null || mongoStr.equals("")) {
 			mongoStr = "127.0.0.1";
@@ -722,21 +667,15 @@ public class MMongoUtil {
 		}
 	}
 
-	
 	public static void main(String[] args) throws Exception {
 		getReplMongo("127.0.0.1:27017");
 		getReplMongo("127.0.0.1:27017, 192.168.3.100:27018, mongohost");
 	}
 
-	
 	public static WriteResult updateOne(DBCollection coll, String queryKey, Object queryValue, String updateKey, boolean updateValue) {
 		return updateOne(coll, queryKey, queryValue, updateKey, new Boolean(updateValue));
 	}
 
-	/*
-	 * queryKey1 = queryValue1のドキュメントのupdateKey1項目の値をupdateValue1にする。 multi=false
-	 */
-	
 	public static WriteResult updateOne(DBCollection coll, String queryKey, Object queryValue, String updateKey1, Object updateValue1, String updateKey2, Object updateValue2) {
 		DBObject query = new BasicDBObject(queryKey, queryValue);
 		DBObject setValue = new BasicDBObject();
@@ -747,7 +686,6 @@ public class MMongoUtil {
 		return coll.update(query, newObj, false, false, WriteConcern.SAFE);
 	}
 
-	
 	public static WriteResult updateOne(DBCollection coll, String queryKey, Object queryValue, String updateKey1, Object updateValue1, String updateKey2, Object updateValue2, String updateKey3, Object updateValue3) {
 		DBObject query = new BasicDBObject(queryKey, queryValue);
 		DBObject setValue = new BasicDBObject();
@@ -759,7 +697,6 @@ public class MMongoUtil {
 		return coll.update(query, newObj, false, false, WriteConcern.SAFE);
 	}
 
-	
 	public static WriteResult updateMulti(DBCollection coll, String queryKey, Object queryValue, String updateKey1, Object updateValue1, String updateKey2, Object updateValue2) {
 		DBObject setObj = new BasicDBObject();
 		setObj.put(updateKey1, updateValue1);
@@ -768,7 +705,6 @@ public class MMongoUtil {
 		return coll.update(new BasicDBObject(queryKey, queryValue), newObj, false, true, WriteConcern.SAFE);
 	}
 
-	
 	public static WriteResult updateMulti(DBCollection coll, DBObject query, String updateKey1, Object updateValue1, String updateKey2, Object updateValue2) {
 		DBObject setObj = new BasicDBObject();
 		setObj.put(updateKey1, updateValue1);
@@ -777,41 +713,34 @@ public class MMongoUtil {
 		return coll.update(query, newObj, false, true, WriteConcern.SAFE);
 	}
 
-	
 	public static WriteResult updateMulti(DBCollection coll, DBObject query, String updateKey, Object updateValue) {
 		DBObject newObj = new BasicDBObject(MMongoUtil.SET, new BasicDBObject(updateKey, updateValue));
 		return coll.update(query, newObj, false, true, WriteConcern.SAFE);
 	}
 
-	
 	public static WriteResult updateMulti(DBCollection coll, String queryKey, Object queryValue, String updateKey, Object updateValue) {
 		DBObject newObj = new BasicDBObject(MMongoUtil.SET, new BasicDBObject(updateKey, updateValue));
 		return coll.update(new BasicDBObject(queryKey, queryValue), newObj, false, true, WriteConcern.SAFE);
 	}
 
-	
 	public static WriteResult updateOne(DBCollection coll, String queryKey, Object queryValue, String updateKey, Object updateValue) {
 		DBObject query = new BasicDBObject(queryKey, queryValue);
 		DBObject newObj = new BasicDBObject(MMongoUtil.SET, new BasicDBObject(updateKey, updateValue));
 		return coll.update(query, newObj, false, false, WriteConcern.SAFE);
 	}
 
-	
 	public static WriteResult updateOne(DB db, String collName, String queryKey, Object queryValue, String updateKey, boolean updateValue) {
 		return updateOne(db.getCollection(collName), queryKey, queryValue, updateKey, updateValue);
 	}
 
-	
 	public static WriteResult updateOne(DB db, String collName, String queryKey, Object queryValue, String updateKey, Object updateValue) {
 		return updateOne(db.getCollection(collName), queryKey, queryValue, updateKey, updateValue);
 	}
 
-	
 	public static void GTE(DBObject ref, String key, int value) {
 		ref.put(key, new BasicDBObject(QueryOperators.GTE, new Integer(value)));
 	}
 
-	
 	public static int getCount(DBCollection coll, String key1, Object value1, String key2, Object value2, String key3, Object value3) {
 		DBObject query = new BasicDBObject(key1, value1);
 		query.put(key2, value2);
@@ -819,16 +748,14 @@ public class MMongoUtil {
 		return (int) coll.getCount(query);
 	}
 
-	
 	public static int getCount(DBCollection coll, String key1, Object value1, String key2, Object value2) {
 		DBObject query = new BasicDBObject(key1, value1);
 		query.put(key2, value2);
 		return (int) coll.getCount(query);
 	}
 
-	
 	public static int getCount(DBCollection coll, String key, Object value) {
 		return (int) coll.getCount(new BasicDBObject(key, value));
 	}
-	
+
 }
