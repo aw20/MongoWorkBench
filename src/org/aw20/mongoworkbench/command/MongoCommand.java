@@ -30,6 +30,10 @@ import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
 public abstract class MongoCommand extends Object {
+	
+	public static String	KEY_NAME 	= "_name";
+	public static String	KEY_COUNT	= "_count";
+	
 	protected	String sName = null, sDb = null, sColl = null, rteMessage = "", cmd = null;
 	protected Exception lastException = null;
 	protected boolean hasRun = false;

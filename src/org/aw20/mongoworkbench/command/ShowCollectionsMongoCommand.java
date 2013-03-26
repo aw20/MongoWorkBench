@@ -36,7 +36,7 @@ import com.mongodb.MongoClient;
 
 public class ShowCollectionsMongoCommand extends MongoCommand {
 
-	private List<String>	colNames = null;
+	private List<String>	colNames = null, jsNames = null, gridfsNames = null;
 	
 	@Override
 	public void execute() throws Exception {
@@ -52,12 +52,26 @@ public class ShowCollectionsMongoCommand extends MongoCommand {
 		DB db	= mdb.getDB(sDb);
 		Set<String>	colSet	= db.getCollectionNames();
 		
-		colNames	= new ArrayList<String>(colSet.size());
-		Iterator<String> it = colSet.iterator();
-		while ( it.hasNext() )
-			colNames.add( it.next() );
+		colNames		= new ArrayList<String>(colSet.size());
+		jsNames			= new ArrayList<String>(1);
+		gridfsNames	= new ArrayList<String>(1);
 		
-		setMessage("# Collections=" + colNames.size() );
+		
+		Iterator<String> it = colSet.iterator();
+		while ( it.hasNext() ){
+			String colName = it.next();
+			
+			if ( colName.endsWith(".js") )
+				jsNames.add( colName );
+			else if ( colName.endsWith(".chunks") )
+				gridfsNames.add( colName.substring(0, colName.lastIndexOf(".") ) );
+			else if ( colName.endsWith(".files") || colName.endsWith("system.indexes") )
+				;
+			else
+				colNames.add( colName );
+		}
+		
+		setMessage("# Collections=" + colNames.size() + "; GridFS=" + gridfsNames.size() + "; Javascript=" + jsNames.size() );
 	}
 
 	@Override
@@ -67,6 +81,14 @@ public class ShowCollectionsMongoCommand extends MongoCommand {
 	
 	public List<String>	getCollectionNames(){
 		return colNames;
+	}
+	
+	public List<String>	getGridFSNames(){
+		return gridfsNames;
+	}
+	
+	public List<String>	getJSNames(){
+		return jsNames;
 	}
 
 }

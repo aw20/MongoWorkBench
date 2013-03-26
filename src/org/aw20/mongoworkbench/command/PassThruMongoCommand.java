@@ -44,13 +44,7 @@ public class PassThruMongoCommand extends MongoCommand {
 		MongoFactory.getInst().setActiveDB(sDb);
 		DB db	= mdb.getDB(sDb);
 		
-		Object obj = db.eval( cmd, (Object[])null);
-		
-		if ( obj != null ){
-			System.out.println( obj.getClass().getName() );
-			System.out.println( obj );
-		}
-		
+		db.eval( cmd, (Object[])null);
 	}
 
 }

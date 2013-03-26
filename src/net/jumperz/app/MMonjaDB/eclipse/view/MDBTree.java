@@ -35,11 +35,9 @@ import java.util.Map;
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
 import net.jumperz.app.MMonjaDB.eclipse.dialog.ServerDialog;
-import net.jumperz.app.MMonjaDBCore.action.MActionManager;
-import net.jumperz.app.MMonjaDBCore.action.MFindAction;
-import net.jumperz.app.MMonjaDBCore.action.MUseAction;
 
 import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.EventWrapper;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -66,7 +64,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		METADATA,
 		COLLECTION,
 		GRIDFS,
-		INDEX
+		INDEX, JAVASCRIPT
 	};
 	
 	private Action editAction;
@@ -126,13 +124,9 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 			} else if ( nodeType == NodeType.DATABASE ) {
 
-				MongoFactory.getInst().setActiveServerDB( selectedItem.getParentItem().getText(), selectedItem.getText() );
-
-			} else if ( nodeType == NodeType.METADATA && selectedItem.getText().equals("Collections") ) {
-
-				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getData()).get("name");
-				String sDb		=	selectedItem.getParentItem().getText();
-				MongoFactory.getInst().setActiveDB(sDb);
+				String sName	= selectedItem.getParentItem().getText();
+				String sDb		=	selectedItem.getText();
+				MongoFactory.getInst().setActiveServerDB( sName, sDb );
 				MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
 
 			} else if ( nodeType == NodeType.COLLECTION ){
@@ -172,41 +166,10 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 				*/
 			}
 		}
-		updateGui();
 	}
 
-	private void updateGui() {
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				boolean hasItem = false;
-				if (tree.getItemCount() > 0) {
-					hasItem = true;
-				}
-				reloadAction.setEnabled(hasItem);
-			}
-		});
-	}
-	
-	
-/*
-	private void drawRootItem(final MConnectAction ca) {
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (tree.getItemCount() == 0) {
-					TreeItem item = new TreeItem(tree, SWT.NONE);
-					item.setText(ca.getName());
-					item.setImage(imageServer);
-					Map data = new HashMap();
-					data.put(data_type, data_type_mongo);
-					item.setData(data);
 
-					editAction.setEnabled(false);
-					disconnectAction.setEnabled(true);
-				}
-			}
-		});
-	}
-*/
+
 	
 	private boolean needUpdate(TreeItem parentItem, java.util.List dbNameList) {
 		if (parentItem == null)
@@ -217,124 +180,25 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			return true;
 
 		for (int i = 0; i < dbNameList.size(); ++i) {
-			if (!dbNameList.get(i).equals(dbItems[i].getText())) {
-				return true;
+			Object o = dbNameList.get(i);
+			
+			if ( o instanceof String ){
+			
+				if (!o.equals(dbItems[i].getText()))
+					return true;
+				
+			}else if ( o instanceof Map ){
+				
+				String k = (String)((Map)o).get( MongoCommand.KEY_NAME);
+				if (!k.equals(dbItems[i].getText()))
+					return true;
+
 			}
 		}
 
 		return false;
 	}
 
-
-	private void selectDbItem(String dbName) {
-
-		TreeItem[] selectedItems = tree.getSelection();
-		if (selectedItems != null && selectedItems.length == 1) {
-			Map map = (Map) selectedItems[0].getData();
-			if (map.containsKey(data_type)) {
-				if (map.get(data_type).equals(data_type_collection)) {
-					if (selectedItems[0].getParentItem().getText().equals(dbName)) {
-						// collection in the db is selected. nothing to do.
-						return;
-					}
-				}
-			}
-		}
-
-		TreeItem dbItem = MUtil.getTreeItemByDbName(tree, dbName);
-		if (dbItem == null) {
-			TreeItem mongoItem = tree.getItem(0);
-			if (mongoItem != null) {
-				dbItem = createDbTreeItem(mongoItem, dbName);
-				// tree.setSelection( item );
-			}
-		}
-
-		if (!MUtil.treeItemSelected(tree, dbItem)) {
-			tree.select(dbItem);
-			onTreeItemSelect();// TODO: :p
-		}
-	}
-
-	private void selectItem(String dbName, String collName) {
-		TreeItem item = MUtil.getTreeItemByDbAndCollName(tree, dbName, collName);
-		if (item == null) {
-			return;
-		}
-		if (!MUtil.treeItemSelected(tree, item)) {
-			tree.select(item);
-			// onTreeItemSelect();//TODO: :p
-		}
-	}
-
-	private void onUse(MUseAction action) {
-		if (action.getOriginView() == this) {
-			return;
-		}
-
-		final String dbName = action.getDBName();
-
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {// *****
-
-				selectDbItem(dbName);
-
-			}
-		});// *****
-	}
-
-	private void onFind(MFindAction action) {
-		final String dbName = action.getDB().getName();
-		final String collName = action.getCollection().getName();
-
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {// *****
-
-				selectItem(dbName, collName);
-
-			}
-		});// *****
-	}
-
-	private void onDisconnect() {
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {// *****
-
-				tree.removeAll();
-				disconnectAction.setEnabled(false);
-
-				updateGui();
-			}
-		});// *****
-
-	}
-
-	/*
-	public void update(final Object e, final Object source) {
-	
-		final MEvent event = (MEvent) e;
-		final String eventName = event.getEventName();
-		if (eventName.indexOf(event_connect + "_end") == 0) {
-			// draw tree item
-			MConnectAction ca = (MConnectAction) source;
-			onConnect(ca);
-		} else if (eventName.indexOf(event_showdbs + "_end") == 0) {
-			MShowDBAction action = (MShowDBAction) source;
-			onShowDbs(action);
-		} else if (eventName.indexOf(event_showcollections + "_end") == 0) {
-			MShowCollectionAction action = (MShowCollectionAction) source;
-			onShowCollections(action);
-		} else if (eventName.indexOf(event_use + "_end") == 0) {
-			MUseAction action = (MUseAction) source;
-			onUse(action);
-		} else if (event.getEventName().indexOf(event_find + "_end") == 0) {
-			MFindAction action = (MFindAction) source;
-			onFind(action);
-		} else if (event.getEventName().indexOf(event_disconnect + "_end") == 0) {
-			onDisconnect();
-		}
-	}
-	*/
 
 	public void init2() {
 		imageServer			= MUtil.getImage(parent.getShell().getDisplay(), "server.png");
@@ -401,11 +265,11 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 		reloadAction = new Action() {
 			public void run() {
-				executeAction("show dbs");
+				onReload();
 			}
 		};
-		reloadAction.setToolTipText("Reload Databases ( show dbs  )");
-		reloadAction.setText("Reload Databases");
+		reloadAction.setToolTipText("Reload");
+		reloadAction.setText("Reload");
 		initAction(reloadAction, "arrow_refresh.png", menuManager);
 		reloadAction.setEnabled(false);
 
@@ -419,8 +283,46 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		}
 	}
 
+	
+	/**
+	 * The refresh has been called
+	 */
+	public void onReload() {
+		if ( tree.getSelectionCount() == 0 )
+			return;
+		
+		TreeItem selectedItem = tree.getSelection()[0];
+		if ( selectedItem == null )
+			return;
+		
+		Map data = (Map) selectedItem.getData();
+		NodeType nodeType = (NodeType)data.get(KEY_TYPE);
+		
+		if ( nodeType == NodeType.SERVER ){
+			
+			String sName	= (String)data.get("name");
+			MongoFactory.getInst().submitExecution( new ShowDbsMongoCommand().setConnection(sName) );
+			
+		} else if ( nodeType == NodeType.DATABASE ) {
+
+			String sName	= selectedItem.getParentItem().getText();
+			String sDb		=	selectedItem.getText();
+			MongoFactory.getInst().setActiveServerDB( sName, sDb );
+			MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
+
+		} else if ( nodeType == NodeType.METADATA ) {
+		
+			String sName	= selectedItem.getParentItem().getParentItem().getText();
+			String sDb		=	selectedItem.getParentItem().getText();
+			MongoFactory.getInst().setActiveServerDB( sName, sDb );
+			MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
+			
+		}
+
+	}
+
 	public void onDisconnectSelect() {
-		MActionManager.getInstance().executeAction("mj disconnect");
+		
 	}
 
 	public void onConnectSelect() {
@@ -485,31 +387,6 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		Map data = new HashMap();
 		data.put( KEY_TYPE, NodeType.DATABASE );
 		dbitem.setData(data);
-
-		// Add the subfolders
-		TreeItem	coll	= new TreeItem( dbitem, 0 );
-		coll.setText("Collections");
-		coll.setImage(imageMetaFolder);
-		data = new HashMap();
-		data.put( KEY_TYPE, NodeType.METADATA );
-		coll.setData(data);
-		
-		/*
-		 * Not Yet Implemented; but when i do it will rock!
-		coll	= new TreeItem( dbitem, 0 );
-		coll.setText("Stored Javascript");
-		coll.setImage(imageMetaFolder);
-		data = new HashMap();
-		data.put( KEY_TYPE, NodeType.METADATA );
-		coll.setData(data);
-		
-		coll	= new TreeItem( dbitem, 0 );
-		coll.setText("GridFS");
-		coll.setImage(imageMetaFolder);
-		data = new HashMap();
-		data.put( KEY_TYPE, NodeType.METADATA );
-		coll.setData(data);
-		*/
 		
 		tree.showItem(dbitem);
 		return dbitem;
@@ -537,10 +414,9 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					e.printStackTrace();
 				}
 
+				reloadAction.setEnabled( (tree.getItemCount() > 0) );
 			}
 		});
-
-		updateGui();
 	}
 
 	
@@ -583,36 +459,56 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 				if (dbItem == null)
 					return;
 				
-				TreeItem	collectionsItem	= dbItem.getItem(0);
+				
+				dbItem.removeAll();
+				
+				// Put in the collections
+				TreeItem	coll	= new TreeItem( dbItem, SWT.None );
+				coll.setText("Collections");
+				coll.setImage(imageMetaFolder);
+				coll.setData( EventWrapper.createMap(KEY_TYPE, NodeType.METADATA) );
 				
 				List<String>	colList = mcmd.getCollectionNames();
-				
-				try {
-					if (needUpdate(collectionsItem, colList)) {
-						collectionsItem.removeAll();
-
-						for (int i = 0; i < colList.size(); ++i) {
-							
-							TreeItem item = new TreeItem(collectionsItem, 0);
-							item.setText( (String)colList.get(i) );
-							tree.showItem(item);
-							item.setImage(imageCollection);
-
-							Map data = new HashMap();
-							data.put( KEY_TYPE, NodeType.COLLECTION );
-							item.setData(data);
-
-						}
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
+				for (int i = 0; i < colList.size(); ++i) {
+					TreeItem item = new TreeItem(coll, 0);
+					item.setText( colList.get(i) );
+					item.setImage(imageCollection);
+					item.setData( EventWrapper.createMap(KEY_TYPE, NodeType.COLLECTION) );
 				}
+				
 
+				TreeItem	js	= new TreeItem( dbItem, SWT.None );
+				js.setText("Stored Javascript");
+				js.setImage(imageMetaFolder);
+				js.setData( EventWrapper.createMap(KEY_TYPE, NodeType.METADATA) );
+				
+				colList = mcmd.getJSNames();
+				for (int i = 0; i < colList.size(); ++i) {
+					TreeItem item = new TreeItem(js, 0);
+					item.setText( colList.get(i) );
+					item.setImage(imageCollection);
+					item.setData( EventWrapper.createMap(KEY_TYPE, NodeType.JAVASCRIPT) );
+				}
+				
+				
+				TreeItem gridfs = new TreeItem( dbItem, SWT.None );
+				gridfs.setText("GridFS");
+				gridfs.setImage(imageMetaFolder);
+				gridfs.setData( EventWrapper.createMap(KEY_TYPE, NodeType.METADATA) );
+
+				colList = mcmd.getGridFSNames();
+				for (int i = 0; i < colList.size(); ++i) {
+					TreeItem item = new TreeItem(gridfs, 0);
+					item.setText( colList.get(i) );
+					item.setImage(imageCollection);
+					item.setData( EventWrapper.createMap(KEY_TYPE, NodeType.GRIDFS) );
+				}
+				
+				tree.showItem(coll);
+				
+				reloadAction.setEnabled( (tree.getItemCount() > 0) );
 			}
 		});
-
-		updateGui();
 	}
 	
 }
