@@ -153,9 +153,8 @@ public class QueryData extends Object {
 			if ( skip < 0 )
 				skip = 0;
 			
-			if ( skip > 0 ){
+			if ( skip > 0 )
 				cmd.append( ".skip(" ).append( skip ).append( ")" );
-			}
 			
 		}else if ( action == NAVITEM.PAGE_FORWARD ){
 
@@ -163,15 +162,13 @@ public class QueryData extends Object {
 			if ( skip > findCommand.getCount() )
 				skip	= findCommand.getCount() - (findCommand.getCount() % findCommand.getExecutedLimit());
 			
-			if ( skip > 0 ){
+			if ( skip > 0 )
 				cmd.append( ".skip(" ).append( skip ).append( ")" );
-			}
 			
 		}else if ( action == NAVITEM.REFRESH ){
 
-			if (  findCommand.getExecutedSkip() > 0 ){
+			if (  findCommand.getExecutedSkip() > 0 )
 				cmd.append( ".skip(" ).append( findCommand.getExecutedSkip() ).append( ")" );
-			}
 
 		}else if ( action == NAVITEM.PAGE_END ){
 
@@ -179,9 +176,8 @@ public class QueryData extends Object {
 			if ( skip < 0 )
 				skip = 0;
 			
-			if ( skip > 0 ){
+			if ( skip > 0 )
 				cmd.append( ".skip(" ).append( skip ).append( ")" );
-			}
 
 		} 
 		

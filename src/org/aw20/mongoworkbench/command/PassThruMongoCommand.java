@@ -24,40 +24,33 @@
  */
 package org.aw20.mongoworkbench.command;
 
-import net.jumperz.util.MRegEx;
-
 import org.aw20.mongoworkbench.MongoFactory;
 
-public class UseMongoCommand extends MongoCommand {
+import com.mongodb.DB;
+import com.mongodb.MongoClient;
 
-	private String dbName = null;
+
+public class PassThruMongoCommand extends MongoCommand {
 	
 	@Override
 	public void execute() throws Exception {
-		if ( sName == null )
+		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
+		if ( mdb == null )
 			throw new Exception("no server selected");
 		
-		dbName = MRegEx.getMatchIgnoreCase("^use\\s+(.*)$", cmd);
-		if ( dbName == null )
-			throw new Exception( "failed to retrieve database name" );
-
-		// Not unusual for commands to end with a ; so chop it off
-		dbName	= dbName.trim();
-		if ( dbName.endsWith(";") )
-			dbName	= dbName.substring(0, dbName.length()-1);
-
-		// Check for bad characters
-		for ( int x=0; x < dbName.length(); x++ ){
-			if ( !Character.isLetterOrDigit( dbName.charAt(x) ) && dbName.charAt(x) != '_' )
-				throw new Exception("database name contains invalid characters");
+		if ( sDb == null )
+			throw new Exception("no database selected");
+		
+		MongoFactory.getInst().setActiveDB(sDb);
+		DB db	= mdb.getDB(sDb);
+		
+		Object obj = db.eval( cmd, (Object[])null);
+		
+		if ( obj != null ){
+			System.out.println( obj.getClass().getName() );
+			System.out.println( obj );
 		}
 		
-		sDb = dbName;
-		MongoFactory.getInst().setActiveDB(dbName);
 	}
 
-	@Override
-	public String getCommandString() {
-		return isSuccess() ? ("use " + dbName) : "invalid";
-	}
 }

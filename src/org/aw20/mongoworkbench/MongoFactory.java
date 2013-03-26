@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
 import org.aw20.util.StringUtil;
@@ -118,6 +119,7 @@ public class MongoFactory extends Thread {
 		// remove line breaks
 		cmd = cmd.replaceAll("(\\r|\\n)", "");
 		cmd = cmd.replaceAll("\\t+", " ");
+		cmd	= cmd.trim();
 
 		Iterator p = commandMap.keySet().iterator();
 		while (p.hasNext()) {
@@ -131,11 +133,20 @@ public class MongoFactory extends Thread {
 					mcmd.parseCommandStr();
 					return mcmd;
 				} catch (Exception e) {
-					System.out.println(e);
+					EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
 					return null;
 				}
 			}
 		}
+		
+		// Determine if this is a command
+		if ( cmd.startsWith("db.") || cmd.startsWith("sh.") || cmd.startsWith("rs.") ){
+			MongoCommand mcmd = new PassThruMongoCommand();
+			mcmd.setConnection(activeServer, activeDB);
+			mcmd.setCommandStr(cmd);
+			return mcmd;
+		}
+			
 		
 		return null;
 	}
@@ -186,7 +197,7 @@ public class MongoFactory extends Thread {
 				try{
 					it.next().onMongoCommandStart(cmd);
 				}catch(Exception e){
-					System.out.println(e);
+					EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
 				}
 			}
 			
@@ -208,11 +219,16 @@ public class MongoFactory extends Thread {
 				try{
 					it.next().onMongoCommandFinished(cmd);
 				}catch(Exception e){
-					System.out.println(e);
+					EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
 				}
 				
 			}
 			
 		}
+	}
+
+	public void setActiveServerDB(String name, String db) {
+		activeServer = name;
+		activeDB = db;
 	}
 }

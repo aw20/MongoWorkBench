@@ -159,7 +159,7 @@ public class FindMongoCommand extends MongoCommand {
 	}
 	
 	public int getExecutedSkip(){
-		return skip;
+		return (skip == -1) ? 0 : skip;
 	}
 
 	public int getCount(){
