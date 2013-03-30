@@ -35,22 +35,33 @@ import java.util.Map;
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
 import net.jumperz.app.MMonjaDB.eclipse.dialog.ServerDialog;
+import net.jumperz.app.MMonjaDB.eclipse.dialog.TextInputPopup;
 
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.EventWrapper;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.CollectionCountMongoCommand;
+import org.aw20.mongoworkbench.command.CollectionRemoveAllMongoCommand;
+import org.aw20.mongoworkbench.command.CreateCollectionMongoCommand;
+import org.aw20.mongoworkbench.command.CreateDbsMongoCommand;
+import org.aw20.mongoworkbench.command.DropCollectionMongoCommand;
+import org.aw20.mongoworkbench.command.DropDbsMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.ShowCollectionsMongoCommand;
 import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -66,12 +77,6 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		GRIDFS,
 		INDEX, JAVASCRIPT
 	};
-	
-	private Action editAction;
-	private Action disconnectAction;
-	private Action reloadAction;
-	private Action createDbAction;
-	private Action removeDbAction;
 	
 	private Image imageServer, imageDatabase, imageCollection, imageMetaFolder;
 	private List<Map>		serverList;
@@ -141,38 +146,14 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 				}catch (Exception e) {
 					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 				}
-				
-				/*
-			} else if (treeType.equals(data_type_db)) {
-				
-				if (isActive()) {
-					String dbName = selectedItem.getText();
-					executeAction("use " + dbName);
-				}
-				executeAction("show collections");
-				
-			} else if (treeType.equals(data_type_collection)) {
-				
-				if (isActive()) {
-					String collName = selectedItem.getText();
-					TreeItem dbItem = selectedItem.getParentItem();
-					String dbName = dbItem.getText();
-					if (!MDataManager.getInstance().getDB().getName().equals(dbName)) {
-						executeAction("use " + dbName);
-						executeAction("show collections");
-					}
-					actionManager.executeAction("db." + collName + ".find()");
-				}
-				*/
+			
 			}
 		}
 	}
 
 
-
-	
 	private boolean needUpdate(TreeItem parentItem, java.util.List dbNameList) {
-		if (parentItem == null)
+		if (parentItem == null || dbNameList == null )
 			return false;
 
 		TreeItem[] dbItems = parentItem.getItems();
@@ -219,6 +200,29 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		tree.setLayoutData(d1);
 
 		// Add in the servers
+		drawServerNodes();
+		
+		// Set the menu up
+		menuManager = new MenuManager();
+		menuManager.setRemoveAllWhenShown(true);
+		menuManager.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				if ( tree.getSelectionCount() != 0 )
+					showContextMenu( tree.getSelection()[0] );
+			}
+		});
+		
+		
+		Menu contextMenu = menuManager.createContextMenu(tree);
+		tree.setMenu(contextMenu);
+		createActions();
+
+		// listeners
+		tree.addListener(SWT.MouseDoubleClick, this);
+		tree.addListener(SWT.KeyDown, this);
+	}
+
+	private void drawServerNodes() {
 		Iterator<Map>	it	= serverList.iterator();
 		while ( it.hasNext() ){
 			Map	map	= it.next();
@@ -232,57 +236,313 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			data.putAll( map );
 			item.setData(data );
 		}
-		
-		
-		// Set the menu up
-		menuManager = new MenuManager();
-		Menu contextMenu = menuManager.createContextMenu(tree);
-		tree.setMenu(contextMenu);
-
-		final MDBTree dbTree = this;
-
-		editAction = new Action() {
-			public void run() {// -----------
-				dbTree.onConnectSelect();
-			}
-		};// -----------
-		editAction.setToolTipText("Add/Edit MongoDB Connection");
-		editAction.setText("Add/Edit");
-		editAction.setEnabled(true);
-
-		disconnectAction = new Action() {
-			public void run() {
-				dbTree.onDisconnectSelect();
-			}
-		};
-		disconnectAction.setToolTipText("Disconnect from MongoDB");
-		disconnectAction.setText("Disconnect");
-
-		initAction(editAction, "server_lightning.png", menuManager);
-		initAction(disconnectAction, "server_delete.png", menuManager);
-
-		disconnectAction.setEnabled(false);
-
-		reloadAction = new Action() {
-			public void run() {
-				onReload();
-			}
-		};
-		reloadAction.setToolTipText("Reload");
-		reloadAction.setText("Reload");
-		initAction(reloadAction, "arrow_refresh.png", menuManager);
-		reloadAction.setEnabled(false);
-
-		// listeners
-		tree.addListener(SWT.MouseDoubleClick, this);
-		//tree.addListener(SWT.Selection, this);
-		tree.addListener(SWT.KeyDown, this);
-
-		if (dataManager.isConnected()) {
-			//onConnect(dataManager.getConnectAction());
-		}
 	}
 
+	private Action	actionList[];
+	
+	private int	ACTION_SERVER_DISCONNECT 			= 0;
+	private int	ACTION_SERVER_CREATEDATABASE 	= 1;
+	private int	ACTION_SERVER_REFRESH 				= 2;
+	private int	ACTION_SERVER_NAME 						= 3;
+	private int	ACTION_SERVER_EDIT 						= 4;
+	private int	ACTION_SERVER_DELETE 					= 5;
+	private int	ACTION_SERVER_STATS 					= 6;
+	private int	ACTION_DATABASE_DROP 					= 7;
+	private int	ACTION_DATABASE_REFRESH				= 8;
+	private int	ACTION_DATABASE_NAME					= 9;
+	private int	ACTION_DATABASE_STATS					= 10;
+	private int	ACTION_COLLECTIONMETADATA_NAME		= 11;
+	private int	ACTION_COLLECTIONMETADATA_CREATE	= 12;
+	private int	ACTION_COLLECTIONMETADATA_REFRESH	= 13;
+	private int	ACTION_COLLECTION_NAME				= 14;
+	private int	ACTION_COLLECTION_EMPTY				= 15;
+	private int	ACTION_COLLECTION_DROP				= 16;
+	private int	ACTION_COLLECTION_COUNT				= 17;
+	private int	ACTION_SERVER_ADD							= 18;
+
+	private void createActions(){
+	
+		actionList	= new Action[19];
+		
+		// Server
+		actionList[ACTION_SERVER_ADD] = new Action() {public void run() {actionRun(ACTION_SERVER_ADD);}	};
+		actionList[ACTION_SERVER_ADD].setText("Add Server");
+		setActionImage( actionList[ACTION_SERVER_ADD], "database_gear.png" );
+		toolBar.add(actionList[ACTION_SERVER_ADD]);
+
+		
+		actionList[ACTION_SERVER_DISCONNECT] = new Action() {public void run() {actionRun(ACTION_SERVER_DISCONNECT);}	};
+		actionList[ACTION_SERVER_DISCONNECT].setText("Disconnect MongoDB");
+
+		actionList[ACTION_SERVER_CREATEDATABASE] = new Action() {public void run() {actionRun(ACTION_SERVER_CREATEDATABASE);}	};
+		actionList[ACTION_SERVER_CREATEDATABASE].setText("Create Database");
+
+		actionList[ACTION_SERVER_REFRESH] = new Action() {public void run() {actionRun(ACTION_SERVER_REFRESH);}	};
+		actionList[ACTION_SERVER_REFRESH].setText("Refresh");
+
+		actionList[ACTION_SERVER_EDIT] = new Action() {public void run() {actionRun(ACTION_SERVER_EDIT);}	};
+		actionList[ACTION_SERVER_EDIT].setText("Edit Connection");
+		
+		actionList[ACTION_SERVER_STATS] = new Action() {public void run() {actionRun(ACTION_SERVER_STATS);}	};
+		actionList[ACTION_SERVER_STATS].setText("Show Statistics");
+		
+		actionList[ACTION_SERVER_DELETE] = new Action() {public void run() {actionRun(ACTION_SERVER_DELETE);}	};
+		actionList[ACTION_SERVER_DELETE].setText("Delete Connection");
+
+		actionList[ACTION_SERVER_NAME] = new Action() {public void run() {}	};
+		actionList[ACTION_SERVER_NAME].setText("name");
+		actionList[ACTION_SERVER_NAME].setEnabled(false);
+		setActionImage( actionList[ACTION_SERVER_NAME], "server.png" );
+		
+		// Database
+		actionList[ACTION_DATABASE_NAME] = new Action() {public void run() {}	};
+		actionList[ACTION_DATABASE_NAME].setText("name");
+		actionList[ACTION_DATABASE_NAME].setEnabled(false);
+		setActionImage( actionList[ACTION_DATABASE_NAME], "database.png" );
+
+		actionList[ACTION_DATABASE_DROP] = new Action() {public void run() {actionRun(ACTION_DATABASE_DROP);}	};
+		actionList[ACTION_DATABASE_DROP].setText("Drop Database");
+
+		actionList[ACTION_DATABASE_STATS] = new Action() {public void run() {actionRun(ACTION_DATABASE_STATS);}	};
+		actionList[ACTION_DATABASE_STATS].setText("Show Statistics");
+
+		actionList[ACTION_DATABASE_REFRESH] = new Action() {public void run() {actionRun(ACTION_DATABASE_REFRESH);}	};
+		actionList[ACTION_DATABASE_REFRESH].setText("Refresh");
+
+		// Collection metadata
+		actionList[ACTION_COLLECTIONMETADATA_NAME] = new Action() {public void run() {}	};
+		actionList[ACTION_COLLECTIONMETADATA_NAME].setText("name");
+		actionList[ACTION_COLLECTIONMETADATA_NAME].setEnabled(false);
+		setActionImage( actionList[ACTION_COLLECTIONMETADATA_NAME], "table_multiple.png" );
+
+		actionList[ACTION_COLLECTIONMETADATA_CREATE] = new Action() {public void run() {actionRun(ACTION_COLLECTIONMETADATA_CREATE);}	};
+		actionList[ACTION_COLLECTIONMETADATA_CREATE].setText("Create Collection");
+
+		actionList[ACTION_COLLECTIONMETADATA_REFRESH] = new Action() {public void run() {actionRun(ACTION_COLLECTIONMETADATA_REFRESH);}	};
+		actionList[ACTION_COLLECTIONMETADATA_REFRESH].setText("Refresh");
+
+		// Collection
+		actionList[ACTION_COLLECTION_NAME] = new Action() {public void run() {}	};
+		actionList[ACTION_COLLECTION_NAME].setText("name");
+		actionList[ACTION_COLLECTION_NAME].setEnabled(false);
+		setActionImage( actionList[ACTION_COLLECTION_NAME], "table_multiple.png" );
+
+		actionList[ACTION_COLLECTION_DROP] = new Action() {public void run() {actionRun(ACTION_COLLECTION_DROP);}	};
+		actionList[ACTION_COLLECTION_DROP].setText("Drop Collection");
+
+		actionList[ACTION_COLLECTION_EMPTY] = new Action() {public void run() {actionRun(ACTION_COLLECTION_EMPTY);}	};
+		actionList[ACTION_COLLECTION_EMPTY].setText("Empty Collection");
+
+		actionList[ACTION_COLLECTION_COUNT] = new Action() {public void run() {actionRun(ACTION_COLLECTION_COUNT);}	};
+		actionList[ACTION_COLLECTION_COUNT].setText("Count Collection");
+		
+	}
+	
+	
+	
+	protected void showContextMenu(TreeItem selectedItem) {
+		Map data = (Map) selectedItem.getData();
+		NodeType nodeType = (NodeType)data.get(KEY_TYPE);
+		
+		if ( nodeType == NodeType.SERVER ){
+
+			actionList[ACTION_SERVER_NAME].setText( selectedItem.getText() );
+			menuManager.add( actionList[ACTION_SERVER_NAME] );
+			menuManager.add( new Separator() );
+
+			if ( selectedItem.getItemCount() > 0 ){
+				menuManager.add( actionList[ACTION_SERVER_REFRESH] );
+				menuManager.add( actionList[ACTION_SERVER_STATS] );
+				menuManager.add( actionList[ACTION_SERVER_CREATEDATABASE] );
+				menuManager.add( new Separator() );
+				menuManager.add( actionList[ACTION_SERVER_DISCONNECT] );
+			}
+			menuManager.add( actionList[ACTION_SERVER_DELETE] );
+			menuManager.add( actionList[ACTION_SERVER_EDIT] );
+			
+		} else if ( nodeType == NodeType.DATABASE ) {
+			
+			actionList[ACTION_DATABASE_NAME].setText( selectedItem.getText() );
+			menuManager.add( actionList[ACTION_DATABASE_NAME] );
+			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_DATABASE_REFRESH] );
+			menuManager.add( actionList[ACTION_DATABASE_DROP] );
+			
+		} else if ( nodeType == NodeType.METADATA && selectedItem.getText().equals("Collections") ) {
+			
+			actionList[ACTION_COLLECTIONMETADATA_NAME].setText( selectedItem.getParentItem().getText() );
+			menuManager.add( actionList[ACTION_COLLECTIONMETADATA_NAME] );
+			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_COLLECTIONMETADATA_REFRESH] );
+			menuManager.add( actionList[ACTION_COLLECTIONMETADATA_CREATE] );
+
+		} else if ( nodeType == NodeType.COLLECTION ) {
+			
+			actionList[ACTION_COLLECTION_NAME].setText( selectedItem.getText() );
+			menuManager.add( actionList[ACTION_COLLECTION_NAME] );
+			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_COLLECTION_COUNT] );
+			menuManager.add( actionList[ACTION_COLLECTION_EMPTY] );
+			menuManager.add( actionList[ACTION_COLLECTION_DROP] );
+		
+		}
+		
+	}
+
+	
+	
+	/**
+	 * Context Menu was clicked
+	 * 
+	 * @param type
+	 */
+	protected	void actionRun( int type ){
+		if ( type == ACTION_SERVER_REFRESH || type == ACTION_DATABASE_REFRESH || type == ACTION_COLLECTIONMETADATA_REFRESH ){
+			onReload();
+		}else if ( type == ACTION_SERVER_DISCONNECT ){
+			
+			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+      messageBox.setMessage("Do you really want to disconnect from this server?\r\n\r\n     " + tree.getSelection()[0].getText() );
+      messageBox.setText("Server Disconnect");
+      int response = messageBox.open();
+      if (response == SWT.YES){
+      	String sName	= tree.getSelection()[0].getText();
+      	Map m = Activator.getDefault().getServerMap(sName);
+      	if ( m == null )
+      		return;
+      	
+      	try {
+					MongoFactory.getInst().registerMongo( m );
+				} catch (UnknownHostException e) {
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+				}
+
+      	tree.getSelection()[0].removeAll();
+      }
+			
+		}else if ( type == ACTION_SERVER_DELETE ){
+
+			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+      messageBox.setMessage("Do you really want delete this server connection?\r\n\r\n     " + tree.getSelection()[0].getText() );
+      messageBox.setText("Server Delete Confirmation");
+      int response = messageBox.open();
+      if (response == SWT.YES){
+      	TreeItem	selectedItem	= tree.getSelection()[0];
+      	String sName	= selectedItem.getText();
+      	
+      	MongoFactory.getInst().removeMongo(sName);
+      	serverList	= Activator.getDefault().removeServerMap(sName);
+      	Activator.getDefault().saveServerList(serverList);
+      	selectedItem.removeAll();
+
+      	tree.removeAll();
+      	drawServerNodes();
+      }
+			
+		}else if ( type == ACTION_SERVER_EDIT ){
+			
+			TreeItem	selectedItem	= tree.getSelection()[0];
+    	String sName	= selectedItem.getText();
+    	onConnectSelect( Activator.getDefault().getServerMap(sName) );
+			
+		}else if ( type == ACTION_SERVER_CREATEDATABASE ){
+			
+			TextInputPopup	popup	= new TextInputPopup(parent.getShell(), "Create Database");
+			String newDbName	= popup.open("Database:");
+			if ( newDbName != null ){
+      	TreeItem	selectedItem	= tree.getSelection()[0];
+      	
+  			String sName	= selectedItem.getText();
+  			MongoFactory.getInst().setActiveServerDB( sName, newDbName );
+  			MongoFactory.getInst().submitExecution( new CreateDbsMongoCommand().setConnection(sName, newDbName) );
+			}
+			
+		}else if ( type == ACTION_SERVER_STATS ){
+			
+		}else if ( type == ACTION_DATABASE_DROP ){
+			
+			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+      messageBox.setMessage("Do you really want drop this database?\r\n\r\n     " + tree.getSelection()[0].getText() );
+      messageBox.setText("Drop Database Confirmation");
+      int response = messageBox.open();
+      if (response == SWT.YES){
+      	
+      	TreeItem	selectedItem	= tree.getSelection()[0];
+  			String sName	= selectedItem.getParentItem().getText();
+  			String sDB		= selectedItem.getText();
+  			MongoFactory.getInst().setActiveServerDB( sName, sDB );
+  			MongoFactory.getInst().submitExecution( new DropDbsMongoCommand().setConnection(sName, sDB) );
+
+      }
+		
+		}else if ( type == ACTION_DATABASE_STATS ){
+			
+		}else if ( type == ACTION_COLLECTIONMETADATA_CREATE ){
+			
+			TextInputPopup	popup	= new TextInputPopup(parent.getShell(), "Create Collection");
+			String newCollName	= popup.open("Collection:");
+			if ( newCollName != null ){
+				TreeItem	selectedItem	= tree.getSelection()[0];
+	    	
+				String sName	= selectedItem.getParentItem().getParentItem().getText();
+				String sDb		=	selectedItem.getParentItem().getText();
+
+				MongoFactory.getInst().setActiveServerDB( sName, sDb );
+				MongoFactory.getInst().submitExecution( new CreateCollectionMongoCommand().setConnection(sName, sDb, newCollName) );
+
+			}
+			
+		}else if ( type == ACTION_COLLECTION_DROP ){
+			
+			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+      messageBox.setMessage("Do you really want drop this collection?\r\n\r\n     " + tree.getSelection()[0].getText() );
+      messageBox.setText("Drop Collection Confirmation");
+      int response = messageBox.open();
+      if (response == SWT.YES){
+  			TreeItem	selectedItem	= tree.getSelection()[0];
+      	
+  			String sName	= selectedItem.getParentItem().getParentItem().getParentItem().getText();
+  			String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+  			String sColl	=	selectedItem.getText();
+
+  			MongoFactory.getInst().setActiveServerDB( sName, sDb );
+  			MongoFactory.getInst().submitExecution( new DropCollectionMongoCommand().setConnection(sName, sDb, sColl) );
+      }
+		
+		}else if ( type == ACTION_COLLECTION_COUNT ){
+			
+			TreeItem	selectedItem	= tree.getSelection()[0];
+    	
+			String sName	= selectedItem.getParentItem().getParentItem().getParentItem().getText();
+			String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+			String sColl	=	selectedItem.getText();
+
+			MongoFactory.getInst().setActiveServerDB( sName, sDb );
+			MongoFactory.getInst().submitExecution( new CollectionCountMongoCommand().setConnection(sName, sDb, sColl) );
+			
+		}else if ( type == ACTION_COLLECTION_EMPTY ){
+			
+			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+      messageBox.setMessage("Do you really want remove all items from this collection?\r\n\r\n     " + tree.getSelection()[0].getText() );
+      messageBox.setText("Empty Collection Confirmation");
+      int response = messageBox.open();
+      if (response == SWT.YES){
+      	TreeItem	selectedItem	= tree.getSelection()[0];
+      	
+  			String sName	= selectedItem.getParentItem().getParentItem().getParentItem().getText();
+  			String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+  			String sColl	=	selectedItem.getText();
+
+  			MongoFactory.getInst().setActiveServerDB( sName, sDb );
+  			MongoFactory.getInst().submitExecution( new CollectionRemoveAllMongoCommand().setConnection(sName, sDb, sColl) );
+      }
+      
+		}else if ( type == ACTION_SERVER_ADD ){
+			onConnectSelect( new HashMap() );		
+		}
+
+	}
+	
 	
 	/**
 	 * The refresh has been called
@@ -321,13 +581,8 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 	}
 
-	public void onDisconnectSelect() {
-		
-	}
-
-	public void onConnectSelect() {
-		Map serverProps	= new HashMap();
-		
+	
+	private void onConnectSelect(Map serverProps) {
 		ServerDialog	serverDialog	= new ServerDialog(parent.getShell());
 		
 		Object result = serverDialog.open(serverProps);
@@ -377,6 +632,8 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			onShowDbs( (ShowDbsMongoCommand)mcmd );
 		else if ( mcmd instanceof ShowCollectionsMongoCommand )
 			onShowCollections( (ShowCollectionsMongoCommand)mcmd );
+		else if ( mcmd instanceof CreateDbsMongoCommand )
+			onShowDbs( (ShowDbsMongoCommand)mcmd );
 	}
 	
 	private TreeItem createDbTreeItem(TreeItem mongoItem, String dbName) {
@@ -411,10 +668,9 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					}
 					
 				} catch (Exception e) {
-					e.printStackTrace();
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 				}
 
-				reloadAction.setEnabled( (tree.getItemCount() > 0) );
 			}
 		});
 	}
@@ -505,8 +761,6 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 				}
 				
 				tree.showItem(coll);
-				
-				reloadAction.setEnabled( (tree.getItemCount() > 0) );
 			}
 		});
 	}

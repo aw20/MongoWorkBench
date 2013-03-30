@@ -24,15 +24,14 @@
  */
 package org.aw20.mongoworkbench.command;
 
-import java.util.List;
-
 import org.aw20.mongoworkbench.MongoFactory;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 
-public class ShowDbsMongoCommand extends MongoCommand {
-
-	private List<String>	dbNames = null;
+public class CreateDbsMongoCommand extends ShowDbsMongoCommand {
 	
 	@Override
 	public void execute() throws Exception {
@@ -41,22 +40,17 @@ public class ShowDbsMongoCommand extends MongoCommand {
 		if ( mdb == null )
 			throw new Exception("no server selected");
 
-		setDBNames(mdb);
+		DB db	= mdb.getDB( sDb );
+
+		String colTemp = "tmp" + System.currentTimeMillis();
+		DBCollection coll = db.createCollection( colTemp, new BasicDBObject() );
+		coll.drop();
 		
-		setMessage("# Databases=" + dbNames.size() );
-	}
-	
-	protected void setDBNames(MongoClient mdb){
-		dbNames = mdb.getDatabaseNames();
+		setDBNames(mdb);
 	}
 
 	@Override
 	public String getCommandString() {
-		return "show dbs";
+		return "create database";
 	}
-	
-	public List<String>	getDBNames(){
-		return dbNames;
-	}
-
 }

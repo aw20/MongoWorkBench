@@ -98,6 +98,12 @@ public class MongoFactory extends Thread {
 		mongoMap.put(name, mclient);
 	}
 	
+	public void removeMongo(String sName){
+		MongoClient	mclient	= mongoMap.remove(sName);
+		if ( mclient != null )
+			mclient.close();
+	}
+	
 	public void destroy(){
 		bRun = false;
 	}
@@ -157,7 +163,7 @@ public class MongoFactory extends Thread {
 			commandQueue.notify();
 		}
 	}
-
+	
 	public MongoClient getMongo(String sName) {
 		activeServer = sName;
 		return mongoMap.get(sName);

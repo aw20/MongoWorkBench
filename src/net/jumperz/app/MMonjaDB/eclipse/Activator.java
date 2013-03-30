@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -208,5 +209,28 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 
 	public void saveServerList(List<Map> serverList){
 		FileUtil.saveClass(serverListFile, serverList);
+	}
+
+	public Map<String, Object> getServerMap(String sName) {
+		Iterator<Map>	it	= getServerList().iterator();
+		while ( it.hasNext() ){
+			Map	m = it.next();
+			if ( m.get("name").equals(sName) )
+				return m;
+		}
+		return null;
+	}
+
+	public List<Map> removeServerMap(String sName) {
+		List<Map> list = getServerList();
+		Iterator<Map>	it	= list.iterator();
+		while ( it.hasNext() ){
+			Map	m = it.next();
+			if ( m.get("name").equals(sName) ){
+				it.remove();
+				break;
+			}
+		}
+		return list;
 	}
 }

@@ -24,39 +24,34 @@
  */
 package org.aw20.mongoworkbench.command;
 
-import java.util.List;
-
 import org.aw20.mongoworkbench.MongoFactory;
 
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 
-public class ShowDbsMongoCommand extends MongoCommand {
+public class DropCollectionMongoCommand extends ShowCollectionsMongoCommand {
 
-	private List<String>	dbNames = null;
-	
 	@Override
 	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
-		
 		if ( mdb == null )
 			throw new Exception("no server selected");
-
-		setDBNames(mdb);
 		
-		setMessage("# Databases=" + dbNames.size() );
-	}
-	
-	protected void setDBNames(MongoClient mdb){
-		dbNames = mdb.getDatabaseNames();
+		if ( sDb == null )
+			throw new Exception("no database selected");
+		
+		MongoFactory.getInst().setActiveDB(sDb);
+
+		DB db	= mdb.getDB(sDb);
+		
+		DBCollection	collection	= db.getCollection(sColl);
+		collection.drop();
+		
+		super.execute();
 	}
 
-	@Override
-	public String getCommandString() {
-		return "show dbs";
+	public String getCommandString(){
+		return "db." + sColl + ".drop()";
 	}
-	
-	public List<String>	getDBNames(){
-		return dbNames;
-	}
-
 }
