@@ -66,7 +66,7 @@ public class TableManager implements Listener {
 	 * @param queryData
 	 */
 	public void redraw(QueryData queryData) {
-		table.setVisible(false);
+		//table.setVisible(false);
 
 		clear();
 
@@ -98,7 +98,7 @@ public class TableManager implements Listener {
 			table.getColumn(i).pack();
 		}
 
-		table.setVisible(true);
+		//table.setVisible(true);
 	}
 
 

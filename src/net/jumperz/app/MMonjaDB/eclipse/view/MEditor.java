@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.mongodb.DB;
 
@@ -84,6 +85,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		tbtmJSONItem.setText("JSON");
 		
 		textJSON = new Text(tabFolder, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		textJSON.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
 		textJSON.setTabs(3);
 		tbtmJSONItem.setControl(textJSON);
 		
@@ -115,6 +117,8 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 				
 				break;
 			}
+			default:
+				break;
 		}
 		
 	}
@@ -147,7 +151,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 			mcmd.setConnection( (String)activeDocumentMap.get(EventWrapper.ACTIVE_NAME) );
 			MongoFactory.getInst().submitExecution(mcmd);
 		} catch (Exception e) {
-			
+			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
 		}
 		
 	}

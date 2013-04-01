@@ -25,10 +25,14 @@
  */
 package org.aw20.util;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.bson.types.ObjectId;
 
 public class JSONFormatter extends Object {
 
@@ -57,7 +61,7 @@ public class JSONFormatter extends Object {
 	 * @return Formatted Json
 	 */
 	public String parseObject(Object _o) {
-		sb = new StringBuilder();
+		sb = new StringBuilder(256);
 		parseValue(_o);
 		return sb.toString();
 	}
@@ -86,9 +90,25 @@ public class JSONFormatter extends Object {
 
 		} else if (_o instanceof Character || _o instanceof String){
 			sb.append("\"" + _o.toString() + "\"");
-			
+		
+		} else if ( _o instanceof Date ){
+			sb.append( "ISODate(\"" );
+			sb.append( DateUtil.getDateString( (Date)_o, "yyyy-MM-dd'T'HH:mm:ss.SSS") );
+			sb.append( "Z\")");
+		} else if ( _o instanceof ObjectId ){
+			sb.append( "ObjectId(\"" );
+			sb.append( (ObjectId)_o );
+			sb.append( "\")");
+		} else if ( _o instanceof Pattern ){
+			sb.append( "/" );
+			sb.append( (Pattern)_o );
+			sb.append( "/");
+		} else if ( _o instanceof byte[] ){	
+			sb.append( "BinData(0,\"" );
+			sb.append( Base64.encodeBytes((byte[])_o) );
+			sb.append( "\")");
 		} else {
-			sb.append("binary-object");
+			sb.append( _o.getClass().getName() );
 		}
 	}
 	
@@ -107,7 +127,7 @@ public class JSONFormatter extends Object {
 			// Write out this key/value pair
 			sb.append(nl);
 			empty = false;
-			sb.append(margin + key + " : ");
+			sb.append(margin + "\"" + key + "\" : ");
 			parseValue(value, _depth);
 			sb.append(",");
 		}

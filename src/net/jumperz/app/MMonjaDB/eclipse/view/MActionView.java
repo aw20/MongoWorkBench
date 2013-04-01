@@ -39,6 +39,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class MActionView extends MAbstractView implements MOutputView {
 	private Action executeAction;
@@ -82,7 +83,8 @@ public class MActionView extends MAbstractView implements MOutputView {
 	public void init2() {
 		menuManager = new MenuManager();
 		textArea = new Text(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
-
+		textArea.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
+		
 		textArea.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.character == SWT.CR && e.stateMask == SWT.SHIFT) {

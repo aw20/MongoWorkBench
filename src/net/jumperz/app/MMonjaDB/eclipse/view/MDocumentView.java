@@ -27,6 +27,8 @@ package net.jumperz.app.MMonjaDB.eclipse.view;
 import net.jumperz.app.MMonjaDB.eclipse.view.table.QueryData;
 import net.jumperz.app.MMonjaDB.eclipse.view.table.TableManager;
 
+import org.aw20.mongoworkbench.Event;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
@@ -39,6 +41,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class MDocumentView extends MAbstractView implements MongoCommandListener {
 	public static enum NAVITEM {
@@ -47,6 +50,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	
 	private Table table;
 	private Text textJson;
+	private TabFolder tabFolder;
 
 	private TableManager	tableManager;
 	private QueryData	queryData;
@@ -64,8 +68,8 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	public void init2() {
 		parent.setLayout( new FillLayout(SWT.HORIZONTAL) );
 		
-		TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
-		
+		tabFolder = new TabFolder(parent, SWT.NONE);
+
 		TabItem tbtmTable = new TabItem(tabFolder, SWT.NONE);
 		tbtmTable.setText("Table");
 		
@@ -78,7 +82,8 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 		TabItem tbtmJson = new TabItem(tabFolder, SWT.NONE);
 		tbtmJson.setText("JSON");
 		
-		textJson = new Text(tabFolder, SWT.BORDER | SWT.MULTI);
+		textJson = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textJson.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
 		tbtmJson.setControl(textJson);
 
 		
@@ -149,11 +154,12 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 		String cmd	= queryData.getCommand( refresh );
 		
 		try {
+			setActionStatus(false);
 			MongoCommand mcmd = MongoFactory.getInst().createCommand(cmd);
 			mcmd.setConnection( queryData.getActiveName(), queryData.getActiveDB() );
 			MongoFactory.getInst().submitExecution(mcmd);
 		} catch (Exception e) {
-			e.printStackTrace();
+			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
 		}
 	}
 
@@ -174,8 +180,16 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
+				if ( tabFolder.getSelectionIndex() == 0 )
+					table.setVisible(false);
+				
+				textJson.setText( queryData.getJSON() );
 				tableManager.redraw( queryData );
-				setActionStatus( true );
+				
+				if ( tabFolder.getSelectionIndex() == 0 )
+					table.setVisible(true);
+
+				setActionStatus(true);
 			}
 		});
 

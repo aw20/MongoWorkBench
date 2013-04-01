@@ -189,8 +189,8 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		
 		parent.setLayout(formLayout);
 
-		tree = new Tree(parent, SWT.BORDER | SWT.SINGLE );
-		tree.setLinesVisible(true);
+		tree = new Tree(parent, SWT.SINGLE );
+		tree.setLinesVisible(false);
 		
 		FormData d1 = new FormData();
 		d1.top 		= new FormAttachment(0, 1);
@@ -619,6 +619,11 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			
 			// Save the serverList
 			Activator.getDefault().saveServerList(serverList);
+			try {
+				MongoFactory.getInst().registerMongo(newProps);
+			} catch (UnknownHostException e) {
+				EventWorkBenchManager.getInst().onEvent(org.aw20.mongoworkbench.Event.EXCEPTION, e);
+			}
 		}
 	}
 

@@ -36,6 +36,7 @@ import net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.NAVITEM;
 
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.util.DateUtil;
+import org.aw20.util.JSONFormatter;
 
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -196,5 +197,25 @@ public class QueryData extends Object {
 			
 		
 		return cmd.toString();
+	}
+
+	public String getJSON() {
+		if ( size() == 0 )
+			return "";
+
+		StringBuilder	sb	= new StringBuilder( 32000 );
+		
+		// Do the rows
+		for ( int r=0; r < size(); r++ ){
+			Map	rowMap	= get(r);
+			
+			sb.append( "/*___ " ).append( r+findCommand.getExecutedSkip() ).append(" ____________________________________*/\r\n" );
+			sb.append( JSONFormatter.format(rowMap) );
+			sb.append( "\r\n\r\n\r\n" );
+		}
+
+		sb.delete(sb.length()-6, sb.length());
+		
+		return sb.toString();
 	}
 }

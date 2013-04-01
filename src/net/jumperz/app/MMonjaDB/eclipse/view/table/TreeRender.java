@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
 
@@ -229,6 +230,9 @@ public class TreeRender {
 		} else if (value instanceof Code) {
 			treeItem.setImage(jsImage);
 			treeItem.setText(2, "code" );
+		} else if (value instanceof Pattern) {
+			treeItem.setImage(jsImage);
+			treeItem.setText(2, "regex" );
 		} else if ( value instanceof byte[] ){
 			treeItem.setImage(jsImage);
 			treeItem.setText(2, "binary" );
