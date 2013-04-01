@@ -5,8 +5,6 @@ A powerful GPL Eclipse plugin MySQL/SQLServer Workbench style client tool for in
 
 Upcoming features
 
-* Manage Multiple MongoDB connections
-* Advanced query editor - select'n'execute
 * MongoDB -2- MongoDB collection copying
 * Map/Reduce IDE
 
@@ -16,3 +14,5 @@ Additions Completed
 * Default layout changed 
 * Cmd History shows; time, status icon, action, message and execution time
 * Cmd History auto column resize on Eclipse
+* Manage Multiple MongoDB connections
+* Advanced query editor - select'n'execute
