@@ -24,15 +24,19 @@
  */
 package org.aw20.mongoworkbench.command;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.aw20.mongoworkbench.MongoFactory;
 
+import com.mongodb.CommandResult;
 import com.mongodb.MongoClient;
 
-public class ShowDbsMongoCommand extends MongoCommand {
+public class DBStatsMongoCommand extends ShowDbsMongoCommand {
 
-	protected List<String>	dbNames = null;
+	private List<Map>	statsListMap;
 	
 	@Override
 	public void execute() throws Exception {
@@ -42,21 +46,21 @@ public class ShowDbsMongoCommand extends MongoCommand {
 			throw new Exception("no server selected");
 
 		setDBNames(mdb);
+		statsListMap	= new ArrayList<Map>();
 		
-		setMessage("# Databases=" + dbNames.size() );
-	}
-	
-	protected void setDBNames(MongoClient mdb){
-		dbNames = mdb.getDatabaseNames();
-	}
-
-	@Override
-	public String getCommandString() {
-		return "show dbs";
-	}
-	
-	public List<String>	getDBNames(){
-		return dbNames;
+		Iterator<String> it = dbNames.iterator();
+		while ( it.hasNext() ){
+			String db = it.next();
+			
+			CommandResult cmdr = mdb.getDB(db).getStats();
+			statsListMap.add( cmdr.toMap() );
+		}
+		
+		setCommandStr("Retrived Database Stats; db=" + statsListMap.size() );
 	}
 
+	public List<Map> getStatsListMap(){
+		return statsListMap;
+	}
+	
 }

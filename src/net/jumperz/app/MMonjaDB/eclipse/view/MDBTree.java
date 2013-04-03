@@ -45,6 +45,7 @@ import org.aw20.mongoworkbench.command.CollectionCountMongoCommand;
 import org.aw20.mongoworkbench.command.CollectionRemoveAllMongoCommand;
 import org.aw20.mongoworkbench.command.CreateCollectionMongoCommand;
 import org.aw20.mongoworkbench.command.CreateDbsMongoCommand;
+import org.aw20.mongoworkbench.command.DBStatsMongoCommand;
 import org.aw20.mongoworkbench.command.DropCollectionMongoCommand;
 import org.aw20.mongoworkbench.command.DropDbsMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -459,6 +460,10 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			
 		}else if ( type == ACTION_SERVER_STATS ){
 			
+			TreeItem	selectedItem	= tree.getSelection()[0];
+			String sName	= selectedItem.getText();
+			MongoFactory.getInst().submitExecution( new DBStatsMongoCommand().setConnection(sName) );
+
 		}else if ( type == ACTION_DATABASE_DROP ){
 			
 			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);

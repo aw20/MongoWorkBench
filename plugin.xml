@@ -34,10 +34,10 @@
       </view>
       <view
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MDBList"
+            class="net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MDBList"
-            name="DB List"
+            id="net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics"
+            name="DB Statistics"
             restorable="true">
       </view>
       <view
@@ -58,26 +58,10 @@
       </view>
       <view
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_edit.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentEditor"
-            name="Document Editor"
-            restorable="true">
-      </view>
-      <view
-            category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_go.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
             name="JavaScript"
-            restorable="true">
-      </view>
-      <view
-            category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MJsonView"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_edit.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MJsonView"
-            name="JSON View"
             restorable="true">
       </view>
      <view
