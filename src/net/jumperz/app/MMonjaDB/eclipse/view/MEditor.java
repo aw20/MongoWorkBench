@@ -51,10 +51,10 @@ import com.mongodb.DB;
 
 public class MEditor extends MAbstractView implements EventWorkBenchListener {
 	private Text textJSON;
-	private Button btnNewButton;
 	
 	private Tree tree;
 	private TreeRender treeRender;
+	private Button btnNewButton;
 	
 	private Map	activeDocumentMap;
 	
@@ -68,11 +68,12 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 	}
 	
 	public void init2() {
-		GridLayout gridLayout = new GridLayout(2, true);
+		GridLayout gridLayout = new GridLayout(1, true);
 		parent.setLayout(gridLayout);
 		
+		
 		TabFolder tabFolder = new TabFolder(parent, SWT.NONE );
-		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
 		TabItem tbtmTreeItem = new TabItem(tabFolder, SWT.NONE);
 		tbtmTreeItem.setText("Document");
@@ -88,7 +89,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		textJSON.setTabs(2);
 		textJSON.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
 		tbtmJSONItem.setControl(textJSON);
-		
+
 		btnNewButton = new Button(parent, SWT.NONE);
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -96,9 +97,8 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 				onUpdate();
 			}
 		});
-		btnNewButton.setEnabled(false);
 		btnNewButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnNewButton.setText("update");
+		btnNewButton.setText("Update Document");
 	}
 
 	@Override
@@ -123,6 +123,20 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		
 	}
 
+	
+	private void onUpdate() {
+		if ( activeDocumentMap == null )
+			return;
+		
+		try {
+			MongoCommand mcmd = MongoFactory.getInst().createCommand( "db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".save(" + textJSON.getText() + ")" );
+			mcmd.setConnection( (String)activeDocumentMap.get(EventWrapper.ACTIVE_NAME) );
+			MongoFactory.getInst().submitExecution(mcmd);
+		} catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+		}
+		
+	}
 
 	private void redraw(Map data){
 		btnNewButton.setEnabled(false);
@@ -141,19 +155,6 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		treeRender.render((Map)activeDocumentMap.get(EventWrapper.DOC_DATA));
 		
 		btnNewButton.setEnabled(true);
-	}
-	
-	
-	private void onUpdate() {
-		
-		try {
-			MongoCommand mcmd = MongoFactory.getInst().createCommand( "db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".save(" + textJSON.getText() + ")" );
-			mcmd.setConnection( (String)activeDocumentMap.get(EventWrapper.ACTIVE_NAME) );
-			MongoFactory.getInst().submitExecution(mcmd);
-		} catch (Exception e) {
-			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
-		}
-		
 	}
 
 }
