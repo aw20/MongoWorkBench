@@ -84,6 +84,7 @@ public class MActionView extends MAbstractView implements MOutputView {
 		menuManager = new MenuManager();
 		textArea = new Text(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
 		textArea.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
+		textArea.setTabs(2);
 		
 		textArea.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {

@@ -83,6 +83,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 		tbtmJson.setText("JSON");
 		
 		textJson = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textJson.setTabs(2);
 		textJson.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
 		tbtmJson.setControl(textJson);
 

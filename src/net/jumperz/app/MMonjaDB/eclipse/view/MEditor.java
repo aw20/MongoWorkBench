@@ -85,8 +85,8 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		tbtmJSONItem.setText("JSON");
 		
 		textJSON = new Text(tabFolder, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		textJSON.setTabs(2);
 		textJSON.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
-		textJSON.setTabs(3);
 		tbtmJSONItem.setControl(textJSON);
 		
 		btnNewButton = new Button(parent, SWT.NONE);
