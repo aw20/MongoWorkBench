@@ -1,16 +1,20 @@
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
+import net.jumperz.app.MMonjaDB.eclipse.view.table.QueryData;
+import net.jumperz.app.MMonjaDB.eclipse.view.table.TableManager;
+
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.DBStatsMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
-import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Table;
 
 public class MDBShowStatistics extends MAbstractView implements MongoCommandListener {
 	private Table table;
+	private TableManager	tableManager;
+
 
 	public MDBShowStatistics() {
 		MongoFactory.getInst().registerListener(this);
@@ -34,6 +38,7 @@ public class MDBShowStatistics extends MAbstractView implements MongoCommandList
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
+		tableManager	= new TableManager(table, false);
 	}
 
 	@Override
@@ -49,6 +54,24 @@ public class MDBShowStatistics extends MAbstractView implements MongoCommandList
 	}
 	
 	private void onDbStatsUpdate(DBStatsMongoCommand mcmd){
-		System.out.println( mcmd.getStatsListMap() );
+		final QueryData qData = new QueryData(mcmd.getStatsListMap(),"db");
+		qData.addRightColumn("avgObjSize");
+		qData.addRightColumn("fileSize");
+		qData.addRightColumn("indexSize");
+		qData.addRightColumn("objects");
+		qData.addRightColumn("storageSize");
+		qData.addRightColumn("dataSize");
+		qData.addRightColumn("numExtents");
+		qData.addRightColumn("indexes");
+		qData.addRightColumn("nsSizeMB");
+		qData.addRightColumn("collections");
+		
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				table.setVisible(false);
+				tableManager.redraw( qData );
+				table.setVisible(true);
+			}
+		});
 	}
 }

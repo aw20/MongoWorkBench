@@ -77,7 +77,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 		tbtmTable.setControl(table);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		tableManager	= new TableManager( table );
+		tableManager	= new TableManager( table, true );
 		
 		TabItem tbtmJson = new TabItem(tabFolder, SWT.NONE);
 		tbtmJson.setText("JSON");

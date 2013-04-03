@@ -24,6 +24,8 @@
  */
 package org.aw20.mongoworkbench.command;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +39,16 @@ import com.mongodb.MongoClient;
 public class DBStatsMongoCommand extends ShowDbsMongoCommand {
 
 	private List<Map>	statsListMap;
+	private DecimalFormat df2places = new DecimalFormat("#0.00");
+	private DecimalFormat nf = (DecimalFormat) DecimalFormat.getInstance();
+	
+	public DBStatsMongoCommand(){
+		df2places.setGroupingUsed(true);
+		
+		DecimalFormatSymbols custom=new DecimalFormatSymbols();
+		custom.setDecimalSeparator(',');
+		nf.setDecimalFormatSymbols(custom);
+	}
 	
 	@Override
 	public void execute() throws Exception {
@@ -53,12 +65,40 @@ public class DBStatsMongoCommand extends ShowDbsMongoCommand {
 			String db = it.next();
 			
 			CommandResult cmdr = mdb.getDB(db).getStats();
-			statsListMap.add( cmdr.toMap() );
+			statsListMap.add( transform(cmdr.toMap()) );
 		}
 		
-		setCommandStr("Retrived Database Stats; db=" + statsListMap.size() );
+		setMessage("Retrived Database Stats; db=" + statsListMap.size() );
 	}
 
+	private Map transform(Map map) {
+		
+		if ( map.containsKey("avgObjSize") )
+			map.put("avgObjSize", df2places.format(map.get("avgObjSize")) );
+		
+		if ( map.containsKey("fileSize") )
+			map.put("fileSize", nf.format(map.get("fileSize")) );
+		
+		if ( map.containsKey("indexSize") )
+			map.put("indexSize", nf.format(map.get("indexSize")) );
+		
+		if ( map.containsKey("objects") )
+			map.put("objects", nf.format(map.get("objects")) );
+		
+		if ( map.containsKey("storageSize") )
+			map.put("storageSize", nf.format(map.get("storageSize")) );
+		
+		if ( map.containsKey("dataSize") )
+			map.put("dataSize", nf.format(map.get("dataSize")) );
+
+		return map;
+	}
+
+	@Override
+	public String getCommandString() {
+		return "db.getStats()";
+	}
+	
 	public List<Map> getStatsListMap(){
 		return statsListMap;
 	}

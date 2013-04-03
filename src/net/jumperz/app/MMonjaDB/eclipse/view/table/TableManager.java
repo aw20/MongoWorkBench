@@ -39,12 +39,14 @@ public class TableManager implements Listener {
 	private Table table; 
 	private QueryData queryData;
 	
-	public TableManager( Table table ){
+	public TableManager( Table table, boolean enableEvents ){
 		this.table = table;
 		
-		table.addListener(SWT.MouseDoubleClick, this);
-		table.addListener(SWT.Selection, this);
-		table.addListener(SWT.KeyDown, this);
+		if ( enableEvents ){
+			table.addListener(SWT.MouseDoubleClick, this);
+			table.addListener(SWT.Selection, this);
+			table.addListener(SWT.KeyDown, this);
+		}
 	}
 	
 
@@ -66,8 +68,6 @@ public class TableManager implements Listener {
 	 * @param queryData
 	 */
 	public void redraw(QueryData queryData) {
-		//table.setVisible(false);
-
 		clear();
 
 		this.queryData = queryData;
@@ -78,7 +78,7 @@ public class TableManager implements Listener {
 		// Do the columns
 		String[]	columns	= queryData.getColumns();
 		for (int i = 0; i < columns.length; ++i) {
-			TableColumn column = new TableColumn(table, SWT.LEFT);
+			TableColumn column = new TableColumn(table, queryData.getColumnAlign( columns[i] ) );
 			column.setText(columns[i]);
 			column.pack();
 		}
@@ -97,8 +97,6 @@ public class TableManager implements Listener {
 		for (int i = 0; i < columns.length; ++i) {
 			table.getColumn(i).pack();
 		}
-
-		//table.setVisible(true);
 	}
 
 

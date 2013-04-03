@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.NAVITEM;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.util.DateUtil;
 import org.aw20.util.JSONFormatter;
+import org.eclipse.swt.SWT;
 
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -47,8 +49,21 @@ public class QueryData extends Object {
 	private static String BLANK = "";
 	private String[]	columns;
 	private	List<Map>	data = null;
+	private Set<String>	rightJustified;
 	
 	private FindMongoCommand	findCommand;
+
+	public QueryData( List<Map>	data, String firstColumn ){
+		this.data = data;
+		
+		rightJustified	= new HashSet<String>();
+		Set<String>	columnSet = new HashSet<String>();
+		Iterator<Map>	it	= this.data.iterator();
+		while ( it.hasNext() ){
+			columnSet.addAll( it.next().keySet() );
+		}
+		setColumns(columnSet, firstColumn);
+	}
 	
 	public QueryData( FindMongoCommand fmcmd ){
 		if ( !fmcmd.isSuccess() )
@@ -56,6 +71,7 @@ public class QueryData extends Object {
 		
 		findCommand	= fmcmd;
 		
+		rightJustified	= new HashSet<String>();
 		Set<String>	columnSet = new HashSet<String>();
 		data	= new ArrayList<Map>();
 		DBCursor	cursor	= fmcmd.getCursor();
@@ -67,13 +83,20 @@ public class QueryData extends Object {
 		}
 
 		findCommand.close();
-		
+		setColumns(columnSet,"_id");
+	}
+	
+	public void addRightColumn(String str){
+		rightJustified.add(str);
+	}
+	
+	private void setColumns(Set<String>	columnSet, String firstColumn){
 		columns	= columnSet.toArray( new String[0] );
 		Arrays.sort(columns);
 		
 		// Move the _id to the front
 		for ( int x=1; x < columns.length; x++ ){
-			if ( columns[x].equals("_id") ){
+			if ( columns[x].equals(firstColumn) ){
 				String column1 = columns[0];
 				columns[0]	= columns[x];
 				columns[x]	= column1;
@@ -217,5 +240,9 @@ public class QueryData extends Object {
 		sb.delete(sb.length()-6, sb.length());
 		
 		return sb.toString();
+	}
+
+	public int getColumnAlign(String columnName) {
+		return (rightJustified.contains(columnName)) ? SWT.RIGHT : SWT.LEFT;
 	}
 }
