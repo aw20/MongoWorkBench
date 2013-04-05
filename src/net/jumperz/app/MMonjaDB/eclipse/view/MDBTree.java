@@ -43,9 +43,11 @@ import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.CollectionCountMongoCommand;
 import org.aw20.mongoworkbench.command.CollectionRemoveAllMongoCommand;
+import org.aw20.mongoworkbench.command.CollectionStatsMongoCommand;
 import org.aw20.mongoworkbench.command.CreateCollectionMongoCommand;
 import org.aw20.mongoworkbench.command.CreateDbsMongoCommand;
 import org.aw20.mongoworkbench.command.DBStatsMongoCommand;
+import org.aw20.mongoworkbench.command.DBserverStatsMongoCommand;
 import org.aw20.mongoworkbench.command.DropCollectionMongoCommand;
 import org.aw20.mongoworkbench.command.DropDbsMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -260,10 +262,11 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 	private int	ACTION_COLLECTION_DROP				= 16;
 	private int	ACTION_COLLECTION_COUNT				= 17;
 	private int	ACTION_SERVER_ADD							= 18;
+	private int	ACTION_COLLECTION_STATS				= 19;
 
 	private void createActions(){
 	
-		actionList	= new Action[19];
+		actionList	= new Action[20];
 		
 		// Server
 		actionList[ACTION_SERVER_ADD] = new Action() {public void run() {actionRun(ACTION_SERVER_ADD);}	};
@@ -305,7 +308,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		actionList[ACTION_DATABASE_DROP].setText("Drop Database");
 
 		actionList[ACTION_DATABASE_STATS] = new Action() {public void run() {actionRun(ACTION_DATABASE_STATS);}	};
-		actionList[ACTION_DATABASE_STATS].setText("Show Statistics");
+		actionList[ACTION_DATABASE_STATS].setText("Server Statistics");
 
 		actionList[ACTION_DATABASE_REFRESH] = new Action() {public void run() {actionRun(ACTION_DATABASE_REFRESH);}	};
 		actionList[ACTION_DATABASE_REFRESH].setText("Refresh");
@@ -318,6 +321,9 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 		actionList[ACTION_COLLECTIONMETADATA_CREATE] = new Action() {public void run() {actionRun(ACTION_COLLECTIONMETADATA_CREATE);}	};
 		actionList[ACTION_COLLECTIONMETADATA_CREATE].setText("Create Collection");
+
+		actionList[ACTION_COLLECTION_STATS] = new Action() {public void run() {actionRun(ACTION_COLLECTION_STATS);}	};
+		actionList[ACTION_COLLECTION_STATS].setText("Collection Statistics");
 
 		actionList[ACTION_COLLECTIONMETADATA_REFRESH] = new Action() {public void run() {actionRun(ACTION_COLLECTIONMETADATA_REFRESH);}	};
 		actionList[ACTION_COLLECTIONMETADATA_REFRESH].setText("Refresh");
@@ -366,6 +372,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			actionList[ACTION_DATABASE_NAME].setText( selectedItem.getText() );
 			menuManager.add( actionList[ACTION_DATABASE_NAME] );
 			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_COLLECTION_STATS] );
 			menuManager.add( actionList[ACTION_DATABASE_REFRESH] );
 			menuManager.add( actionList[ACTION_DATABASE_DROP] );
 			
@@ -463,6 +470,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			TreeItem	selectedItem	= tree.getSelection()[0];
 			String sName	= selectedItem.getText();
 			MongoFactory.getInst().submitExecution( new DBStatsMongoCommand().setConnection(sName) );
+			MongoFactory.getInst().submitExecution( new DBserverStatsMongoCommand().setConnection(sName) );
 
 		}else if ( type == ACTION_DATABASE_DROP ){
 			
@@ -482,6 +490,14 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		
 		}else if ( type == ACTION_DATABASE_STATS ){
 			
+		}else if ( type == ACTION_COLLECTION_STATS ){
+
+			TreeItem	selectedItem	= tree.getSelection()[0];
+			String sName	= selectedItem.getParentItem().getText();
+			String sDb		=	selectedItem.getText();
+			MongoFactory.getInst().setActiveServerDB( sName, sDb );
+			MongoFactory.getInst().submitExecution( new CollectionStatsMongoCommand().setConnection(sName, sDb) );
+
 		}else if ( type == ACTION_COLLECTIONMETADATA_CREATE ){
 			
 			TextInputPopup	popup	= new TextInputPopup(parent.getShell(), "Create Collection");

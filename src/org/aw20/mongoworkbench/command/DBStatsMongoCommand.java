@@ -38,7 +38,7 @@ import com.mongodb.MongoClient;
 
 public class DBStatsMongoCommand extends ShowDbsMongoCommand {
 
-	private List<Map>	statsListMap;
+	protected List<Map>	statsListMap = new ArrayList<Map>();
 	private DecimalFormat df2places = new DecimalFormat("#0.00");
 	private DecimalFormat nf = (DecimalFormat) DecimalFormat.getInstance();
 	
@@ -58,8 +58,6 @@ public class DBStatsMongoCommand extends ShowDbsMongoCommand {
 			throw new Exception("no server selected");
 
 		setDBNames(mdb);
-		statsListMap	= new ArrayList<Map>();
-		
 		Iterator<String> it = dbNames.iterator();
 		while ( it.hasNext() ){
 			String db = it.next();
@@ -71,10 +69,13 @@ public class DBStatsMongoCommand extends ShowDbsMongoCommand {
 		setMessage("Retrived Database Stats; db=" + statsListMap.size() );
 	}
 
-	private Map transform(Map map) {
+	protected Map transform(Map map) {
 		
 		if ( map.containsKey("avgObjSize") )
 			map.put("avgObjSize", df2places.format(map.get("avgObjSize")) );
+		
+		if ( map.containsKey("paddingFactor") )
+			map.put("paddingFactor", df2places.format(map.get("paddingFactor")) );
 		
 		if ( map.containsKey("fileSize") )
 			map.put("fileSize", nf.format(map.get("fileSize")) );
@@ -82,8 +83,20 @@ public class DBStatsMongoCommand extends ShowDbsMongoCommand {
 		if ( map.containsKey("indexSize") )
 			map.put("indexSize", nf.format(map.get("indexSize")) );
 		
+		if ( map.containsKey("size") )
+			map.put("size", nf.format(map.get("size")) );
+		
+		if ( map.containsKey("lastExtentSize") )
+			map.put("lastExtentSize", nf.format(map.get("lastExtentSize")) );
+		
+		if ( map.containsKey("totalIndexSize") )
+			map.put("totalIndexSize", nf.format(map.get("totalIndexSize")) );
+		
 		if ( map.containsKey("objects") )
 			map.put("objects", nf.format(map.get("objects")) );
+		
+		if ( map.containsKey("count") )
+			map.put("count", nf.format(map.get("count")) );
 		
 		if ( map.containsKey("storageSize") )
 			map.put("storageSize", nf.format(map.get("storageSize")) );

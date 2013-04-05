@@ -1,0 +1,28 @@
+Items to be done
+
+UI
+- When Server Statistics make sure the view is in focus
+- When Collection Statistics make sure the view is in focus
+- When find make sure the view is in focus
+- Add Sorting to the TableManager class
+
+
+Connection
+- MongoFactory do not create the MongoClient on a register.  Only on a connect
+
+
+
+Map Reduce
+- Create a view for MapReduce
+
+
+GridFS
+- Mechanism for uploading and downloading files
+
+
+Javascript
+- Mechanism for storing and loading files
+
+
+DocumentEditor
+- Delete document button

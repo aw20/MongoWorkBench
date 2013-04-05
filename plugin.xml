@@ -37,14 +37,14 @@
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database.png"
             id="net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics"
-            name="DB Statistics"
+            name="Server Statistics"
             restorable="true">
       </view>
       <view
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionList"
+            class="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_multiple.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionList"
+            id="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus"
             name="Collection List"
             restorable="true">
       </view>

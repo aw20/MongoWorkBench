@@ -57,6 +57,7 @@ public class MPerspectiveFactory1 extends MAbstractLogAgent implements IPerspect
 
 		bodyleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.class.getName());
 		bodyleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics.class.getName());
+		bodyleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus.class.getName());
 
 		bottomleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView.class.getName());
 

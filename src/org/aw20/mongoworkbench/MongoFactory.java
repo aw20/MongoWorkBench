@@ -182,18 +182,21 @@ public class MongoFactory extends Thread {
 		
 		while (bRun){
 			
-			synchronized(commandQueue){
-				try {
-					commandQueue.wait();
-					cmd	= commandQueue.remove(0);
-
-					if ( cmd == null )
-						continue;
-					
-				} catch (InterruptedException e) {
-					bRun = false;
-					break;
+			while ( commandQueue.size() == 0 ){
+				synchronized (commandQueue) {
+					try {
+						commandQueue.wait();
+					} catch (InterruptedException e) {
+						bRun = false;
+						return;
+					}
 				}
+			}
+			
+			synchronized(commandQueue){
+				cmd	= commandQueue.remove(0);
+				if ( cmd == null )
+					continue;
 			}
 
 

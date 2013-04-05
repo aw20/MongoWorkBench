@@ -58,8 +58,12 @@ public class TreeRender {
 	private Image mapImage;
 	private Image nullImage;
 	private Image jsImage;
+
+	public TreeRender(Device device, Tree tree ){
+		this( device, tree, true );
+	}
 	
-	public TreeRender(Device device, Tree tree){
+	public TreeRender(Device device, Tree tree, boolean showType ){
 		this.tree = tree;
 		
 		oidImage 			= MUtil.getImage(device, "bullet_star.png");
@@ -85,9 +89,11 @@ public class TreeRender {
 		trclmnNewColumn2.setWidth(150);
 		trclmnNewColumn2.setText("Value");
 		
-		TreeColumn trclmnNewColumn3 = new TreeColumn(tree, SWT.NONE);
-		trclmnNewColumn3.setWidth(55);
-		trclmnNewColumn3.setText("Type");
+		if ( showType ){
+			TreeColumn trclmnNewColumn3 = new TreeColumn(tree, SWT.NONE);	
+			trclmnNewColumn3.setWidth(55);
+			trclmnNewColumn3.setText("Type");
+		}
 		
 		tree.pack();
 	}
@@ -115,7 +121,6 @@ public class TreeRender {
 			drawItem("", null, list, (list.size() < 35) );
 
 		}
-		
 	}
 	
 	
@@ -239,5 +244,4 @@ public class TreeRender {
 			treeItem.setText(1, "[bin " + ((byte[])value).length + " bytes]" );
 		}
 	}
-
 }
