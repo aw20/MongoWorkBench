@@ -1,18 +1,13 @@
 package net.jumperz.util;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import net.jumperz.app.MBitDog.MBitDog;
 
 public class MLogServer extends MSingleThreadCommand implements MLogger {
 	public static final int log_debug = 0;
@@ -70,16 +65,6 @@ public class MLogServer extends MSingleThreadCommand implements MLogger {
 
 	// --------------------------------------------------------------------------------
 	public void init(String bitDogFileName, MThreadPool threadPool) throws IOException {
-		simpleMode = false;
-
-		// BitDogを開始
-		out = new PipedOutputStream();
-		InputStream in = new PipedInputStream((PipedOutputStream) out);
-		MBitDog bitDog = new MBitDog(bitDogFileName, in);
-		threadPool.addCommand(bitDog);
-
-		// LogServerを開始
-		threadPool.addCommand(this);
 	}
 
 	// --------------------------------------------------------------------------------
@@ -90,60 +75,10 @@ public class MLogServer extends MSingleThreadCommand implements MLogger {
 
 	// --------------------------------------------------------------------------------
 	public void shutdown() {
-		// この関数はインスタンスのメインスレッドとは別のスレッドから呼び出されることに注意
-
-		if (terminated) {
-			return;
-		}
-
-		terminated = true;
-		synchronized (this) {
-			this.notify();
-		}
-
-		// このインスタンスのメインスレッドが溜まっているログを書き込む間待機する
-		// このshutdown()が呼び出されたタイミング以降はlog()の機能は保証しなくていい
-		// しかしshutdown()以前に届いていたメッセージは必ず出力するようにする
-
-		/*
-		 * //ここでwhileループでmessageQueueを監視してもいいかも MSystemUtil.sleep( 1000 );
-		 * 
-		 * //残っているメッセージをすべて吐き出す synchronized( messageQueue ) { execute2(); } MStreamUtil.closeStream( out );
-		 * 
-		 * terminated = true; synchronized( this ) { this.notify(); }
-		 */
 	}
 
 	// --------------------------------------------------------------------------------
 	public void execute2() {
-		if (simpleMode) {
-			return;
-		}
-
-		while (true) {
-			String message = null;
-
-			// キューからメッセージを取り出す
-			// messageQueueをロックするので、時間がかかる可能性のあるストリームへの書き込みはロックを開放してから行う
-			synchronized (messageQueue) {
-				if (messageQueue.isEmpty()) {
-					break;
-				} else {
-					message = (String) messageQueue.getFirst();
-					messageQueue.removeFirst();
-				}
-			}
-
-			try {
-				// 書き込み
-				out.write(message.getBytes(MCharset.CS_ISO_8859_1));
-				out.write(0x0A);
-			} catch (IOException e) {
-				e.printStackTrace();
-				MStreamUtil.closeStream(out);
-				break;
-			}
-		}
 	}
 
 	// --------------------------------------------------------------------------------

@@ -21,8 +21,10 @@
  */
 package net.jumperz.app.MMonjaDBCore.action;
 
-import net.jumperz.app.MMonjaDBCore.*;
-import net.jumperz.app.MMonjaDBCore.event.*;
+import net.jumperz.app.MMonjaDBCore.MAbstractLogAgent;
+import net.jumperz.app.MMonjaDBCore.MDataManager;
+import net.jumperz.app.MMonjaDBCore.MInputView;
+import net.jumperz.app.MMonjaDBCore.event.MEventManager;
 
 
 public abstract class MAbstractAction extends MAbstractLogAgent implements MAction {
@@ -39,7 +41,6 @@ public abstract class MAbstractAction extends MAbstractLogAgent implements MActi
 	private String		cmdStr = null;
 	private String		message = null;
 	private Exception	execException = null;
-	private long execTime = 0, startTime = 0;
 	
 	public void setCmd( String _cmdstr ){
 		this.cmdStr = _cmdstr;
@@ -65,35 +66,12 @@ public abstract class MAbstractAction extends MAbstractLogAgent implements MActi
 		return execException;
 	}
 	
-	public long getTimeMS(){
-		return execTime;
-	}
-	
 	public final void setContextImpl(Object context) {}
 
 	public void breakCommand() {
 	}
 
 	public final void execute() {
-		MActionManager.getInstance().notify2( MEvent.MEVENT_EXECUTION_START, this );
-
-		startTime	= System.currentTimeMillis();
-		
-		try {
-			
-			if (checkCondition()) {
-				eventManager.fireEvent(new MEvent(getEventName() + "_start"), this);
-				executeFunction();
-				eventManager.fireEvent(new MEvent(getEventName() + "_end"), this);
-			}
-
-		} catch (Exception e) {
-			this.setException( e );
-			eventManager.fireErrorEvent(e, this);
-		} finally {
-			execTime = System.currentTimeMillis() - startTime;
-			MActionManager.getInstance().notify2( MEvent.MEVENT_EXECUTION_FINISHED, this );
-		}
 	}
 
 	public MInputView getOriginView() {
@@ -103,30 +81,4 @@ public abstract class MAbstractAction extends MAbstractLogAgent implements MActi
 	public void setOriginView(MInputView v) {
 		originView = v;
 	}
-
-	private boolean checkCondition() throws Exception {
-		if (getActionCondition() == action_cond_none) {
-
-		} else if (getActionCondition() == action_cond_not_connected_or_connected_to_different_host) {
-			if (dataManager.isConnected()) {
-				if (dataManager.connectedToSameHost(this)) {
-					return false;
-				}
-			}
-		} else if (getActionCondition() == action_cond_connected) {
-			if (!dataManager.isConnected()) {
-				throw new Exception("Not connected to MongoDB.");
-			}
-		} else if (getActionCondition() == action_cond_db) {
-			if (dataManager.getDB() == null) {
-				throw new Exception("Database is not choosed.");
-			}
-		} else if (getActionCondition() == action_cond_collection) {
-			if (dataManager.getDocumentDataList() == null) {
-				throw new Exception("collection is not choosed.");
-			}
-		}
-		return true;
-	}
-
 }

@@ -21,4 +21,3 @@ Javascript
 
 
 DocumentEditor
-- Delete document button

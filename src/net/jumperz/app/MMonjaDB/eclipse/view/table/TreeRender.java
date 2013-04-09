@@ -148,8 +148,9 @@ public class TreeRender {
 			//fieldNameTreeItemMap.put(fieldName, newItem);
 
 			if (value == null) {
-				newItem.setText(key + " : null");
+				newItem.setText(key);
 				newItem.setImage(nullImage);
+				setItemInfo(newItem, key, value);
 			} else if (value instanceof Map) {
 				newItem.setText(key);
 				newItem.setImage(mapImage);

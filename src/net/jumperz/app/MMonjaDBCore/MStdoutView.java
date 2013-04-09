@@ -21,11 +21,6 @@
  */
 package net.jumperz.app.MMonjaDBCore;
 
-import net.jumperz.app.MMonjaDBCore.action.MConnectAction;
-import net.jumperz.app.MMonjaDBCore.action.MShowCollectionAction;
-import net.jumperz.app.MMonjaDBCore.action.MShowDBAction;
-import net.jumperz.app.MMonjaDBCore.action.MUseAction;
-import net.jumperz.app.MMonjaDBCore.event.MEvent;
 import net.jumperz.util.MCommand;
 
 public class MStdoutView extends MAbstractLogAgent implements MOutputView, MCommand {
@@ -39,26 +34,6 @@ public class MStdoutView extends MAbstractLogAgent implements MOutputView, MComm
 	}
 
 	public void update(final Object e, final Object source) {
-		
-		final MEvent event = (MEvent) e;
-		if (event.getEventName().indexOf(event_error) == 0) {
-			final Object error = event.getData().get("error");
-			debug(error);
-		} else if (event.getEventName().indexOf(event_connect + "_end") == 0) {
-			MConnectAction action = (MConnectAction) source;
-			debug("connected:" + action.getMongo());
-		} else if (event.getEventName().indexOf(event_showcollections + "_end") == 0) {
-			MShowCollectionAction action = (MShowCollectionAction) source;
-			debug(action.getCollSet());
-		} else if (event.getEventName().indexOf(event_showdbs + "_end") == 0) {
-			MShowDBAction action = (MShowDBAction) source;
-			debug(action.getDBList());
-		} else if (event.getEventName().indexOf(event_use + "_end") == 0) {
-			MUseAction action = (MUseAction) source;
-			debug("switched to db " + action.getDBName());
-		} else if (event.getEventName().indexOf(event_find + "_end") == 0) {
-			
-		}
 	}
 
 	private void execute2() throws Exception {

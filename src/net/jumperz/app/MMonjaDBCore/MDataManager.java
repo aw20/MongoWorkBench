@@ -21,24 +21,12 @@
  */
 package net.jumperz.app.MMonjaDBCore;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.jumperz.app.MMonjaDBCore.action.MAbstractAction;
 import net.jumperz.app.MMonjaDBCore.action.MActionManager;
-import net.jumperz.app.MMonjaDBCore.action.MConnectAction;
-import net.jumperz.app.MMonjaDBCore.action.MFindAction;
-import net.jumperz.app.MMonjaDBCore.action.MShowDBAction;
-import net.jumperz.app.MMonjaDBCore.action.MUseAction;
-import net.jumperz.app.MMonjaDBCore.action.mj.MEditAction;
-import net.jumperz.app.MMonjaDBCore.event.MEvent;
-import net.jumperz.app.MMonjaDBCore.event.MEventManager;
-import net.jumperz.mongo.MFindQuery;
 import net.jumperz.mongo.MMongoUtil;
-import net.jumperz.util.MCommand;
 import net.jumperz.util.MHistory;
 import net.jumperz.util.MObserver2;
 import net.jumperz.util.MProperties;
@@ -46,8 +34,6 @@ import net.jumperz.util.MThreadPool;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 
 //import net.jumperz.app.MMonjaDBCore.exception.MConnectedToWrongHostException;
@@ -73,9 +59,6 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 	// private volatile String lastFindActionString;
 	private volatile String lastEditActionString;
 
-	private volatile MFindAction lastFindAction;
-
-	private volatile MConnectAction connectAction;
 
 	private int sortOrder = sort_order_default;
 
@@ -92,7 +75,6 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 	// private int batchSize = default_batch_size;
 	private int maxFindResults = default_max_results;
 
-	private boolean maybeHasMoreResults;
 
 	// copy paste
 	private volatile List copiedDocumentList = new ArrayList();
@@ -114,26 +96,6 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 		return copiedDocumentList;
 	}
 
-	
-	public boolean connectedToDifferentHost(MAbstractAction _action) {
-		return (isConnected() && !connectedToSameHost(_action));
-	}
-
-	
-	public MConnectAction getConnectAction() {
-		return connectAction;
-	}
-
-	
-	public boolean connectedToSameHost(MAbstractAction _action) {
-		if (connectAction == null) {
-			return false;
-		} else {
-			return connectAction.equals(_action);
-		}
-	}
-
-	
 	public void setCopiedDocumentList(List copiedDocumentList) {
 		this.copiedDocumentList = copiedDocumentList;
 	}
@@ -143,15 +105,6 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 	}
 
 	
-	public MFindAction getLastFindAction() {
-		return lastFindAction;
-	}
-
-	
-	public String getLastFindActionString() {
-		return lastFindAction.getActionStr();
-	}
-
 	
 	public String getCollName() {
 		return collName;
@@ -183,22 +136,6 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 		return documentDataList;
 	}
 
-	
-	public DBObject getDocumentDataByAction(MEditAction action) {
-		Object _id = action.getIdAsObject();
-		DBObject _data = (DBObject) getDocumentDataMap().get(_id);
-
-		if (_data == null) {
-			String _idStr = action.getIdAsString();
-			if (_idStr.matches("^[\\.0-9]+$")) {
-				// is objectid type double?
-				_data = (DBObject) getDocumentDataMap().get(new Double(_idStr));
-			}
-		}
-		return _data;
-	}
-
-	
 	public Map getDocumentDataMap() {
 		return documentDataMap;
 	}
@@ -249,48 +186,10 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 	}
 
 	
-	private synchronized void onConnect(MConnectAction action) {
-		this.connectAction = action;
-
-		mongo = action.getMongo();
-		db = action.getDB();
-
-		threadPool.addCommand(new MCommand() {
-			public void execute() { // -----------------
-				checkNumberInt();
-			}
-
-			public void breakCommand() {
-			}
-		}); // ------------
-	}
-
-	
 	public boolean numberIntEnabled() {
 		return numberIntEnabled;
 	}
 
-	
-	private void checkNumberInt() {
-		try {
-			db.eval("NumberInt(1)", (Object[]) null);
-			numberIntEnabled = true;
-		} catch (Exception e) {
-			// e.printStackTrace();
-		}
-	}
-
-	
-	private synchronized void onShowDbs(MShowDBAction action) {
-		// dbNameList = action.getDBList();
-	}
-
-	
-	private synchronized void onUse(MUseAction action) {
-		db = mongo.getDB(action.getDBName());
-	}
-
-	
 	public void stopThreadPools() {
 		threadPool.slowStop();
 		actionThreadPool.slowStop();
@@ -307,58 +206,11 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 	}
 
 	
-	private void onFind(MFindAction action) throws IOException {
-		// dbName = action.getDB().getName();
-		collName = action.getCollection().getName();
-
-		// reset data
-		documentDataList = new ArrayList();
-		documentDataMap = new HashMap();
-		document = null;
-		sortOrder = sort_order_default;
-		lastFindAction = action;
-		findHistory.add(action.getActionStr());
-
-		MFindQuery findQuery = MMongoUtil.parseFindQuery(db, action.getActionStr());
-		int limit = findQuery.getLimitArg();
-
-		DBCursor cursor = action.getCursor();
-		maybeHasMoreResults = true;
-		for (int i = 0; i < maxFindResults; ++i) {
-			if (cursor.hasNext()) {
-				// Map data = cursor.next().toMap();
-				DBObject data = cursor.next();
-				documentDataList.add(data);
-				documentDataMap.put(data.get("_id"), data);
-			} else {
-				if (i == limit) {
-					// debug( "--3--" );
-					maybeHasMoreResults = true;
-				} else {
-					// debug( "--4--" + i + ":" + limit );
-					maybeHasMoreResults = false;
-				}
-				cursor.close();
-				break;
-			}
-		}
-
-		columnNameList = MMongoUtil.getNameListFromDataList(documentDataList);
-		// drawTable( documentDataList, columnNameList );
-	}
-
-	
 	public Object getLastEditedDocument() {
 		return document;
 	}
 
-	
-	private void onEdit(MEditAction action) {
-		lastEditActionString = action.getAction();
-		document = documentDataMap.get(action.getIdAsObject());
-	}
 
-	
 	public void updateDocument(Object _id, String editingFieldName, Object newValue) {
 		BasicDBObject query = new BasicDBObject("_id", _id);
 		BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(editingFieldName, newValue));
@@ -396,111 +248,24 @@ public class MDataManager extends MAbstractLogAgent implements MObserver2, MCons
 
 	
 	public void reloadDocument() {
-		MActionManager.getInstance().executeAction(getLastFindActionString());
-		MActionManager.getInstance().executeAction(getLastEditActionString());
 	}
 
 	
 	public boolean hasPrevItems() {
-		if (lastFindAction == null) {
-			return false;
-		} else {
-			MFindQuery fq = lastFindAction.getFindQuery();
-			MFindQuery prevQuery = MMongoUtil.getPrevItemsQuery(db, fq, maxFindResults);
-			if (prevQuery == null) {
-				return false;
-			} else {
-				return true;
-			}
-		}
+		return true;
 	}
 
 	
 	public boolean hasNextItems() {
-		if (lastFindAction == null) {
-			return false;
-		} else {
-			return maybeHasMoreResults;
-		}
+		return false;
 	}
 
-	
-	private void onNextItems() {
-		if (!hasNextItems()) {
-			return;
-		} else {
-			// hasMoreResults is true here
-			MFindQuery fq = lastFindAction.getFindQuery();
-			MFindQuery nextQuery = MMongoUtil.getNextItemsQuery(db, fq, maxFindResults);
-			debug(nextQuery);
-			MActionManager.getInstance().executeAction(MMongoUtil.findQueryToString(db, nextQuery));
-		}
+
+	@Override
+	public void update(Object event, Object source) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	
-	private void onPrevItems() {
-		if (!hasPrevItems()) {
-			return;
-		} else {
-			MFindQuery fq = lastFindAction.getFindQuery();
-			MFindQuery prevQuery = MMongoUtil.getPrevItemsQuery(db, fq, maxFindResults);
-			if (prevQuery != null) {
-				MActionManager.getInstance().executeAction(MMongoUtil.findQueryToString(db, prevQuery));
-			}
-		}
-	}
-
-	
-	private void onDisconnect() {
-		mongo = null;
-		db = null;
-		collName = null;
-		// dbNameList = null;
-		documentDataList = null;
-		documentDataMap = null;
-		columnNameList = null;
-		document = null;
-		lastFindAction = null;
-		lastEditActionString = "";
-		connectAction.close();
-		connectAction = null;
-	}
-
-	
-	public void update(final Object e, final Object source) {
-		// threadPool.addCommand( new MCommand() { public void execute(){ //-----------------
-
-		MEvent event = (MEvent) e;
-		if (event.getEventName().indexOf(event_connect + "_end") == 0) {
-			onConnect((MConnectAction) source);
-		} else if (event.getEventName().indexOf(event_showdbs + "_end") == 0) {
-			MShowDBAction action = (MShowDBAction) source;
-			onShowDbs(action);
-		} else if (event.getEventName().indexOf(event_use + "_end") == 0) {
-			MUseAction action = (MUseAction) source;
-			onUse(action);
-		} else if (event.getEventName().indexOf(event_find + "_end") == 0) {
-			MFindAction action = (MFindAction) source;
-			try {
-				onFind(action);
-			} catch (IOException ex) {
-				MEventManager.getInstance().fireErrorEvent(ex);
-			}
-		} else if (event.getEventName().indexOf(event_mj_edit + "_end") == 0) {
-			MEditAction action = (MEditAction) source;
-			onEdit(action);
-		} else if (event.getEventName().indexOf(event_mj_prev_items + "_end") == 0) {
-			onPrevItems();
-		} else if (event.getEventName().indexOf(event_mj_next_items + "_end") == 0) {
-			onNextItems();
-		} else if (event.getEventName().indexOf(event_disconnect + "_end") == 0) {
-			onDisconnect();
-		}
-		/*
-		 * else if( event.getEventName().indexOf( event_find + "_end" ) == 0 ) { MFindAction action = ( MFindAction )source; onFind( action ); }
-		 */
-		// } public void breakCommand(){} } ); //------------
-
-	}
 	
 }

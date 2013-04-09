@@ -25,12 +25,21 @@
  */
 package net.jumperz.app.MMonjaDBCore.action;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import net.jumperz.util.*;
-import net.jumperz.app.MMonjaDBCore.*;
-import net.jumperz.app.MMonjaDBCore.event.*;
-import net.jumperz.app.MMonjaDBCore.action.mj.*;
+import net.jumperz.app.MMonjaDBCore.MAbstractLogAgent;
+import net.jumperz.app.MMonjaDBCore.MConstants;
+import net.jumperz.app.MMonjaDBCore.MDataManager;
+import net.jumperz.app.MMonjaDBCore.MInputView;
+import net.jumperz.app.MMonjaDBCore.action.mj.MCopyAction;
+import net.jumperz.app.MMonjaDBCore.action.mj.MPasteAction;
+import net.jumperz.app.MMonjaDBCore.action.mj.MSortAction;
+import net.jumperz.app.MMonjaDBCore.action.mj.MUpdateIntFieldAction;
+import net.jumperz.util.MObserver2;
+import net.jumperz.util.MSubject2;
+import net.jumperz.util.MSubject2Impl;
+import net.jumperz.util.MThreadPool;
 
 public class MActionManager extends MAbstractLogAgent implements MConstants, MSubject2 {
 	private static final MActionManager instance = new MActionManager();
@@ -49,55 +58,14 @@ public class MActionManager extends MAbstractLogAgent implements MConstants, MSu
 
 	private MActionManager() {
 		actionMap = new LinkedHashMap();
-		actionMap.put("^connect.*", MConnectAction.class);
-		actionMap.put("^mj disconnect", MDisconnectAction.class);
-		actionMap.put("^show\\s+collections", MShowCollectionAction.class);
 		actionMap.put("^show\\s+dbs", MShowDBAction.class);
-		actionMap.put("^use\\s+.*", MUseAction.class);
-		actionMap.put("^db\\.[^\\(]+\\.find\\(.*", MFindAction.class);
-		actionMap.put("^mj show all db stats$", MShowAllDbStatsAction.class);
-		actionMap.put("^mj show all collection stats$", MShowAllCollectionStatsAction.class);
 		actionMap.put("^mj sort .*", MSortAction.class);
-		actionMap.put("^db\\.[^\\(]+\\.update\\(.*", MUpdateAction.class);
-		actionMap.put("^db\\.[^\\(]+\\.save\\(.*", MSaveAction.class);
-		actionMap.put("^db\\.[^\\(]+\\.insert\\(.*", MInsertAction.class);
-		actionMap.put("^db\\.[^\\(]+\\.remove\\(.*", MRemoveAction.class);
-		actionMap.put("^mj edit field .*", MEditFieldAction.class);
-		actionMap.put("^mj edit .*", MEditAction.class);
 		actionMap.put("^mj update int field.*", MUpdateIntFieldAction.class);
-		actionMap.put("^mj prev items$", MPrevItemsAction.class);
-		actionMap.put("^mj next items$", MNextItemsAction.class);
 		actionMap.put("^mj copy$", MCopyAction.class);
 		actionMap.put("^mj paste$", MPasteAction.class);
-		actionMap.put("^mj remove$", MMjRemoveAction.class);
-		// actionMap.put( "^mj connect ssh.*", MSshConnectAction.class );
 	}
 
 	public MAction getAction(String actionStr) {
-		if (actionStr == null || actionStr.length() < 1) {
-			return null;
-		}
-
-		// remove line breaks
-		actionStr = actionStr.replaceAll("(\\r|\\n)", "");
-		actionStr = actionStr.replaceAll("\\t+", " ");
-		
-		Iterator p = actionMap.keySet().iterator();
-		while (p.hasNext()) {
-			String patternStr = (String) p.next();
-			if (actionStr.matches(patternStr)) {
-				Class clazz = (Class) actionMap.get(patternStr);
-				try {
-					MAction maction = (MAction) clazz.newInstance();
-					maction.setCmd( actionStr );
-					maction.parse( actionStr );
-					return maction;
-				} catch (Exception e) {
-					MEventManager.getInstance().fireErrorEvent(e);
-					return null;
-				}
-			}
-		}
 		return null;
 	}
 
@@ -107,31 +75,7 @@ public class MActionManager extends MAbstractLogAgent implements MConstants, MSu
 	}
 	
 	public MAction executeAction(String actionStr, MInputView view) {
-		if (actionStr == null || actionStr.length() < 1) {
-			return null;
-		}
-
-		// remove line breaks
-		actionStr = actionStr.replaceAll("(\\r|\\n)", "");
-		actionStr = actionStr.replaceAll("\\t+", " ");
-
-		MAction action = getAction(actionStr);
-		if (action == null) {
-			MEventManager.getInstance().fireErrorEvent( new MParseException("Action not found : " + actionStr) );
-			return null;
-		}
-
-		action.setOriginView(view);
-		action.setCmd(actionStr);
-
-		if (!action.parse(actionStr)) {
-			debug(action);
-			MEventManager.getInstance().fireErrorEvent(new MParseException("Parse Error : " + actionStr));
-			return null;
-		}
-
-		threadPool.addCommand(action);
-		return action;
+		return null;
 	}
 
 	public MAction executeAction(String actionStr) {

@@ -41,6 +41,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -51,110 +52,142 @@ import com.mongodb.DB;
 
 public class MEditor extends MAbstractView implements EventWorkBenchListener {
 	private Text textJSON;
-	
 	private Tree tree;
 	private TreeRender treeRender;
 	private Button btnNewButton;
-	
-	private Map	activeDocumentMap;
-	
+	private Map activeDocumentMap;
+	private Button btnNewButton_1;
+
 	public MEditor() {
 		EventWorkBenchManager.getInst().registerListener(this);
 	}
-	
+
 	public void dispose() {
 		EventWorkBenchManager.getInst().deregisterListener(this);
 		super.dispose();
 	}
-	
+
 	public void init2() {
-		GridLayout gridLayout = new GridLayout(1, true);
+		GridLayout gridLayout = new GridLayout(2, true);
 		parent.setLayout(gridLayout);
-		
-		
-		TabFolder tabFolder = new TabFolder(parent, SWT.NONE );
-		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		
+
+
+		TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
 		TabItem tbtmTreeItem = new TabItem(tabFolder, SWT.NONE);
 		tbtmTreeItem.setText("Document");
-		
+
 		tree = new Tree(tabFolder, SWT.BORDER | SWT.FULL_SELECTION);
 		tbtmTreeItem.setControl(tree);
-		treeRender	= new TreeRender(parent.getDisplay(),tree);
-		
+		treeRender = new TreeRender(parent.getDisplay(), tree);
+
 		TabItem tbtmJSONItem = new TabItem(tabFolder, SWT.NONE);
 		tbtmJSONItem.setText("JSON");
-		
+
 		textJSON = new Text(tabFolder, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		textJSON.setTabs(2);
 		textJSON.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
 		tbtmJSONItem.setControl(textJSON);
 
+		btnNewButton_1 = new Button(parent, SWT.NONE);
+		btnNewButton_1.setText("delete document");
+		btnNewButton_1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+		btnNewButton_1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				onDelete();
+			}
+		});
+
 		btnNewButton = new Button(parent, SWT.NONE);
+		btnNewButton.setText("save document");
+		btnNewButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onUpdate();
 			}
 		});
-		btnNewButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnNewButton.setText("Update Document");
 	}
 
 	@Override
 	public void onEventWorkBench(Event event, final Object data) {
 
-		switch ( event ){
-			case DOCUMENT_VIEW:{
+		switch (event) {
+			case DOCUMENT_VIEW: {
 				shell.getDisplay().asyncExec(new Runnable() {
 					public void run() {
-						redraw( (Map)data );
+						redraw((Map) data);
 					}
 				});
 				break;
 			}
-			case ELEMENT_VIEW:{
-				
+			case ELEMENT_VIEW: {
+
 				break;
 			}
 			default:
 				break;
 		}
-		
+
 	}
 
+	private void onDelete() {
+		if (activeDocumentMap == null)
+			return;
+
+		Map m = (Map)activeDocumentMap.get(EventWrapper.DOC_DATA);
+		String id = m.get("_id").toString();
+		
+		MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+    messageBox.setMessage("Do you delete this document?\r\n\r\n     " + id );
+    messageBox.setText("Document Delete");
+    int response = messageBox.open();
+    if (response == SWT.YES){
+	
+			try {
+				MongoCommand mcmd = MongoFactory.getInst().createCommand("db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".remove({_id:ObjectId(\"" + id + "\")},true)");
+				mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME));
+				MongoFactory.getInst().submitExecution(mcmd);
+			} catch (Exception e) {
+				EventWorkBenchManager.getInst().onEvent(Event.EXCEPTION, e);
+			}
+    }
+	}
 	
 	private void onUpdate() {
-		if ( activeDocumentMap == null )
+		if (activeDocumentMap == null)
 			return;
 		
 		try {
-			MongoCommand mcmd = MongoFactory.getInst().createCommand( "db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".save(" + textJSON.getText() + ")" );
-			mcmd.setConnection( (String)activeDocumentMap.get(EventWrapper.ACTIVE_NAME) );
+			MongoCommand mcmd = MongoFactory.getInst().createCommand("db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".save(" + textJSON.getText() + ")");
+			mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME));
 			MongoFactory.getInst().submitExecution(mcmd);
 		} catch (Exception e) {
-			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+			EventWorkBenchManager.getInst().onEvent(Event.EXCEPTION, e);
 		}
-		
 	}
 
-	private void redraw(Map data){
+	private void redraw(Map data) {
 		btnNewButton.setEnabled(false);
+		btnNewButton_1.setEnabled(false);
 
 		// Update the JSON
 		textJSON.setText("");
 
-		activeDocumentMap	= data;
-		
-		if ( activeDocumentMap.get(EventWrapper.DOC_DATA) instanceof Map || activeDocumentMap.get(EventWrapper.DOC_DATA) instanceof List ){
+		activeDocumentMap = data;
+
+		if (activeDocumentMap.get(EventWrapper.DOC_DATA) instanceof Map || activeDocumentMap.get(EventWrapper.DOC_DATA) instanceof List) {
 			DB db = MongoFactory.getInst().getMongoActiveDB();
-			textJSON.setText( (String) db.eval("tojson(arguments[0])", new Object[] { activeDocumentMap.get(EventWrapper.DOC_DATA) }) );
+			textJSON.setText((String) db.eval("tojson(arguments[0])", new Object[] { activeDocumentMap.get(EventWrapper.DOC_DATA) }));
 		}
 
 		// Update the tree
-		treeRender.render((Map)activeDocumentMap.get(EventWrapper.DOC_DATA));
-		
+		treeRender.render((Map) activeDocumentMap.get(EventWrapper.DOC_DATA));
+
 		btnNewButton.setEnabled(true);
+		btnNewButton_1.setEnabled(true);
 	}
 
 }

@@ -39,7 +39,6 @@ public interface MAction extends MCommand {
 
 	public void setException(Exception e);
 	public Exception getExecException();
-	public long getTimeMS();
 	
 	public void setOriginView(MInputView view);
 

@@ -132,7 +132,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 			} else if ( nodeType == NodeType.COLLECTION ){
 
-				showView("net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics");
+				showView("net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView");
 				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
 				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
 				String sColl	= selectedItem.getText();

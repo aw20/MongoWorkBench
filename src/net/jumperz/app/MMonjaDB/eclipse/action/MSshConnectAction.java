@@ -38,7 +38,6 @@ import javax.swing.JTextField;
 
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDB.eclipse.dialog.MPasswordDialog;
-import net.jumperz.app.MMonjaDBCore.action.MConnectAction;
 import net.jumperz.util.MRegEx;
 import net.jumperz.util.MStringUtil;
 
@@ -48,13 +47,10 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
-import com.mongodb.Mongo;
 
-public class MSshConnectAction extends MConnectAction {
+public class MSshConnectAction  {
 	// mj connect ssh joe@www.example.jp:22 ~/.ssh/id_dsa 127.0.0.1:27017/dbname
 	private String actionStr;
-
-	private int lPort;
 
 	private String lHost = "127.0.0.1";
 
@@ -69,8 +65,6 @@ public class MSshConnectAction extends MConnectAction {
 	private String sshUser;
 
 	private String identityFileName;
-
-	private String dbName;
 
 	private Session session;
 
@@ -108,42 +102,16 @@ public class MSshConnectAction extends MConnectAction {
 				sshPort = MStringUtil.parseInt(MRegEx.getMatch(":([0-9]+)", sshStr));
 				sshHost = sshStr.substring(0, sshStr.indexOf(':'));
 			} else {
-				sshPort = default_ssh_port;
 				sshHost = sshStr;
 			}
-			debug("sshUser:" + sshUser);
-			debug("sshHost:" + sshHost);
-			debug("sshPort:" + sshPort);
 
 			// dbName
-			String mongoStr = array[4];
-			if (mongoStr.indexOf('/') == -1) {
-				dbName = "test";
-			} else {
-				dbName = MRegEx.getMatch("/(.*)$", mongoStr);
-				mongoStr = mongoStr.substring(0, mongoStr.indexOf('/'));
-			}
-
 			// port and host
-			if (mongoStr.indexOf(':') > -1) {
-				mongoPort = MStringUtil.parseInt(MRegEx.getMatch(":([0-9]+)", mongoStr));
-				mongoHost = mongoStr.substring(0, mongoStr.indexOf(':'));
-			} else {
-				mongoPort = default_mongo_port;
-				mongoHost = mongoStr;
-			}
-			debug("dbName:" + dbName);
-			debug("mongoPort:" + mongoPort);
-			debug("mongoHost:" + mongoHost);
+
 
 			// key file
 			identityFileName = MRegEx.getMatch("\"([^\"]+)\"$", action);
-			debug("--" + identityFileName + "--");
-			if (!(new File(identityFileName)).exists()) {
-				debug("identify file not file:" + identityFileName);
-			}
 		} catch (Exception e) {
-			debug(e);
 			return false;
 		}
 		return true;
@@ -160,13 +128,10 @@ public class MSshConnectAction extends MConnectAction {
 	}
 
 	public void close() {
-		mongo.close();
 		session.disconnect();
 	}
 
 	public void executeFunction() throws Exception {
-		checkExistingConnection();
-
 		JSch jsch = new JSch();
 		if ((new File(identityFileName)).exists()) {
 			String identityContent = MStringUtil.loadStrFromFile(identityFileName);
@@ -180,9 +145,6 @@ public class MSshConnectAction extends MConnectAction {
 		UserInfo ui = new MyUserInfo();
 		session.setUserInfo(ui);
 		session.connect();
-		lPort = session.setPortForwardingL(lHost, 0, mongoHost, mongoPort);
-		mongo = new Mongo(lHost, lPort);
-		db = mongo.getDB(dbName);
 
 		/*
 		 * (new Thread(){ public void run() { try { Thread.sleep( 30000 ); session.delPortForwardingL( lHost, lPort ); } catch( Exception e ) { e.printStackTrace(); } } }).start();
