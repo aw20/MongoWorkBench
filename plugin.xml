@@ -8,6 +8,7 @@
             name="MongoWorkBench">
       </category>
       <view
+            allowMultiple="false"
             category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDBTree"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_gear.png"
@@ -16,6 +17,7 @@
             restorable="true">
       </view>
       <view
+            allowMultiple="false"
             category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MActionView"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
@@ -33,6 +35,7 @@
             restorable="true">
       </view>
       <view
+            allowMultiple="false"
             category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database.png"
@@ -41,6 +44,7 @@
             restorable="true">
       </view>
       <view
+            allowMultiple="false"
             category="MongoWorkBench.category1"
             class="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_multiple.png"

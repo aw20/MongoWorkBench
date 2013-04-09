@@ -1,15 +1,11 @@
 Items to be done
 
 UI
-- When Server Statistics make sure the view is in focus
-- When Collection Statistics make sure the view is in focus
 - When find make sure the view is in focus
-- Add Sorting to the TableManager class
+- Make sorting more intelligent
 
 
 Connection
-- MongoFactory do not create the MongoClient on a register.  Only on a connect
-
 
 
 Map Reduce

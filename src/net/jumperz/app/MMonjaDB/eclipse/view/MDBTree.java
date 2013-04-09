@@ -26,7 +26,6 @@
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,6 +52,7 @@ import org.aw20.mongoworkbench.command.DropDbsMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.ShowCollectionsMongoCommand;
 import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
+import org.aw20.mongoworkbench.command.UseMongoCommand;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -67,6 +67,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 public class MDBTree extends MAbstractView implements MongoCommandListener {
 	private Tree tree;
@@ -86,16 +89,6 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 	public MDBTree() {
 		serverList	= Activator.getDefault().getServerList();
-		
-		Iterator<Map>	it	= serverList.iterator();
-		while ( it.hasNext() ){
-			try {
-				MongoFactory.getInst().registerMongo( it.next() );
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
-		}
-
 		MongoFactory.getInst().registerListener(this);
 	}
 
@@ -139,6 +132,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 			} else if ( nodeType == NodeType.COLLECTION ){
 
+				showView("net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics");
 				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
 				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
 				String sColl	= selectedItem.getText();
@@ -415,16 +409,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
       int response = messageBox.open();
       if (response == SWT.YES){
       	String sName	= tree.getSelection()[0].getText();
-      	Map m = Activator.getDefault().getServerMap(sName);
-      	if ( m == null )
-      		return;
-      	
-      	try {
-					MongoFactory.getInst().registerMongo( m );
-				} catch (UnknownHostException e) {
-					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
-				}
-
+      	MongoFactory.getInst().removeMongo(sName);
       	tree.getSelection()[0].removeAll();
       }
 			
@@ -467,6 +452,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			
 		}else if ( type == ACTION_SERVER_STATS ){
 			
+			showView("net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics");
 			TreeItem	selectedItem	= tree.getSelection()[0];
 			String sName	= selectedItem.getText();
 			MongoFactory.getInst().submitExecution( new DBStatsMongoCommand().setConnection(sName) );
@@ -488,10 +474,10 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
       }
 		
-		}else if ( type == ACTION_DATABASE_STATS ){
-			
 		}else if ( type == ACTION_COLLECTION_STATS ){
 
+			showView("net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus");
+			
 			TreeItem	selectedItem	= tree.getSelection()[0];
 			String sName	= selectedItem.getParentItem().getText();
 			String sDb		=	selectedItem.getText();
@@ -562,6 +548,16 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			onConnectSelect( new HashMap() );		
 		}
 
+	}
+	
+	
+	private void showView( String viewname ){
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+			.showView( viewname, null, IWorkbenchPage.VIEW_VISIBLE );
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -640,11 +636,6 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			
 			// Save the serverList
 			Activator.getDefault().saveServerList(serverList);
-			try {
-				MongoFactory.getInst().registerMongo(newProps);
-			} catch (UnknownHostException e) {
-				EventWorkBenchManager.getInst().onEvent(org.aw20.mongoworkbench.Event.EXCEPTION, e);
-			}
 		}
 	}
 
@@ -660,8 +651,28 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			onShowCollections( (ShowCollectionsMongoCommand)mcmd );
 		else if ( mcmd instanceof CreateDbsMongoCommand )
 			onShowDbs( (ShowDbsMongoCommand)mcmd );
+		else if ( mcmd instanceof UseMongoCommand )
+			onUseCommand( (UseMongoCommand)mcmd );
 	}
 	
+	private void onUseCommand(UseMongoCommand mcmd) {
+		final String db = mcmd.getDB();
+		final String name = mcmd.getName();
+		
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				TreeItem	serveritem	= findTreeItem( tree.getParentItem(), NodeType.SERVER, name);
+				if ( serveritem == null )
+					return;
+				
+				TreeItem	dbitem	= findTreeItem( serveritem, NodeType.DATABASE, db);
+				if ( dbitem != null )
+					tree.showItem(dbitem);
+			}
+		} );
+		
+	}
+
 	private TreeItem createDbTreeItem(TreeItem mongoItem, String dbName) {
 		TreeItem dbitem = new TreeItem(mongoItem, 0);
 		dbitem.setText(dbName);
@@ -692,6 +703,9 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 							createDbTreeItem(item, (String)dbList.get(i) );
 						}
 					}
+					
+					// Show the server item
+					tree.showItem( item );
 					
 				} catch (Exception e) {
 					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );

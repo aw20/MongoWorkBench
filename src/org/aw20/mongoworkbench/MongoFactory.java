@@ -34,12 +34,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.jumperz.app.MMonjaDB.eclipse.Activator;
+
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
-import org.aw20.util.StringUtil;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
@@ -86,22 +87,29 @@ public class MongoFactory extends Thread {
 	public void deregisterListener(MongoCommandListener listener){
 		mongoListeners.remove(listener);
 	}
-	
-	public void registerMongo( Map<String,Object> mongoDetails ) throws UnknownHostException{
-		String name	= (String)mongoDetails.get("name");
 		
-		MongoClient	mclient	= mongoMap.get(name);
-		if ( mclient != null )
-			mclient.close();
-		
-		mclient	= new MongoClient( (String)mongoDetails.get("host"), StringUtil.toInteger(mongoDetails.get("port"), 27017) );
-		mongoMap.put(name, mclient);
-	}
-	
 	public void removeMongo(String sName){
 		MongoClient	mclient	= mongoMap.remove(sName);
 		if ( mclient != null )
 			mclient.close();
+	}
+	
+	
+	public MongoClient getMongo(String sName) {
+		activeServer = sName;
+		
+		if ( mongoMap.containsKey(sName) )
+			return mongoMap.get(sName);
+		else{
+			try {
+				MongoClient mc	= Activator.getDefault().getMongoClient(sName);
+				mongoMap.put( sName, mc );
+				return mc;
+			} catch (UnknownHostException e) {
+				EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e);
+				return null;
+			}
+		}
 	}
 	
 	public void destroy(){
@@ -162,11 +170,6 @@ public class MongoFactory extends Thread {
 			commandQueue.add(mcmd);
 			commandQueue.notify();
 		}
-	}
-	
-	public MongoClient getMongo(String sName) {
-		activeServer = sName;
-		return mongoMap.get(sName);
 	}
 
 	public MongoClient getMongoActive() {

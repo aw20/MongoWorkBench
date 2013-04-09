@@ -70,6 +70,7 @@ public class TableManager implements Listener {
 	public void redraw(QueryData queryData) {
 		clear();
 
+		
 		this.queryData = queryData;
 
 		if ( queryData.size() == 0 )
@@ -97,6 +98,8 @@ public class TableManager implements Listener {
 		for (int i = 0; i < columns.length; ++i) {
 			table.getColumn(i).pack();
 		}
+		
+		new TableSorter(table);
 	}
 
 

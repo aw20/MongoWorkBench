@@ -55,6 +55,7 @@ public class MDBShowStatistics extends MAbstractView implements MongoCommandList
 		table.setLinesVisible(true);
 		tableManager	= new TableManager(table, false);
 		
+		
 		Composite composite_1 = new Composite(sashForm, SWT.NONE);
 		composite_1.setLayout(new GridLayout(1, false));
 

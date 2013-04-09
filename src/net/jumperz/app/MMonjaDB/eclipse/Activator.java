@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +52,7 @@ import net.jumperz.util.MStreamUtil;
 import net.jumperz.util.MSystemUtil;
 
 import org.aw20.util.FileUtil;
+import org.aw20.util.StringUtil;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.widgets.Shell;
@@ -61,6 +63,8 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.mongodb.MongoClient;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -220,7 +224,7 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 		}
 		return null;
 	}
-
+	
 	public List<Map> removeServerMap(String sName) {
 		List<Map> list = getServerList();
 		Iterator<Map>	it	= list.iterator();
@@ -232,5 +236,13 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 			}
 		}
 		return list;
+	}
+
+	public MongoClient getMongoClient(String sName) throws UnknownHostException{
+		Map<String, Object>	props	= getServerMap( sName );
+		if ( props == null )
+			return null;
+		
+		return new MongoClient( (String)props.get("host"), StringUtil.toInteger(props.get("port"), 27017) );
 	}
 }
