@@ -9,6 +9,16 @@ a.save = function(){
 	return this;
 };
 
+a.update = function(){
+	this.invoked.push('update');
+	this.updateArg	= [];
+	
+	for( var i = 0; i < arguments.length; ++i )	{
+		this.updateArg[i] = arguments[i];
+	}
+	return this;
+};
+
 a.find = function(){
 	this.invoked.push('find');
 	

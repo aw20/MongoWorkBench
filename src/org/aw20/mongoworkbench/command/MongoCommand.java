@@ -163,8 +163,7 @@ public abstract class MongoCommand extends Object {
 		this.cmd = cmd;
 	}
 
-	public void parseCommandStr() throws Exception {
-	}
+	public void parseCommandStr() throws Exception {}
 
 	public String getMatchIgnoreCase(String patternStr, String target) {
 		Pattern pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -180,8 +179,6 @@ public abstract class MongoCommand extends Object {
 		}
 	}
 	
-	
-	
 	protected BasicDBObject parseMongoCommandString(DB db, String cmd) throws IOException {
 		String newCmd = cmd.replaceFirst("db." + sColl, "a");
 
@@ -189,10 +186,11 @@ public abstract class MongoCommand extends Object {
 		jsStr = StringUtil.tokenReplace(jsStr, new String[]{"//_QUERY_"}, new String[]{newCmd} );
 
 		BasicDBObject cmdMap = (BasicDBObject)db.eval(jsStr, (Object[])null);
-		
+
 		// Remove the helper methods
 		cmdMap.remove("find");
 		cmdMap.remove("save");
+		cmdMap.remove("update");
 		cmdMap.remove("limit");
 		cmdMap.remove("skip");
 		cmdMap.remove("sort");

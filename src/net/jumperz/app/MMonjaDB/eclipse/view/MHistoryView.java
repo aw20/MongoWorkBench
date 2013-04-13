@@ -260,7 +260,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 			TableItem item = null;
 			for ( int x=0; x < table.getItemCount(); x++ ){
 				TableItem row = table.getItem(x);
-				if ( (Integer)row.getData() == mcmd.hashCode() ){
+				if ( row.getData() != null && (Integer)row.getData() == mcmd.hashCode() ){
 					item = row;
 					break;
 				}

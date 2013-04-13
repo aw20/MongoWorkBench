@@ -33,7 +33,6 @@ import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
-import org.aw20.mongoworkbench.command.SaveMongoCommand;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -169,9 +168,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 
 	@Override
 	public void onMongoCommandFinished(MongoCommand mcmd) {
-		if ( mcmd instanceof SaveMongoCommand ){
-			
-		}else	if ( mcmd instanceof FindMongoCommand ){
+		if ( mcmd.getClass().getName().equals( FindMongoCommand.class.getName() ) ){
 			onFindCommand( (FindMongoCommand)mcmd );			
 		}
 	}

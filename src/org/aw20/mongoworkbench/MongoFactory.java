@@ -40,6 +40,7 @@ import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
+import org.aw20.mongoworkbench.command.UpdateMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
 
 import com.mongodb.DB;
@@ -74,6 +75,7 @@ public class MongoFactory extends Thread {
 		// Register the Commands
 		commandMap.put("^db\\.[^\\(]+\\.find\\(.*", FindMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.save\\(.*", SaveMongoCommand.class);
+		commandMap.put("^db\\.[^\\(]+\\.update\\(.*", UpdateMongoCommand.class);
 		commandMap.put("^use\\s+.*", UseMongoCommand.class);
 
 		setName( "MongoFactory" );
