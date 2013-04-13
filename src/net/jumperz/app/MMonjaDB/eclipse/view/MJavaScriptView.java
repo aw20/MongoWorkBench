@@ -24,11 +24,6 @@
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
-import net.jumperz.app.MMonjaDBCore.MInputView;
-import net.jumperz.app.MMonjaDBCore.MOutputView;
-import net.jumperz.mongo.MMongoUtil;
-import net.jumperz.util.MSystemUtil;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -41,9 +36,7 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Text;
 
-import com.mongodb.BasicDBObject;
-
-public class MJavaScriptView extends MAbstractView implements MOutputView, MInputView {
+public class MJavaScriptView extends MAbstractView {
 	private Text text1, text2;
 	private Action executeAction;
 	private Action clearAction;
@@ -51,7 +44,6 @@ public class MJavaScriptView extends MAbstractView implements MOutputView, MInpu
 	private long initializedTime;
 
 	public MJavaScriptView() {
-		eventManager.register2(this);
 	}
 
 	public void init2() {
@@ -74,7 +66,7 @@ public class MJavaScriptView extends MAbstractView implements MOutputView, MInpu
 		});
 		text1.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				executeAction.setEnabled(dataManager.isConnected() && text1.getText().length() > 0);
+
 			}
 		});
 		FormData fd_text = new FormData();
@@ -113,43 +105,15 @@ public class MJavaScriptView extends MAbstractView implements MOutputView, MInpu
 		initAction(clearAction, "bullet_delete.png", null);
 		clearAction.setEnabled(true);
 
-		if (prop.containsKey(JAVASCRIPT_COMPOSITE_WEIGHT)) {
-
-			(new Thread() {
-				public void run() {
-					MSystemUtil.sleep(0);
-					shell.getDisplay().asyncExec(new Runnable() {
-						public void run() {// ----
-							sashForm.setWeights(prop.getIntArrayProperty(JAVASCRIPT_COMPOSITE_WEIGHT));
-						}
-					});// ----
-				}
-			}).start();
-
-		} else {
-			sashForm.setWeights(new int[] { 70, 30 });
-		}
 		initializedTime = System.currentTimeMillis();
 	}
 
 	private void onSashResize() {
 		if (System.currentTimeMillis() >= initializedTime + 3000) {
-			prop.setProperty(JAVASCRIPT_COMPOSITE_WEIGHT, sashForm.getWeights());
 		}
 	}
 
 	private void onExecute() {
-		Object o = dataManager.getDB().eval(text1.getText(), (Object[]) null);
-		if (o != null && o instanceof BasicDBObject) {
-			text2.setText(MMongoUtil.toJson(dataManager.getDB(), o));
-		} else {
-			text2.setText(o + "");
-		}
-	}
-
-	public void dispose() {
-		eventManager.removeObserver2(this);
-		super.dispose();
 	}
 
 	public void setFocus() {

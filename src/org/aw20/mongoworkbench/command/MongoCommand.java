@@ -25,20 +25,26 @@
 package org.aw20.mongoworkbench.command;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
 public abstract class MongoCommand extends Object {
-	
-	public static String	KEY_NAME 	= "_name";
-	public static String	KEY_COUNT	= "_count";
-	
-	protected	String sName = null, sDb = null, sColl = null, rteMessage = "", cmd = null;
+
+	public static String KEY_NAME = "_name";
+
+	public static String KEY_COUNT = "_count";
+
+	protected String sName = null, sDb = null, sColl = null, rteMessage = "", cmd = null;
+
 	protected Exception lastException = null;
+
 	protected boolean hasRun = false;
+
 	private long execTime = -1;
-	
+
 	/**
 	 * Sets the connection details to which this command pertains to
 	 * 
@@ -46,100 +52,100 @@ public abstract class MongoCommand extends Object {
 	 * @param database
 	 * @param collection
 	 */
-	public MongoCommand setConnection( String mongoName, String database, String collection ){
-		this.sName 	= mongoName;
-		this.sDb 		= database;
-		this.sColl 	= collection;
-		return this;
-	}
-		
-	public MongoCommand setConnection( String mongoName, String database ){
-		this.sName 	= mongoName;
-		this.sDb 		= database;
-		return this;
-	}
-		
-	public MongoCommand setConnection( String mongoName ){
-		this.sName 	= mongoName;
+	public MongoCommand setConnection(String mongoName, String database, String collection) {
+		this.sName = mongoName;
+		this.sDb = database;
+		this.sColl = collection;
 		return this;
 	}
 
-	public MongoCommand setConnection( MongoCommand mcmd ){
-		this.sName 	= mcmd.sName;
-		this.sDb 		= mcmd.sDb;
-		this.sColl 	= mcmd.sColl;
+	public MongoCommand setConnection(String mongoName, String database) {
+		this.sName = mongoName;
+		this.sDb = database;
 		return this;
 	}
-	
-	public boolean isSuccess(){
+
+	public MongoCommand setConnection(String mongoName) {
+		this.sName = mongoName;
+		return this;
+	}
+
+	public MongoCommand setConnection(MongoCommand mcmd) {
+		this.sName = mcmd.sName;
+		this.sDb = mcmd.sDb;
+		this.sColl = mcmd.sColl;
+		return this;
+	}
+
+	public boolean isSuccess() {
 		return lastException == null;
 	}
-	
-	public boolean hasRun(){
+
+	public boolean hasRun() {
 		return hasRun;
 	}
-	
-	public void markAsRun(){
+
+	public void markAsRun() {
 		hasRun = true;
 	}
-	
-	public Exception getException(){
+
+	public Exception getException() {
 		return lastException;
 	}
-	
-	public void setException(Exception e){
+
+	public void setException(Exception e) {
 		lastException = e;
 	}
-	
-	public String getExceptionMessage(){
-		if ( lastException == null ) return "";
-		
-		if ( lastException instanceof MongoException ){
+
+	public String getExceptionMessage() {
+		if (lastException == null)
+			return "";
+
+		if (lastException instanceof MongoException) {
 			String e = lastException.getMessage();
-			if ( e.startsWith("command failed [$eval]: {") && e.endsWith("}") ){
-				try{
-					Map m = (Map)JSON.parse( e.substring( e.indexOf("{") ) );
-					return (String)m.get("errmsg");
-				}catch(Exception ee){
+			if (e.startsWith("command failed [$eval]: {") && e.endsWith("}")) {
+				try {
+					Map m = (Map) JSON.parse(e.substring(e.indexOf("{")));
+					return (String) m.get("errmsg");
+				} catch (Exception ee) {
 					return lastException.getMessage();
 				}
 			}
 		}
-		
+
 		return lastException.getMessage();
 	}
-	
-	public long getExecTime(){
+
+	public long getExecTime() {
 		return execTime;
 	}
-	
 
 	protected void setMessage(String string) {
 		rteMessage = string;
 	}
-	
-	public String getMessage(){
+
+	public String getMessage() {
 		return rteMessage;
 	}
-	
-	public String getName(){
+
+	public String getName() {
 		return sName;
 	}
-	
-	public String getDB(){
+
+	public String getDB() {
 		return sDb;
 	}
-	
-	public String getCollection(){
+
+	public String getCollection() {
 		return sColl;
 	}
-	
+
 	/**
 	 * Override this function to provide the body of the command
 	 */
 	public abstract void execute() throws Exception;
-	
-	public String getCommandString(){
+
+	public String getCommandString() {
 		return this.cmd;
 	}
 
@@ -151,5 +157,20 @@ public abstract class MongoCommand extends Object {
 		this.cmd = cmd;
 	}
 
-	public void parseCommandStr() throws Exception {}
+	public void parseCommandStr() throws Exception {
+	}
+
+	public String getMatchIgnoreCase(String patternStr, String target) {
+		Pattern pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+		Matcher matcher = pattern.matcher(target);
+		if (matcher.find()) {
+			if (matcher.groupCount() > 0) {
+				return matcher.group(1);
+			} else {
+				return target.substring(matcher.start(), matcher.end());
+			}
+		} else {
+			return "";
+		}
+	}
 }

@@ -25,13 +25,11 @@
  */
 package net.jumperz.app.MMonjaDB.eclipse;
 
-import net.jumperz.app.MMonjaDBCore.MAbstractLogAgent;
-
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
-public class MPerspectiveFactory1 extends MAbstractLogAgent implements IPerspectiveFactory {
+public class MPerspectiveFactory1 implements IPerspectiveFactory {
 	
 	public void createInitialLayout(IPageLayout layout) {
 		String editorArea = layout.getEditorArea();
@@ -50,7 +48,7 @@ public class MPerspectiveFactory1 extends MAbstractLogAgent implements IPerspect
 
 		topleftFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MDBTree.class.getName());
 
-		topcenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MActionView.class.getName());
+		topcenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MCommandConsole.class.getName());
 		topcenterFolder.addView(net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView.class.getName());
 
 		bodyright.addView(net.jumperz.app.MMonjaDB.eclipse.view.MEditor.class.getName());
@@ -61,7 +59,7 @@ public class MPerspectiveFactory1 extends MAbstractLogAgent implements IPerspect
 
 		bottomleft.addView(net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView.class.getName());
 
-		bodyleft.addPlaceholder( net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.class.getName() + ":*" );
+		//bodyleft.addPlaceholder( net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView.class.getName() + ":*" );
 	
 	}
 }

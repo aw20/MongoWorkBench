@@ -27,14 +27,7 @@ package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
-import net.jumperz.app.MMonjaDBCore.MAbstractLogAgent;
 import net.jumperz.app.MMonjaDBCore.MConstants;
-import net.jumperz.app.MMonjaDBCore.MDataManager;
-import net.jumperz.app.MMonjaDBCore.MInputView;
-import net.jumperz.app.MMonjaDBCore.action.MActionManager;
-import net.jumperz.app.MMonjaDBCore.event.MEventManager;
-import net.jumperz.util.MLogServer;
-import net.jumperz.util.MProperties;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -52,25 +45,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.ViewPart;
 
-public abstract class MAbstractView extends ViewPart implements MConstants, Listener, MInputView {
+public abstract class MAbstractView extends ViewPart implements MConstants, Listener {
 	protected Shell shell;
-
-	protected MProperties prop = MDataManager.getInstance().getProp();
 
 	protected FormLayout formLayout;
 	protected static FormData buttonFormData1, buttonFormData2, buttonFormData3;
 	protected boolean initialized = false;
 	protected Composite parent;
-	protected MEventManager eventManager = MEventManager.getInstance();
-	protected MActionManager actionManager = MActionManager.getInstance();
-	protected MDataManager dataManager = MDataManager.getInstance();
 
 	protected MenuManager menuManager;
 	protected IMenuManager dropDownMenu;
 	protected IToolBarManager toolBar;
 	protected IActionBars actionBars;
-
-	private MAbstractLogAgent logAgent = new MAbstractLogAgent() {};
 
 	static {
 		buttonFormData1 = new FormData(BUTTON_WIDTH, BUTTON_HEIGHT);
@@ -88,7 +74,6 @@ public abstract class MAbstractView extends ViewPart implements MConstants, List
 
 	
 	public void executeAction(String actionStr) {
-		actionManager.executeAction(actionStr, this);
 	}
 
 	
@@ -102,22 +87,18 @@ public abstract class MAbstractView extends ViewPart implements MConstants, List
 
 	
 	public void log(int logLevel, Object message) {
-		logAgent.log(logLevel, message);
 	}
 
 	
 	public void info(Object message) {
-		log(MLogServer.log_info, message);
 	}
 
 	
 	public void warn(Object message) {
-		log(MLogServer.log_warn, message);
 	}
 
 	
 	public void debug(Object message) {
-		log(MLogServer.log_debug, message);
 	}
 
 	

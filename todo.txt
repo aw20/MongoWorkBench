@@ -21,3 +21,7 @@ Javascript
 
 
 DocumentEditor
+
+
+DocumentView
+- Update the tab with the document count

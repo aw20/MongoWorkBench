@@ -1,14 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: MongoWorkBench
-Bundle-SymbolicName: net.jumperz.app.MMonjaDB;singleton:=true
+Bundle-SymbolicName: org.aw20.MongoWorkBench;singleton:=true
 Bundle-Version: 0.9.0
 Bundle-Activator: net.jumperz.app.MMonjaDB.eclipse.Activator
 Bundle-Vendor: aw2.0
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ui.console
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: bin/,
  lib/jsch-0.1.46.jar,
@@ -31,3 +30,4 @@ Export-Package: com.jcraft.jsch,
  org.bson.util,
  org.bson.util.annotations,
  swing2swt.layout
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -99,8 +99,8 @@ public interface MConstants {
 
 	public static final int sort_order_desc = -1;
 
-	public static final int default_batch_size = 200;
-	public static final int default_max_results = 200;
+	public static final int default_batch_size = 50;
+	public static final int default_max_results = 50;
 
 	public static final int default_ssh_port = 22;
 

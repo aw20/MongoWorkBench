@@ -36,8 +36,6 @@ public class MPrefManager implements IPropertyChangeListener, MConstants {
 
 	private IPreferenceStore pref;
 
-	private MDataManager dataManager = MDataManager.getInstance();
-
 	public static MPrefManager getInstance() {
 		return instance;
 	}
@@ -49,7 +47,6 @@ public class MPrefManager implements IPropertyChangeListener, MConstants {
 	}
 
 	public void applyPref() {
-		dataManager.setMaxFindResults(pref.getInt(PREF_MAX_FIND_RESULTS));
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {

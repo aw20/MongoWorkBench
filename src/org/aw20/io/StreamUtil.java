@@ -38,8 +38,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URL;
 
 public class StreamUtil extends Object {
+	
+	public static InputStream getResourceStream(String resource, ClassLoader classLoader) throws IOException {
+		URL url = classLoader.getResource(resource);
+		return url.openStream();
+	}
+
+	public static InputStream getResourceStream(String resource) throws IOException {
+		return getResourceStream(resource, StreamUtil.class.getClassLoader());
+	}
 	
 	/**
 	 * Convienace method for loading the resource in the class path to a string

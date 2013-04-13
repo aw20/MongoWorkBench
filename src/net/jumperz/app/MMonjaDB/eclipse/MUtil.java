@@ -27,9 +27,7 @@ package net.jumperz.app.MMonjaDB.eclipse;
 
 import java.io.InputStream;
 
-import net.jumperz.app.MMonjaDBCore.event.MEventManager;
-import net.jumperz.util.MStreamUtil;
-
+import org.aw20.io.StreamUtil;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -41,14 +39,13 @@ public class MUtil {
 	public static Image getImage(Device device, String imageFileName) {
 		InputStream in = null;
 		try {
-			in = MStreamUtil.getResourceStream("net/jumperz/app/MMonjaDB/eclipse/resources/" + imageFileName);
+			in = StreamUtil.getResourceStream("net/jumperz/app/MMonjaDB/eclipse/resources/" + imageFileName);
 			ImageData imageData = new ImageData(in);
 			return new Image(device, imageData);
 		} catch (Exception e) {
-			MEventManager.getInstance().fireErrorEvent(e);
 			return null;
 		} finally {
-			MStreamUtil.closeStream(in);
+			StreamUtil.closeStream(in);
 		}
 	}
 

@@ -23,8 +23,6 @@ package net.jumperz.gui;
 
 import java.util.Arrays;
 
-import net.jumperz.util.MProperties;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -55,86 +53,6 @@ public class MSwtUtil {
 		}
 	}
 
-	
-	public static void setTreeColumnWidthToProperties(String prefix, Tree tree, MProperties prop) {
-		TreeColumn[] columns = tree.getColumns();
-		for (int i = 0; i < columns.length - 1; ++i) {
-			prop.setProperty(prefix + ".treeColumnWidth" + Integer.toString(i), columns[i].getWidth());
-		}
-	}
-
-	
-	public static void getTreeColumnWidthFromProperties(String prefix, Tree tree, MProperties prop, int[] defaultWidth) {
-		TreeColumn[] columns = tree.getColumns();
-		if (columns.length > defaultWidth.length) {
-			getTreeColumnWidthFromProperties(prefix, tree, prop, 20);
-		} else {
-			for (int i = 0; i < columns.length; ++i) {
-				columns[i].setWidth(prop.getIntProperty(prefix + ".treeColumnWidth" + Integer.toString(i), defaultWidth[i]));
-			}
-		}
-	}
-
-	
-	public static void getTreeColumnWidthFromProperties(String prefix, Tree tree, MProperties prop, int defaultWidth) {
-		try {
-			TreeColumn[] columns = tree.getColumns();
-			for (int i = 0; i < columns.length; ++i) {
-				columns[i].setWidth(prop.getIntProperty(prefix + ".treeColumnWidth" + Integer.toString(i), defaultWidth));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	
-	public static void setTableColumnWidthToProperties(String prefix, Table table, MProperties prop) {
-		TableColumn[] columns = table.getColumns();
-		for (int i = 0; i < columns.length - 1; ++i) {
-			prop.setProperty(prefix + ".columnWidth" + Integer.toString(i), columns[i].getWidth());
-		}
-	}
-
-	
-	public static void getTableColumnWidthFromProperties2(String prefix, Table table, MProperties prop) {
-		TableColumn[] columns = table.getColumns();
-		if (columns.length > 0) {
-			getTableColumnWidthFromProperties(prefix, table, prop, table.getBounds().width / columns.length);
-		} else {
-			getTableColumnWidthFromProperties(prefix, table, prop, 20);
-		}
-	}
-
-	
-	public static void getTableColumnWidthFromProperties(String prefix, Table table, MProperties prop) {
-		getTableColumnWidthFromProperties(prefix, table, prop, 20);
-	}
-
-	
-	public static void getTableColumnWidthFromProperties(String prefix, Table table, MProperties prop, int[] defaultWidth) {
-		TableColumn[] columns = table.getColumns();
-		if (columns.length > defaultWidth.length) {
-			getTableColumnWidthFromProperties(prefix, table, prop, 20);
-		} else {
-			for (int i = 0; i < columns.length; ++i) {
-				columns[i].setWidth(prop.getIntProperty(prefix + ".columnWidth" + Integer.toString(i), defaultWidth[i]));
-			}
-		}
-	}
-
-	
-	public static void getTableColumnWidthFromProperties(String prefix, Table table, MProperties prop, int defaultWidth) {
-		try {
-			TableColumn[] columns = table.getColumns();
-			for (int i = 0; i < columns.length; ++i) {
-				columns[i].setWidth(prop.getIntProperty(prefix + ".columnWidth" + Integer.toString(i), defaultWidth));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	
 	public static void addListenerToTreeColumns2(Tree tree, Listener listener) {
 		TreeColumn[] columns = tree.getColumns();
 		for (int i = 0; i < columns.length; ++i) {

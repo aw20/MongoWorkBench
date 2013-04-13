@@ -19,9 +19,9 @@
       <view
             allowMultiple="false"
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MActionView"
+            class="net.jumperz.app.MMonjaDB.eclipse.view.MCommandConsole"
             icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MActionView"
+            id="net.jumperz.app.MMonjaDB.eclipse.view.MCommandConsole"
             name="Cmd Console"
             restorable="true">
       </view>

@@ -24,8 +24,6 @@
  */
 package org.aw20.mongoworkbench.command;
 
-import net.jumperz.util.MRegEx;
-
 import org.aw20.mongoworkbench.MongoFactory;
 
 public class UseMongoCommand extends MongoCommand {
@@ -37,7 +35,7 @@ public class UseMongoCommand extends MongoCommand {
 		if ( sName == null )
 			throw new Exception("no server selected");
 		
-		dbName = MRegEx.getMatchIgnoreCase("^use\\s+(.*)$", cmd);
+		dbName = getMatchIgnoreCase("^use\\s+(.*)$", cmd);
 		if ( dbName == null )
 			throw new Exception( "failed to retrieve database name" );
 

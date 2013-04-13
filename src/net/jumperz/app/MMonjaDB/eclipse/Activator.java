@@ -30,7 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -38,29 +37,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.jumperz.app.MMonjaDB.eclipse.action.MSshConnectAction;
 import net.jumperz.app.MMonjaDB.eclipse.pref.MPrefManager;
-import net.jumperz.app.MMonjaDBCore.MAbstractLogAgent;
 import net.jumperz.app.MMonjaDBCore.MConstants;
-import net.jumperz.app.MMonjaDBCore.MDataManager;
-import net.jumperz.app.MMonjaDBCore.MStdoutView;
-import net.jumperz.app.MMonjaDBCore.action.MActionManager;
-import net.jumperz.app.MMonjaDBCore.event.MEventManager;
-import net.jumperz.util.MLogServer;
-import net.jumperz.util.MProperties;
-import net.jumperz.util.MStreamUtil;
-import net.jumperz.util.MSystemUtil;
 
+import org.aw20.io.StreamUtil;
 import org.aw20.util.FileUtil;
 import org.aw20.util.StringUtil;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -76,9 +64,6 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 	private File configFile, commandFile, serverListFile;
 	private volatile Shell shell;
 
-	public Activator() {
-	}
-
 	public synchronized void setShell(Shell s) {
 		if (shell == null) {
 			shell = s;
@@ -86,45 +71,26 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 		}
 	}
 
+	public void showView( String viewname ){
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+			.showView( viewname, null, IWorkbenchPage.VIEW_VISIBLE );
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public Shell getShell() {
 		return shell;
 	}
 
-	private MessageConsole findConsole(String name) {
-		ConsolePlugin plugin = ConsolePlugin.getDefault();
-		IConsoleManager conMan = plugin.getConsoleManager();
-		IConsole[] existing = conMan.getConsoles();
-		for (int i = 0; i < existing.length; i++)
-			if (name.equals(existing[i].getName()))
-				return (MessageConsole) existing[i];
-		
-		// no console found, so create a new ones
-		MessageConsole myConsole = new MessageConsole(name, null);
-		conMan.addConsoles(new IConsole[] { myConsole });
-		return myConsole;
-	}
-
-	private void setupConsole() {
-		MessageConsole mc = findConsole(CONSOLE_NAME);
-		MessageConsoleStream out = mc.newMessageStream();
-		PrintStream ps = new PrintStream(out);
-		MAbstractLogAgent.enabled = true;
-		MLogServer.getInstance().setSimpleOut(ps);
-	}
-
+	
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
 
-		setupConsole();
 		loadConfig();
 		MPrefManager.getInstance().init();
-
-		MLogServer.getInstance().addIgnoredClassName("MAbstractView");
-		MEventManager.getInstance().register2(MDataManager.getInstance());
-		MEventManager.getInstance().register2(new MStdoutView());
-		MEventManager.getInstance().register2(new MAuthManager());
-		MActionManager.getInstance().addAction("^mj connect ssh.*", MSshConnectAction.class);
 	}
 
 	public void loadConfig() throws IOException {
@@ -133,7 +99,7 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 			URL configURL = location.getURL();
 			if (configURL != null && configURL.getProtocol().startsWith("file")) {
 				File platformDir = new File(configURL.getFile(), Activator.PLUGIN_ID);
-				MSystemUtil.createDir(platformDir.getAbsolutePath());
+				createDir(platformDir.getAbsolutePath());
 				String configFileName = platformDir.getAbsolutePath() + "/" + DEFAULT_CONFIG_FILE_NAME;
 				
 				commandFile	= new File( platformDir.getAbsolutePath(), "command.txt" );
@@ -147,7 +113,6 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 	}
 
 	private void loadConfig(String configFileName) throws IOException {
-		MProperties prop = new MProperties();
 		configFile = new File(configFileName);
 		InputStream in = null;
 		
@@ -156,22 +121,20 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 			if (configFile.exists() && configFile.isFile()) {
 				in = new FileInputStream(configFile);
 			} else {
-				in = MStreamUtil.getResourceStream("net/jumperz/app/MMonjaDB/eclipse/resources/" + DEFAULT_CONFIG_FILE_NAME);
+				in = StreamUtil.getResourceStream("net/jumperz/app/MMonjaDB/eclipse/resources/" + DEFAULT_CONFIG_FILE_NAME);
 			}
-			prop.load(in);
 		
 		}finally{
 			if ( in != null )
 				in.close();
 		}
-
-		MDataManager.getInstance().setProp(prop);
+		
 	}
 
 	public void saveConfig() throws IOException {
 		OutputStream out = new FileOutputStream(configFile);
 		try {
-			MDataManager.getInstance().getProp().store(out);
+
 		} finally {
 			out.close();
 		}
@@ -187,19 +150,21 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 		return plugin;
 	}
 
-	public void saveWorkBench(String text) {
+	public void saveWorkBench(int type, String text) {
 		try {
-			FileUtil.writeToFile(commandFile, text);
+			File cmdFile = new File( commandFile.getParent(), type + commandFile.getName() );
+			FileUtil.writeToFile(cmdFile, text);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public String getWorkBench() {
+	public String getWorkBench(int type) {
 		try {
-			return FileUtil.readToString(commandFile);
+			File cmdFile = new File( commandFile.getParent(), type + commandFile.getName() );
+			return FileUtil.readToString(cmdFile);
 		} catch (IOException e) {
-			return null;
+			return "";
 		}
 	}
 
@@ -244,5 +209,25 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 			return null;
 		
 		return new MongoClient( (String)props.get("host"), StringUtil.toInteger(props.get("port"), 27017) );
+	}
+	
+	
+	private String createDir(String dirName) throws IOException {
+		File dir = new File(dirName);
+		if (dir.exists()) {
+			if (!dir.isDirectory()) {
+				throw new IOException("Couldn't make directory: " + dir.getCanonicalPath());
+			}
+		} else {
+			if (!dir.mkdirs()) {
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {}
+				if (!dir.isDirectory()) {
+					throw new IOException("Couldn't make directory: " + dir.getCanonicalPath());
+				}
+			}
+		}
+		return dir.getCanonicalPath();
 	}
 }

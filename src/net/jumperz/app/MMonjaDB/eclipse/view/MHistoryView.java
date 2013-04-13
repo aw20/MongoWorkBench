@@ -27,8 +27,6 @@
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
-import net.jumperz.app.MMonjaDBCore.action.MAction;
-import net.jumperz.app.MMonjaDBCore.action.MActionManager;
 import net.jumperz.gui.MSwtUtil;
 
 import org.aw20.mongoworkbench.EventWorkBenchListener;
@@ -202,13 +200,9 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 		if ( s < 0 )
 			return;
 		
-		TableItem	row	= table.getItem(s);
-		String action = row.getText(COLUMN_ACTION);
+		//TableItem	row	= table.getItem(s);
+		//String action = row.getText(COLUMN_ACTION);
 		
-		MAction maction = MActionManager.getInstance().getAction(action);
-		if ( maction != null ){
-			MActionManager.getInstance().submitForExecution(maction, this);
-		}
 	}
 	
 	
@@ -260,7 +254,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 			TableItem item = null;
 			for ( int x=0; x < table.getItemCount(); x++ ){
 				TableItem row = table.getItem(x);
-				if ( (int)row.getData() == mcmd.hashCode() ){
+				if ( (Integer)row.getData() == mcmd.hashCode() ){
 					item = row;
 					break;
 				}

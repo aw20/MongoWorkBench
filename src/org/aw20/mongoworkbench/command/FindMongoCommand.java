@@ -29,7 +29,6 @@ import java.util.List;
 
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDBCore.MConstants;
-import net.jumperz.util.MRegEx;
 
 import org.aw20.io.StreamUtil;
 import org.aw20.mongoworkbench.MongoFactory;
@@ -183,6 +182,6 @@ public class FindMongoCommand extends MongoCommand {
 	 * @return
 	 */
 	protected String getCollNameFromAction(String actionStr, String actionName) {
-		return MRegEx.getMatchIgnoreCase("^db\\.([^\\(]+)\\." + actionName + "\\(", actionStr);
+		return getMatchIgnoreCase("^db\\.([^\\(]+)\\." + actionName + "\\(", actionStr);
 	}
 }

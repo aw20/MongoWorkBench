@@ -29,7 +29,6 @@ import net.jumperz.app.MMonjaDB.eclipse.*;
 public class PreferenceInitializer extends AbstractPreferenceInitializer implements MConstants {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		// store.setDefault( BATCH_SIZE, default_batch_size );
 		store.setDefault(PREF_MAX_FIND_RESULTS, default_max_results);
 	}
 

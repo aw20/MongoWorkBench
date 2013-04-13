@@ -67,9 +67,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
 public class MDBTree extends MAbstractView implements MongoCommandListener {
 	private Tree tree;
@@ -132,7 +129,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 			} else if ( nodeType == NodeType.COLLECTION ){
 
-				showView("net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView");
+				Activator.getDefault().showView("net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView");
 				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
 				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
 				String sColl	= selectedItem.getText();
@@ -452,7 +449,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			
 		}else if ( type == ACTION_SERVER_STATS ){
 			
-			showView("net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics");
+			Activator.getDefault().showView("net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics");
 			TreeItem	selectedItem	= tree.getSelection()[0];
 			String sName	= selectedItem.getText();
 			MongoFactory.getInst().submitExecution( new DBStatsMongoCommand().setConnection(sName) );
@@ -476,7 +473,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		
 		}else if ( type == ACTION_COLLECTION_STATS ){
 
-			showView("net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus");
+			Activator.getDefault().showView("net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus");
 			
 			TreeItem	selectedItem	= tree.getSelection()[0];
 			String sName	= selectedItem.getParentItem().getText();
@@ -551,16 +548,6 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 	}
 	
 	
-	private void showView( String viewname ){
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-			.showView( viewname, null, IWorkbenchPage.VIEW_VISIBLE );
-		} catch (PartInitException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
 	/**
 	 * The refresh has been called
 	 */
@@ -603,7 +590,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		ServerDialog	serverDialog	= new ServerDialog(parent.getShell());
 		
 		Object result = serverDialog.open(serverProps);
-		if ( (result instanceof Boolean) && (boolean)result ){
+		if ( (result instanceof Boolean) && (Boolean)result ){
 			final Map	newProps	= serverDialog.getAttributes();
 			
 			// Run around to see if this is a new one
