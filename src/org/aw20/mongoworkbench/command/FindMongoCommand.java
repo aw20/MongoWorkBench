@@ -24,13 +24,11 @@
  */
 package org.aw20.mongoworkbench.command;
 
-import java.io.IOException;
 import java.util.List;
 
 import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDBCore.MConstants;
 
-import org.aw20.io.StreamUtil;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.util.StringUtil;
 
@@ -59,12 +57,7 @@ public class FindMongoCommand extends MongoCommand {
 		MongoFactory.getInst().setActiveDB(sDb);
 
 		DB db	= mdb.getDB(sDb);
-		try {
-			parseFindQuery(db);
-		} catch (IOException e) {
-			setException(e);
-			return;
-		}
+		cmdMap = parseMongoCommandString(db, cmd);
 		
 		DBCollection	collection	= db.getCollection(sColl);
 		
@@ -138,19 +131,6 @@ public class FindMongoCommand extends MongoCommand {
 		
 		if ( sColl == null || sColl.length() == 0 )
 			throw new Exception("failed to determine collection from command");
-	}
-	
-	protected void parseFindQuery(DB db) throws IOException {
-		String newCmd = cmd.replaceFirst("db." + sColl, "a");
-
-		String jsStr = StreamUtil.readToString( this.getClass().getResourceAsStream("parseFindQuery.txt") ); 
-		jsStr = StringUtil.tokenReplace(jsStr, new String[]{"//_QUERY_"}, new String[]{newCmd} );
-		
-		cmdMap = (BasicDBObject)db.eval(jsStr, (Object[])null);
-		cmdMap.remove("find");
-		cmdMap.remove("limit");
-		cmdMap.remove("skip");
-		cmdMap.remove("sort");
 	}
 
 	public int getExecutedLimit(){

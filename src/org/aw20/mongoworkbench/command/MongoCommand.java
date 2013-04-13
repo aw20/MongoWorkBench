@@ -24,10 +24,16 @@
  */
 package org.aw20.mongoworkbench.command;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.aw20.io.StreamUtil;
+import org.aw20.util.StringUtil;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
@@ -173,4 +179,26 @@ public abstract class MongoCommand extends Object {
 			return "";
 		}
 	}
+	
+	
+	
+	protected BasicDBObject parseMongoCommandString(DB db, String cmd) throws IOException {
+		String newCmd = cmd.replaceFirst("db." + sColl, "a");
+
+		String jsStr = StreamUtil.readToString( this.getClass().getResourceAsStream("parseCommand.txt") ); 
+		jsStr = StringUtil.tokenReplace(jsStr, new String[]{"//_QUERY_"}, new String[]{newCmd} );
+
+		BasicDBObject cmdMap = (BasicDBObject)db.eval(jsStr, (Object[])null);
+		
+		// Remove the helper methods
+		cmdMap.remove("find");
+		cmdMap.remove("save");
+		cmdMap.remove("limit");
+		cmdMap.remove("skip");
+		cmdMap.remove("sort");
+
+		return cmdMap;
+	}
+
+	
 }

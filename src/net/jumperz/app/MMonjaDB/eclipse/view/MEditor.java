@@ -52,8 +52,13 @@ import com.mongodb.DB;
 
 public class MEditor extends MAbstractView implements EventWorkBenchListener {
 	private Text textJSON;
+	
 	private Tree tree;
 	private TreeRender treeRender;
+	
+	private Tree	wrTree;
+	private TreeRender	wrTreeRender;
+	
 	private Button btnNewButton;
 	private Map activeDocumentMap;
 	private Button btnNewButton_1;
@@ -90,6 +95,12 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		textJSON.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
 		tbtmJSONItem.setControl(textJSON);
 
+		tbtmTreeItem = new TabItem(tabFolder, SWT.NONE);
+		tbtmTreeItem.setText("WriteResult");
+		wrTree = new Tree(tabFolder, SWT.BORDER | SWT.FULL_SELECTION);
+		tbtmTreeItem.setControl(wrTree);
+		wrTreeRender = new TreeRender(parent.getDisplay(), wrTree);
+		
 		btnNewButton_1 = new Button(parent, SWT.NONE);
 		btnNewButton_1.setText("delete document");
 		btnNewButton_1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
@@ -124,13 +135,24 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 				break;
 			}
 			case ELEMENT_VIEW: {
-
+				break;
+			}
+			case WRITERESULT: {
+				shell.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						writeResult((Map) data);
+					}
+				});
 				break;
 			}
 			default:
 				break;
 		}
 
+	}
+
+	protected void writeResult(Map data) {
+		wrTreeRender.render(data);
 	}
 
 	private void onDelete() {

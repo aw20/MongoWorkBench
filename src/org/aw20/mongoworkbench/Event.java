@@ -31,6 +31,8 @@ public enum Event {
 	DOCUMENT_VIEW,
 	ELEMENT_VIEW,
 	
+	WRITERESULT,
+	
 	EXCEPTION
 	
 }

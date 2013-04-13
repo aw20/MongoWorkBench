@@ -22,14 +22,25 @@
  *  https://github.com/aw20/MongoWorkBench
  *  Original fork: https://github.com/Kanatoko/MonjaDB
  *  
- *  March 2013
+ *  April 2013
  */
 package org.aw20.mongoworkbench.command;
 
+import java.util.Date;
+import java.util.Map;
+
+import org.aw20.mongoworkbench.Event;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoFactory;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
+import com.mongodb.util.JSON;
 
 
 public class SaveMongoCommand extends FindMongoCommand {
@@ -47,13 +58,30 @@ public class SaveMongoCommand extends FindMongoCommand {
 		MongoFactory.getInst().setActiveDB(sDb);
 		
 		DB db	= mdb.getDB(sDb);
-		try {
-			db.eval(cmd, (Object[]) null);
-		} catch (Exception e){
-			setException(e);
-		}
+		BasicDBObject cmdMap	= parseMongoCommandString(db, cmd);
 		
-		setMessage( "document saved" );
+		if ( !cmdMap.containsField("saveArg") )
+			throw new Exception("no save document");
+		
+		DBObject	document				= (DBObject)cmdMap.get("saveArg");
+		DBCollection	collection	= db.getCollection(sColl);
+		
+		// Run the command
+		db.requestStart();
+		WriteResult writeresult;
+		try{
+			writeresult = collection.save(document, WriteConcern.JOURNAL_SAFE);
+		}finally{
+			db.requestDone();
+		}
+
+		// Get the result
+		Map mwriteresult	= (Map)JSON.parse( writeresult.toString() );
+		mwriteresult.put("exeDate", new Date() );
+		
+		EventWorkBenchManager.getInst().onEvent( Event.WRITERESULT, mwriteresult );
+		
+		setMessage( "Saved: updatedExisting=" + mwriteresult.get("updatedExisting") + "; documentsUpdated=" + mwriteresult.get("n") );
 	}
 	
 	@Override
@@ -63,6 +91,4 @@ public class SaveMongoCommand extends FindMongoCommand {
 		if ( sColl == null || sColl.length() == 0 )
 			throw new Exception("failed to determine collection from command");
 	}
-
-	
 }

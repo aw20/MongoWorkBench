@@ -26,6 +26,7 @@
  */
 package net.jumperz.app.MMonjaDB.eclipse.view;
 
+import net.jumperz.app.MMonjaDB.eclipse.Activator;
 import net.jumperz.app.MMonjaDB.eclipse.MUtil;
 import net.jumperz.gui.MSwtUtil;
 
@@ -33,6 +34,7 @@ import org.aw20.mongoworkbench.EventWorkBenchListener;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.util.DateUtil;
 import org.eclipse.jface.action.Action;
@@ -149,7 +151,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 			}
 		};
 		redoAction.setToolTipText("Redo Selected Command");
-		redoAction.setText("Redo\tShift+Enter");
+		redoAction.setText("ReRun Command\tShift+Enter");
 		initAction(redoAction, "table_go.png", menuManager);
 		redoAction.setEnabled(false);
 
@@ -163,7 +165,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 			}
 		};
 		copyAction.setToolTipText("Copy Command to Clipboard");
-		copyAction.setText("Copy");
+		copyAction.setText("Copy Command");
 		setActionImage(copyAction, "page_copy.png");
 		addActionToToolBar(copyAction);
 		copyAction.setEnabled(false);
@@ -174,24 +176,12 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 
 
 	private void copyActionToClipboard() {
-		// 
 		int s = table.getSelectionIndex();
 		if ( s < 0 )
 			return;
 		
 		TableItem	row	= table.getItem(s);
-		
-		StringBuffer buf = new StringBuffer(256)
-			.append( row.getText(COLUMN_ACTION) )
-			.append( "\r\n" )
-			.append( row.getText(COLUMN_MESSAGE) )
-			.append( "\r\nTime " )
-			.append( row.getText(COLUMN_TIME) )
-			.append( "; " )
-			.append( row.getText(COLUMN_MS) )
-			;
-
-		MSwtUtil.copyToClipboard(buf.toString());
+		MSwtUtil.copyToClipboard( row.getText(COLUMN_ACTION) );
 	}
 
 
@@ -200,9 +190,25 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 		if ( s < 0 )
 			return;
 		
-		//TableItem	row	= table.getItem(s);
-		//String action = row.getText(COLUMN_ACTION);
-		
+		TableItem	row		= table.getItem(s);
+		String cmdText 	= row.getText(COLUMN_ACTION);
+		try {
+
+			MongoCommand cmd = MongoFactory.getInst().createCommand(cmdText);
+			if (cmd != null) {
+				cmd.setConnection(MongoFactory.getInst().getActiveServer(), MongoFactory.getInst().getActiveDB());
+				MongoFactory.getInst().submitExecution(cmd);
+				
+				if ( cmd instanceof FindMongoCommand ){
+					Activator.getDefault().showView("net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView");		
+				}
+
+			} else
+				throw new Exception("command not found");
+
+		} catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent(org.aw20.mongoworkbench.Event.EXCEPTION, e);
+		}
 	}
 	
 	
