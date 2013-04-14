@@ -10,69 +10,78 @@
       <view
             allowMultiple="false"
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MDBTree"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_gear.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MDBTree"
+            class="org.aw20.mongoworkbench.eclipse.view.MDBTree"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/database_gear.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MDBTree"
             name="DB Tree"
             restorable="true">
       </view>
       <view
             allowMultiple="false"
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MCommandConsole"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MCommandConsole"
+            class="org.aw20.mongoworkbench.eclipse.view.MCommandConsole"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MCommandConsole"
             name="Cmd Console"
             restorable="true">
       </view>
       <view
             allowMultiple="false"
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/cog_start.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MHistoryView"
+            class="org.aw20.mongoworkbench.eclipse.view.MCommandWizardView"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MCommandWizardView"
+            name="Cmd Wizards"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="MongoWorkBench.category1"
+            class="org.aw20.mongoworkbench.eclipse.view.MHistoryView"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MHistoryView"
             name="Cmd History"
             restorable="true">
       </view>
       <view
             allowMultiple="false"
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MDBShowStatistics"
+            class="org.aw20.mongoworkbench.eclipse.view.MDBShowStatistics"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/database.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MDBShowStatistics"
             name="Server Statistics"
             restorable="true">
       </view>
       <view
             allowMultiple="false"
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_multiple.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MCollectionShowStatus"
+            class="org.aw20.mongoworkbench.eclipse.view.MCollectionShowStatus"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/table_multiple.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MCollectionShowStatus"
             name="Collection List"
             restorable="true">
       </view>
       <view
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MDocumentView"
+            class="org.aw20.mongoworkbench.eclipse.view.MDocumentView"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/table.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MDocumentView"
             name="Query Output"
             restorable="true">
       </view>
       <view
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_go.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MJavaScriptView"
+            class="org.aw20.mongoworkbench.eclipse.view.MJavaScriptView"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/database_go.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MJavaScriptView"
             name="JavaScript"
             restorable="true">
       </view>
      <view
             category="MongoWorkBench.category1"
-            class="net.jumperz.app.MMonjaDB.eclipse.view.MEditor"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/table_edit.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.view.MEditor"
+            class="org.aw20.mongoworkbench.eclipse.view.MEditor"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/table_edit.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MEditor"
             name="Editor"
             restorable="true">
       </view>
@@ -80,14 +89,14 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="net.jumperz.app.MMonjaDB.eclipse.pref.PreferenceInitializer">
+            class="org.aw20.mongoworkbench.eclipse.pref.PreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="net.jumperz.app.MMonjaDB.eclipse.pref.MPrefPage"
-            id="net.jumperz.app.MMonjaDB.eclipse.pref.MPrefPage"
+            class="org.aw20.mongoworkbench.eclipse.pref.MPrefPage"
+            id="org.aw20.mongoworkbench.eclipse.pref.MPrefPage"
             name="MongoWorkBench">
       </page>
    </extension>
@@ -99,7 +108,7 @@
       </category>
       <command
             categoryId="MongoWorkBench.TopMenu"
-            defaultHandler="net.jumperz.app.MMonjaDB.eclipse.handler.MActivationHandler"
+            defaultHandler="org.aw20.mongoworkbench.eclipse.handler.MActivationHandler"
             id="MongoWorkBench.activateCommand"
             name="Open MongoWorkBench Perspective">
       </command>
@@ -121,9 +130,9 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="net.jumperz.app.MMonjaDB.eclipse.MPerspectiveFactory1"
-            icon="src/net/jumperz/app/MMonjaDB/eclipse/resources/database_gear.png"
-            id="net.jumperz.app.MMonjaDB.eclipse.MPerspectiveFactory1"
+            class="org.aw20.mongoworkbench.eclipse.MPerspectiveFactory1"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/database_gear.png"
+            id="org.aw20.mongoworkbench.eclipse.MPerspectiveFactory1"
             name="MongoWorkbench">
       </perspective>
    </extension>

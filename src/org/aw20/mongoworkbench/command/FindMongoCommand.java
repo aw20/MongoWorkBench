@@ -26,10 +26,10 @@ package org.aw20.mongoworkbench.command;
 
 import java.util.List;
 
-import net.jumperz.app.MMonjaDB.eclipse.Activator;
-import net.jumperz.app.MMonjaDBCore.MConstants;
 
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.eclipse.Activator;
+import org.aw20.mongoworkbench.eclipse.MConstants;
 import org.aw20.util.StringUtil;
 
 import com.mongodb.BasicDBObject;

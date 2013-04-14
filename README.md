@@ -1,18 +1,23 @@
-MongoWorkbench
+MongoWorkBench
 =======
 
-A powerful GPL Eclipse plugin MySQL/SQLServer Workbench style client tool for interacting with MongoDB.  Based and forked from the popular MonjaDB Eclipse plugin.
+A powerful GPL3.0 Eclipse plugin MySQL/SQLServer Workbench style client tool for interacting with the popular NoSQL MongoDB (http://mongodb.org).  
 
-Upcoming features
+Installation
 
-* MongoDB -2- MongoDB collection copying
-* Map/Reduce IDE
+To follow
 
+Features
 
-Additions Completed
+* Interact with multiple Mongo Servers at once
+* Advanced document browser/viewer
+* Command Console window - "select'n'run" queries
+* Advanced Wizards for: Aggregation, Map/Reduce, Group and Updates
+* JSON viewer for documents
+* Command History to quickly repeat commands
+* Database and Collection statistics
 
-* Default layout changed 
-* Cmd History shows; time, status icon, action, message and execution time
-* Cmd History auto column resize on Eclipse
-* Manage Multiple MongoDB connections
-* Advanced query editor - select'n'execute
+Project History
+
+This project was originally forked from the MonjaDB Eclipse plugin (https://github.com/Kanatoko/MonjaDB) which is released under GPL.
+MongoWorkBench has since undergone a major rewrite taking the project in a different direction.

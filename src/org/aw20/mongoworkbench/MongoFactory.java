@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.jumperz.app.MMonjaDB.eclipse.Activator;
 
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -42,6 +41,7 @@ import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
 import org.aw20.mongoworkbench.command.UpdateMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
+import org.aw20.mongoworkbench.eclipse.Activator;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
