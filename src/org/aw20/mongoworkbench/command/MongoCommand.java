@@ -189,6 +189,7 @@ public abstract class MongoCommand extends Object {
 
 		// Remove the helper methods
 		cmdMap.remove("find");
+		cmdMap.remove("group");
 		cmdMap.remove("save");
 		cmdMap.remove("update");
 		cmdMap.remove("limit");

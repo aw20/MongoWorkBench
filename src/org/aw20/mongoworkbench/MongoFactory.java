@@ -34,13 +34,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
 import org.aw20.mongoworkbench.command.UpdateMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
+import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.eclipse.Activator;
 
 import com.mongodb.DB;
@@ -64,7 +64,7 @@ public class MongoFactory extends Thread {
 	private boolean bRun = true;
 
 	
-	private String activeServer = null, activeDB = null;
+	private String activeServer = null, activeDB = null, activeCollection = null;
 	
 	public MongoFactory(){
 		mongoMap				= new HashMap<String,MongoClient>();
@@ -76,6 +76,7 @@ public class MongoFactory extends Thread {
 		commandMap.put("^db\\.[^\\(]+\\.find\\(.*", FindMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.save\\(.*", SaveMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.update\\(.*", UpdateMongoCommand.class);
+		commandMap.put("^db\\.[^\\(]+\\.group\\(.*", GroupMongoCommand.class);
 		commandMap.put("^use\\s+.*", UseMongoCommand.class);
 
 		setName( "MongoFactory" );
@@ -226,6 +227,9 @@ public class MongoFactory extends Thread {
 				cmd.hasRun();
 			}
 
+			if ( cmd.getCollection() != null )
+				activeCollection = cmd.getCollection();
+			
 
 			// Now let the listeners know we have finished
 			it	= mongoListeners.iterator();
@@ -244,5 +248,9 @@ public class MongoFactory extends Thread {
 	public void setActiveServerDB(String name, String db) {
 		activeServer = name;
 		activeDB = db;
+	}
+
+	public String getActiveCollection() {
+		return activeCollection;
 	}
 }
