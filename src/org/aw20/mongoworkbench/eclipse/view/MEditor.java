@@ -206,10 +206,13 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		}
 
 		// Update the tree
-		treeRender.render((Map) activeDocumentMap.get(EventWrapper.DOC_DATA));
+		Map map = (Map) activeDocumentMap.get(EventWrapper.DOC_DATA);
+		treeRender.render(map);
 
-		btnNewButton.setEnabled(true);
-		btnNewButton_1.setEnabled(true);
+		if ( activeDocumentMap.get(EventWrapper.ACTIVE_DB) != null ){
+			btnNewButton.setEnabled(true);
+			btnNewButton_1.setEnabled(true);
+		}
 	}
 
 }

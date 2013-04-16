@@ -30,6 +30,7 @@ import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
+import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.table.QueryData;
 import org.aw20.mongoworkbench.eclipse.view.table.TableManager;
@@ -152,6 +153,8 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	 */
 	protected void onAction(NAVITEM refresh) {
 		String cmd	= queryData.getCommand( refresh );
+		if ( cmd == null )
+			return;
 		
 		try {
 			setActionStatus(false);
@@ -169,12 +172,14 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	@Override
 	public void onMongoCommandFinished(MongoCommand mcmd) {
 		if ( mcmd.getClass().getName().equals( FindMongoCommand.class.getName() ) ){
-			onFindCommand( (FindMongoCommand)mcmd );			
+			onCommand( new QueryData( ((FindMongoCommand)mcmd) ), true );
+		}	else if ( mcmd.getClass().getName().equals( GroupMongoCommand.class.getName() ) ){
+			onCommand( new QueryData( ((GroupMongoCommand)mcmd).getResults(), null ), false );
 		}
 	}
 
-	private void onFindCommand(FindMongoCommand mcmd) {
-		queryData	= new QueryData( mcmd );
+	private void onCommand(QueryData data, final boolean enableButtons ) {
+		queryData	= data;
 
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
@@ -187,7 +192,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 				if ( tabFolder.getSelectionIndex() == 0 )
 					table.setVisible(true);
 
-				setActionStatus(true);
+				setActionStatus(enableButtons);
 			}
 		});
 

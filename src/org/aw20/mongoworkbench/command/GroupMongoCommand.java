@@ -25,13 +25,15 @@ package org.aw20.mongoworkbench.command;
 
 import org.aw20.mongoworkbench.MongoFactory;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.GroupCommand;
 import com.mongodb.MongoClient;
 
 public class GroupMongoCommand extends FindMongoCommand {
 
+	private BasicDBList dbListResult = null;
+	
 	@Override
 	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
@@ -50,11 +52,21 @@ public class GroupMongoCommand extends FindMongoCommand {
 		if ( !cmdMap.containsField("groupArg") )
 			throw new Exception("no group document");
 
+		// Execute the command
+		Object result	= db.eval(cmd, (Object[])null );
 		
-		
-		System.out.println( cmdMap );
+		if ( result == null )
+			throw new Exception("null returned");
+		if ( !(result instanceof BasicDBList ) )
+			throw new Exception("not correct type returned: " + result.getClass().getName() );
+
+		dbListResult	= (BasicDBList)result;
+		setMessage("# rows=" + dbListResult.size() );
 	}
 	
+	public BasicDBList getResults(){
+		return dbListResult;
+	}
 	
 	@Override
 	public void parseCommandStr() throws Exception {

@@ -32,13 +32,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.MDocumentView.NAVITEM;
 import org.aw20.util.DateUtil;
 import org.aw20.util.JSONFormatter;
 import org.eclipse.swt.SWT;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
@@ -50,18 +50,18 @@ public class QueryData extends Object {
 	private	List<Map>	data = null;
 	private Set<String>	rightJustified;
 	
-	private FindMongoCommand	findCommand;
+	private FindMongoCommand	findCommand = null;
 
-	public QueryData( List<Map>	data, String firstColumn ){
-		this.data = data;
+	public QueryData( BasicDBList	listdata, String firstColumn ){
+		List<Map> data	= new ArrayList<Map>(listdata.size());
+		for ( int x=0; x < listdata.size(); x++ )
+			data.add( ((DBObject)listdata.get(x)).toMap() );
 		
-		rightJustified	= new HashSet<String>();
-		Set<String>	columnSet = new HashSet<String>();
-		Iterator<Map>	it	= this.data.iterator();
-		while ( it.hasNext() ){
-			columnSet.addAll( it.next().keySet() );
-		}
-		setColumns(columnSet, firstColumn);
+		init(data, firstColumn);
+	}
+	
+	public QueryData( List<Map>	data, String firstColumn ){
+		init( data, firstColumn );
 	}
 	
 	public QueryData( FindMongoCommand fmcmd ){
@@ -83,6 +83,18 @@ public class QueryData extends Object {
 
 		findCommand.close();
 		setColumns(columnSet,"_id");
+	}
+
+	private void init(List<Map> data, String firstColumn) {
+		this.data = data;
+
+		rightJustified = new HashSet<String>();
+		Set<String> columnSet = new HashSet<String>();
+		Iterator<Map> it = this.data.iterator();
+		while (it.hasNext()) {
+			columnSet.addAll(it.next().keySet());
+		}
+		setColumns(columnSet, firstColumn);
 	}
 	
 	public void addRightColumn(String str){
@@ -142,15 +154,15 @@ public class QueryData extends Object {
 	}
 
 	public String getActiveName() {
-		return findCommand.getName();
+		return (findCommand != null) ? findCommand.getName() : null;
 	}
 
 	public String getActiveDB() {
-		return findCommand.getDB();
+		return (findCommand != null) ? findCommand.getDB() : null;
 	}
 
 	public String getActiveColl() {
-		return findCommand.getCollection();
+		return (findCommand != null) ? findCommand.getCollection() : null;
 	}
 
 	
@@ -161,6 +173,8 @@ public class QueryData extends Object {
 	 * @return
 	 */
 	public String getCommand(NAVITEM action) {
+		if (findCommand == null)
+			return null;
 		
 		StringBuilder	cmd	= new StringBuilder(128);
 		cmd.append( "db." )
@@ -231,7 +245,7 @@ public class QueryData extends Object {
 		for ( int r=0; r < size(); r++ ){
 			Map<String,Object>	rowMap	= get(r);
 			
-			sb.append( "/*___ " ).append( r+findCommand.getExecutedSkip() ).append(" ____________________________________*/\r\n" );
+			sb.append( "/*___ " ).append( r+ ((findCommand != null ) ? findCommand.getExecutedSkip() : 0) ).append(" ____________________________________*/\r\n" );
 			sb.append( JSONFormatter.format(rowMap) );
 			sb.append( "\r\n\r\n\r\n" );
 		}

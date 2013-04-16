@@ -33,6 +33,8 @@ public enum Event {
 	
 	WRITERESULT,
 	
-	EXCEPTION
+	EXCEPTION, 
+	
+	TOWIZARD
 	
 }

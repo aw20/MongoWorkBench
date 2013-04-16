@@ -64,8 +64,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 	}
 
 	private Table table;
-	private Action redoAction;
-	private Action copyAction;
+	private Action redoAction, copyAction, copyMessageAction, toWizardAction;
 	private Image	imgGood = null, imgBad = null;
 
 	private static int	COLUMN_STATUS = 0;
@@ -76,6 +75,9 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 	private static int	COLUMN_MESSAGE = 5;
 	private static int	COLUMN_MS = 6;
 	
+	private static String PROP_NAME 		= "nm";
+	private static String PROP_DB 			= "db";
+	private static String PROP_SUCCESS 	= "sc";
 	
 	public void dispose() {
 		MongoFactory.getInst().deregisterListener(this);
@@ -149,7 +151,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 				executeSelectedAction();
 			}
 		};
-		redoAction.setToolTipText("Redo Selected Command");
+		redoAction.setToolTipText("ReRun Selected Command");
 		redoAction.setText("ReRun Command\tShift+Enter");
 		initAction(redoAction, "table_go.png", menuManager);
 		redoAction.setEnabled(false);
@@ -160,7 +162,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 		// copyAction
 		copyAction = new Action() {
 			public void run() {
-				copyActionToClipboard();
+				copyActionToClipboard(COLUMN_ACTION);
 			}
 		};
 		copyAction.setToolTipText("Copy Command to Clipboard");
@@ -168,19 +170,64 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 		setActionImage(copyAction, "page_copy.png");
 		addActionToToolBar(copyAction);
 		copyAction.setEnabled(false);
-		
 		dropDownMenu.add(copyAction);
 		menuManager.add(copyAction);
+
+		
+		// copyMessageAction
+		copyMessageAction = new Action() {
+			public void run() {
+				copyActionToClipboard(COLUMN_MESSAGE);
+			}
+		};
+		copyMessageAction.setToolTipText("Copy Message to Clipboard");
+		copyMessageAction.setText("Copy Message");
+		setActionImage(copyMessageAction, "page_white_paste_table.png");
+		addActionToToolBar(copyMessageAction);
+		copyMessageAction.setEnabled(false);
+		
+		dropDownMenu.add(copyMessageAction);
+		menuManager.add(copyMessageAction);
+
+		dropDownMenu.add(new Separator());
+		menuManager.add(new Separator());
+		
+
+		// copyMessageAction
+		toWizardAction = new Action() {
+			public void run() {
+				onToWizard();
+			}
+		};
+		toWizardAction.setToolTipText("Open in Wizard");
+		toWizardAction.setText("Open in Wizard");
+		setActionImage(toWizardAction, "page_edit.png");
+		addActionToToolBar(toWizardAction);
+		toWizardAction.setEnabled(false);
+		
+		dropDownMenu.add(toWizardAction);
+		menuManager.add(toWizardAction);
 	}
 
 
-	private void copyActionToClipboard() {
+	private void onToWizard() {
+		int s = table.getSelectionIndex();
+		if ( s < 0 )
+			return;
+		
+		Activator.getDefault().showView( MCommandWizardView.class.getName() );
+		
+		TableItem	row	= table.getItem(s);
+		EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.TOWIZARD, row.getText(COLUMN_ACTION) );
+	}
+
+	private void copyActionToClipboard(int column) {
 		int s = table.getSelectionIndex();
 		if ( s < 0 )
 			return;
 		
 		TableItem	row	= table.getItem(s);
-		MSwtUtil.copyToClipboard( row.getText(COLUMN_ACTION) );
+		MSwtUtil.copyToClipboard( row.getText(column) );
 	}
 
 
@@ -189,13 +236,18 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 		if ( s < 0 )
 			return;
 		
-		TableItem	row		= table.getItem(s);
+		TableItem	row	= table.getItem(s);
+		
+		// only want to do the successful commands
+		if ( row.getData(PROP_SUCCESS) == null || !(Boolean)row.getData(PROP_SUCCESS) )
+			return;
+		
 		String cmdText 	= row.getText(COLUMN_ACTION);
 		try {
 
 			MongoCommand cmd = MongoFactory.getInst().createCommand(cmdText);
 			if (cmd != null) {
-				cmd.setConnection(MongoFactory.getInst().getActiveServer(), MongoFactory.getInst().getActiveDB());
+				cmd.setConnection( (String)row.getData(PROP_NAME), (String)row.getData(PROP_DB) );
 				MongoFactory.getInst().submitExecution(cmd);
 				
 				if ( cmd instanceof FindMongoCommand ){
@@ -235,6 +287,8 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 		if ( table.getItemCount() == 1 ){
 			copyAction.setEnabled(true);
 			redoAction.setEnabled(true);
+			copyMessageAction.setEnabled(true);
+			toWizardAction.setEnabled(true);
 		}
 		
 		
@@ -251,6 +305,8 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 			item.setText( COLUMN_MS, "" );
 			
 			item.setData( mcmd.hashCode() );
+			item.setData( PROP_NAME, mcmd.getName() );
+			item.setData( PROP_DB, mcmd.getDB() );
 			table.showItem(item);
 			
 		} else {
@@ -277,6 +333,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 			}
 
 			item.setText( COLUMN_MS, String.valueOf(mcmd.getExecTime()) + " ms" );
+			item.setData( PROP_SUCCESS, mcmd.isSuccess() );
 
 			table.showItem(item);
 		}

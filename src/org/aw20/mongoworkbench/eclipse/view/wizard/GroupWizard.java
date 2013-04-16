@@ -86,6 +86,7 @@ public class GroupWizard extends Composite {
 
 		textGroupInitial = new Text(composite_13, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
 		textGroupInitial.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		textGroupInitial.setText("{\r\n\r\n}");
 
 		Label lblHelp_4 = new Label(composite_13, SWT.NONE);
 		lblHelp_4.setText("Initializes the aggregation result document");
@@ -116,7 +117,7 @@ public class GroupWizard extends Composite {
 
 		textGroupKeyF = new Text(composite_14, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
 		textGroupKeyF.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		textGroupKeyF.setText("function(doc){\r\n\r\n\r\n}");
+		textGroupKeyF.setText("function(doc){\r\n\r\n}");
 
 		Label lblHelp_5 = new Label(composite_14, SWT.NONE);
 		lblHelp_5.setText("Alternative to the key field. A function that creates a 'key object' for use as the grouping key");
@@ -230,7 +231,7 @@ public class GroupWizard extends Composite {
 				.append(",");
 		}
 			
-		if (textGroupCondition.getText().trim().length() > 0){
+		if (textGroupFinalize.getText().trim().length() > 0){
 			sb.append( "finalize : " )
 				.append( textGroupFinalize.getText().trim() );
 		}

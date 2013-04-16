@@ -26,23 +26,36 @@
 package org.aw20.mongoworkbench.eclipse.view;
 
 
+import org.aw20.mongoworkbench.Event;
+import org.aw20.mongoworkbench.EventWorkBenchListener;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.eclipse.view.wizard.AggregateWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.GroupWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.MapReduceWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.UpdateWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
-public class MCommandWizardView extends MAbstractView {
+public class MCommandWizardView extends MAbstractView implements EventWorkBenchListener {
+	
+	private TabFolder tabFolder;
+	
 	public MCommandWizardView() {
+		EventWorkBenchManager.getInst().registerListener(this);
 	}
 
+	public void dispose() {
+		EventWorkBenchManager.getInst().deregisterListener(this);
+		super.dispose();
+	}
+	
 	public void init2() {
 		parent.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
+		tabFolder = new TabFolder(parent, SWT.NONE);
 
 		TabItem tbtmUpdate = new TabItem(tabFolder, SWT.NONE);
 		tbtmUpdate.setText("db.col.update()");
@@ -59,6 +72,24 @@ public class MCommandWizardView extends MAbstractView {
 		TabItem tbtmMapReduce = new TabItem(tabFolder, SWT.NONE);
 		tbtmMapReduce.setText("db.col.mapReduce()");
 		tbtmMapReduce.setControl( new MapReduceWizard(tabFolder, SWT.NONE));
+	}
+
+	@Override
+	public void onEventWorkBench(Event event, final Object data) {
+		if ( event != Event.TOWIZARD )
+			return;
+		
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				
+				Control[]	childControls	= tabFolder.getChildren();
+				for ( int x=0; x < childControls.length; x++ ){
+					System.out.println( childControls[x].getClass().getName() );
+				}
+
+			}
+		});
+		
 	}
 
 }
