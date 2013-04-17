@@ -29,6 +29,7 @@ import org.aw20.mongoworkbench.Event;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.AggregateMongoCommand;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -173,7 +174,8 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	public void onMongoCommandFinished(MongoCommand mcmd) {
 		if ( mcmd.getClass().getName().equals( FindMongoCommand.class.getName() ) ){
 			onCommand( new QueryData( ((FindMongoCommand)mcmd) ), true );
-		}	else if ( mcmd.getClass().getName().equals( GroupMongoCommand.class.getName() ) ){
+		}	else if ( mcmd.getClass().getName().equals( GroupMongoCommand.class.getName() )
+				|| mcmd.getClass().getName().equals( AggregateMongoCommand.class.getName() ) ){
 			onCommand( new QueryData( ((GroupMongoCommand)mcmd).getResults(), null ), false );
 		}
 	}

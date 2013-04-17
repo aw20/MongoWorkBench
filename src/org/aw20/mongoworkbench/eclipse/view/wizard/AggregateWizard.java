@@ -25,10 +25,20 @@
  */
 package org.aw20.mongoworkbench.eclipse.view.wizard;
 
+import java.io.IOException;
+
+import org.aw20.mongoworkbench.Event;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.AggregateMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.util.JSONFormatter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -38,10 +48,12 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 public class AggregateWizard extends Composite implements WizardCommandI {
-	
+	private String HELPURL = "http://docs.mongodb.org/manual/reference/method/db.collection.aggregate";
+		
 	private Text textPipe;
 	private TabFolder tabFolder;
 	private Button btnRemovePipe;
@@ -64,8 +76,25 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 		GridData gd_lblHttpdocsmongodborgmanualreferencemethoddbcollectionaggrega = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
 		gd_lblHttpdocsmongodborgmanualreferencemethoddbcollectionaggrega.widthHint = 425;
 		lblHttpdocs.setLayoutData(gd_lblHttpdocsmongodborgmanualreferencemethoddbcollectionaggrega);
-		lblHttpdocs.setText("http://docs.mongodb.org/manual/reference/method/db.collection.aggregate");
+		lblHttpdocs.setText(HELPURL);
+		lblHttpdocs.setCursor( new Cursor( this.getDisplay(), SWT.CURSOR_HAND ) );
+		lblHttpdocs.addMouseListener(new MouseListener() {
 
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {}
+
+			@Override
+			public void mouseDown(MouseEvent e) {}
+
+			@Override
+			public void mouseUp(MouseEvent e) {
+				try {
+					java.awt.Desktop.getDesktop().browse(java.net.URI.create(HELPURL));
+				} catch (IOException e1) {}
+			}
+
+		});
+		
 		Button btnAddPipeline = new Button(this, SWT.NONE);
 		btnAddPipeline.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -99,12 +128,44 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 
 
 	protected void onExecute() {
-				
+		if ( MongoFactory.getInst().getActiveCollection() == null ){
+			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, new Exception("no active collection selected") );
+			return;
+		}
+		
+		// Build up the command
+		StringBuilder	sb = new StringBuilder();
+		sb.append("db.")
+			.append( MongoFactory.getInst().getActiveCollection() )
+			.append(".aggregate( ");
+
+		
 		TabItem[] tabs = tabFolder.getItems();
 		for ( int x=0; x < tabs.length; x++ ){
-			((Text)tabs[x].getControl()).getText();
+			String text = ((Text)tabs[x].getControl()).getText().trim();
+			
+			if ( text.length() == 0 )
+				continue;
+			else if ( !text.startsWith("{") && !text.endsWith("}") ){
+				EventWorkBenchManager.getInst().onEvent(Event.EXCEPTION, new Exception("invalid Pipe#" + (x+1)) );
+				return;
+			}else{
+				sb.append( text ).append(",");
+			}
 		}
-	
+		
+		if ( sb.charAt(sb.length()-1) == ',')
+			sb.deleteCharAt(sb.length()-1);
+
+		sb.append( ")" );
+		
+		try {
+			MongoCommand	mcmd	= MongoFactory.getInst().createCommand(sb.toString());
+			if ( mcmd != null )
+				MongoFactory.getInst().submitExecution( mcmd.setConnection( MongoFactory.getInst().getActiveServer(), MongoFactory.getInst().getActiveDB() ) );
+		}catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+		}
 	}
 
 
@@ -131,10 +192,35 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 
 	@Override
 	public boolean onWizardCommand(MongoCommand cmd, BasicDBObject dbo) {
+		if ( !cmd.getClass().getName().equals( AggregateMongoCommand.class.getName() ) )
+			return false;
+		
+		if ( !dbo.containsField("aggregateArg") )
+			return false;
+		
+		BasicDBList	args = (BasicDBList)dbo.get("aggregateArg");
+		if (args.size() == 0)
+			return false;
+		
+		// remove all the tabs
+		while ( tabFolder.getItemCount() > 0 )
+			tabFolder.getItem(0).dispose();
 		
 		
-		return false;
+		for ( int x=0; x < args.size(); x++ ){
+			TabItem tbtmPipe = new TabItem(tabFolder, SWT.NONE);
+			tbtmPipe.setText("Pipe#" + (x+1) );
+			Text textPipe = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+			textPipe.setText( JSONFormatter.format(args.get(x)) );
+			tbtmPipe.setControl(textPipe);
+		}
 		
+		if ( tabFolder.getItemCount() > 1 )
+			btnRemovePipe.setEnabled(true);
+		else
+			btnRemovePipe.setEnabled(false);
+		
+		return true;
 	}
 
 }

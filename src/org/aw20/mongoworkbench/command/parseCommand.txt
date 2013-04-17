@@ -3,6 +3,16 @@ var a =	{
 	findArg : []
 };
 
+a.aggregate = function(){
+	this.invoked.push('aggregate');
+	this.aggregateArg	= [];
+	
+	for( var i = 0; i < arguments.length; ++i )	{
+		this.aggregateArg[i] = arguments[i];
+	}
+	return this;
+};
+
 a.group = function(){
 	this.invoked.push('group');
 	this.groupArg = arguments[0];

@@ -30,10 +30,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 
-public class GroupMongoCommand extends FindMongoCommand {
+public class AggregateMongoCommand extends GroupMongoCommand {
 
-	protected BasicDBList dbListResult = null;
-	
 	@Override
 	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
@@ -49,28 +47,30 @@ public class GroupMongoCommand extends FindMongoCommand {
 		DB db	= mdb.getDB(sDb);
 		BasicDBObject cmdMap	= parseMongoCommandString(db, cmd);
 		
-		if ( !cmdMap.containsField("groupArg") )
-			throw new Exception("no group document");
+		if ( !cmdMap.containsField("aggregateArg") )
+			throw new Exception("no aggregate document");
 
 		// Execute the command
 		Object result	= db.eval(cmd, (Object[])null );
 		
 		if ( result == null )
 			throw new Exception("null returned");
-		if ( !(result instanceof BasicDBList ) )
+		if ( !(result instanceof BasicDBObject ) )
 			throw new Exception("not correct type returned: " + result.getClass().getName() );
 
-		dbListResult	= (BasicDBList)result;
-		setMessage("# rows=" + dbListResult.size() );
+		BasicDBObject dbo = (BasicDBObject)result;
+		if ( dbo.containsField("result") ){
+			dbListResult	= (BasicDBList)dbo.get("result");
+			setMessage("# rows=" + dbListResult.size() );
+		} else {
+			setMessage("# rows=0" );
+		}
 	}
 	
-	public BasicDBList getResults(){
-		return dbListResult;
-	}
 	
 	@Override
 	public void parseCommandStr() throws Exception {
-		sColl = getCollNameFromAction(cmd, "group");
+		sColl = getCollNameFromAction(cmd, "aggregate");
 		
 		if ( sColl == null || sColl.length() == 0 )
 			throw new Exception("failed to determine collection from command");
