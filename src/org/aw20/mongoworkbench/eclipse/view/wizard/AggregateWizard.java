@@ -25,6 +25,7 @@
  */
 package org.aw20.mongoworkbench.eclipse.view.wizard;
 
+import org.aw20.mongoworkbench.command.MongoCommand;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,7 +38,9 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
-public class AggregateWizard extends Composite {
+import com.mongodb.BasicDBObject;
+
+public class AggregateWizard extends Composite implements WizardCommandI {
 	
 	private Text textPipe;
 
@@ -78,6 +81,15 @@ public class AggregateWizard extends Composite {
 		btnExecuteAggregation.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnExecuteAggregation.setText("execute");
 
+		
+	}
+
+
+	@Override
+	public boolean onWizardCommand(MongoCommand cmd, BasicDBObject dbo) {
+		return false;
+		
+		// http://www.eclipse.org/forums/index.php/mv/tree/126725/#page_top
 		
 	}
 

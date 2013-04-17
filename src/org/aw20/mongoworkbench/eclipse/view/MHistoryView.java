@@ -29,6 +29,7 @@ package org.aw20.mongoworkbench.eclipse.view;
 
 import org.aw20.mongoworkbench.EventWorkBenchListener;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.EventWrapper;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
@@ -51,6 +52,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+
+import com.mongodb.BasicDBObject;
 
 
 /**
@@ -218,7 +221,18 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 		Activator.getDefault().showView( MCommandWizardView.class.getName() );
 		
 		TableItem	row	= table.getItem(s);
-		EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.TOWIZARD, row.getText(COLUMN_ACTION) );
+		
+		MongoCommand cmd;
+		BasicDBObject dbo;
+		try {
+			cmd = MongoFactory.getInst().createCommand( row.getText(COLUMN_ACTION) );
+			cmd.setConnection( (String)row.getData(PROP_NAME), (String)row.getData(PROP_DB) );
+			dbo = cmd.parse();
+		} catch (Exception e) {
+			return;
+		}
+
+		EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.TOWIZARD, EventWrapper.createMap( EventWrapper.COMMAND, cmd, EventWrapper.DBOBJECT, dbo ) );
 	}
 
 	private void copyActionToClipboard(int column) {

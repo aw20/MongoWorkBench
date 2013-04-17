@@ -25,6 +25,7 @@
  */
 package org.aw20.mongoworkbench.eclipse.view.wizard;
 
+import org.aw20.mongoworkbench.command.MongoCommand;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -38,7 +39,9 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
-public class MapReduceWizard extends Composite {
+import com.mongodb.BasicDBObject;
+
+public class MapReduceWizard extends Composite implements WizardCommandI {
 
 	private Text textMRMap;
 	private Text textMRReduce;
@@ -213,6 +216,11 @@ public class MapReduceWizard extends Composite {
 		Button btnExecuteMapReduce = new Button(this, SWT.NONE);
 		btnExecuteMapReduce.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnExecuteMapReduce.setText("execute");
+	}
+
+	@Override
+	public boolean onWizardCommand(MongoCommand cmd, BasicDBObject dbo) {
+		return false;
 	}
 
 }

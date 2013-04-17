@@ -20,8 +20,6 @@
  *  resulting work. 
  *  
  *  https://github.com/aw20/MongoWorkBench
- *  Original fork: https://github.com/Kanatoko/MonjaDB
- *  
  */
 package org.aw20.mongoworkbench.eclipse.view.wizard;
 
@@ -31,6 +29,9 @@ import org.aw20.mongoworkbench.Event;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.UpdateMongoCommand;
+import org.aw20.util.JSONFormatter;
+import org.aw20.util.StringUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -44,7 +45,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class UpdateWizard extends Composite {
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+
+public class UpdateWizard extends Composite implements WizardCommandI {
 
 	private Text textUpdateQuery;
 	private Text textUpdateUpdate;
@@ -148,5 +152,32 @@ public class UpdateWizard extends Composite {
 		}catch (Exception e) {
 			EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 		}
+	}
+
+	@Override
+	public boolean onWizardCommand(MongoCommand cmd, BasicDBObject dbo) {
+		if ( !cmd.getClass().getName().equals( UpdateMongoCommand.class.getName() ) )
+			return false;
+		
+		if ( !dbo.containsField("updateArg") )
+			return false;
+		
+		BasicDBList	list	= (BasicDBList)dbo.get("updateArg");	
+		
+		// Set the fields of the wizard from the command
+		textUpdateQuery.setText( JSONFormatter.format( ((BasicDBObject)list.get(0)).toMap() ) );
+		textUpdateUpdate.setText( JSONFormatter.format( ((BasicDBObject)list.get(1)).toMap() ) );
+		
+		if ( list.size() >= 3 )
+			btnUpdateUpsert.setSelection( StringUtil.toBoolean( list.get(2), false ) );
+		else
+			btnUpdateUpsert.setSelection( false );
+
+		if ( list.size() >= 4 )
+			btnUpdateMulti.setSelection( StringUtil.toBoolean( list.get(3), false ) );
+		else
+			btnUpdateMulti.setSelection( false );
+
+		return true;
 	}
 }

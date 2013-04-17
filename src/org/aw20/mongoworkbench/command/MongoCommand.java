@@ -30,10 +30,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.aw20.io.StreamUtil;
+import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.util.StringUtil;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
+import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
@@ -178,6 +180,23 @@ public abstract class MongoCommand extends Object {
 			return "";
 		}
 	}
+	
+	
+	public BasicDBObject parse() throws Exception{
+		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
+		
+		if ( mdb == null )
+			throw new Exception("no server selected");
+		
+		if ( sDb == null )
+			throw new Exception("no database selected");
+		
+		MongoFactory.getInst().setActiveDB(sDb);
+		
+		DB db	= mdb.getDB(sDb);
+		return parseMongoCommandString(db, cmd);
+	}
+	
 	
 	protected BasicDBObject parseMongoCommandString(DB db, String cmd) throws IOException {
 		String newCmd = cmd.replaceFirst("db." + sColl, "a");

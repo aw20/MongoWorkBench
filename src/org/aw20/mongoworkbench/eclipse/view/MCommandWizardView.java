@@ -26,18 +26,25 @@
 package org.aw20.mongoworkbench.eclipse.view;
 
 
+import java.util.Map;
+
 import org.aw20.mongoworkbench.Event;
 import org.aw20.mongoworkbench.EventWorkBenchListener;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.EventWrapper;
+import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.wizard.AggregateWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.GroupWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.MapReduceWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.UpdateWizard;
+import org.aw20.mongoworkbench.eclipse.view.wizard.WizardCommandI;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+
+import com.mongodb.BasicDBObject;
 
 public class MCommandWizardView extends MAbstractView implements EventWorkBenchListener {
 	
@@ -79,17 +86,23 @@ public class MCommandWizardView extends MAbstractView implements EventWorkBenchL
 		if ( event != Event.TOWIZARD )
 			return;
 		
+		final MongoCommand cmd	= (MongoCommand)((Map)data).get(EventWrapper.COMMAND);
+		final BasicDBObject dbo = (BasicDBObject)((Map)data).get(EventWrapper.DBOBJECT);
+
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				
 				Control[]	childControls	= tabFolder.getChildren();
 				for ( int x=0; x < childControls.length; x++ ){
-					System.out.println( childControls[x].getClass().getName() );
+					if ( ((WizardCommandI)childControls[x]).onWizardCommand(cmd, dbo) ){
+						tabFolder.setSelection(x);
+						return;
+					}
 				}
-
+				
 			}
 		});
-		
+
 	}
 
 }

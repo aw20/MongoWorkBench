@@ -20,33 +20,21 @@
  *  resulting work. 
  *  
  *  https://github.com/aw20/MongoWorkBench
- *  Original fork: https://github.com/Kanatoko/MonjaDB
- *  
- *  March 2013
  */
-package org.aw20.mongoworkbench;
 
-import java.util.HashMap;
-import java.util.Map;
+package org.aw20.mongoworkbench.eclipse.view.wizard;
 
+import org.aw20.mongoworkbench.command.MongoCommand;
 
-public class EventWrapper {
+import com.mongodb.BasicDBObject;
 
-	public static String	ACTIVE_NAME = "sname";
-	public static String	ACTIVE_DB 	= "sdb";
-	public static String	ACTIVE_COLL = "scoll";
-	public static String	DOC_DATA 		= "data";
+public interface WizardCommandI {
+
+	/**
+	 * Called when the wizard has been triggered and we need to set the UI with that data
+	 * 
+	 * @param cmd
+	 */
+	public boolean onWizardCommand( MongoCommand cmd, BasicDBObject dbo );
 	
-	public static String	COMMAND			= "command";
-	public static String	DBOBJECT		= "dbobject";
-	
-	public static	Map createMap( Object... args ){
-		HashMap	map	= new HashMap();
-		
-		for ( int x=0; x < args.length; x += 2 ){
-			map.put( args[x], args[x+1] );
-		}
-		
-		return map;
-	}
 }

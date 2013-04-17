@@ -28,7 +28,9 @@ import java.io.IOException;
 import org.aw20.mongoworkbench.Event;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.util.JSONFormatter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -44,7 +46,10 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
-public class GroupWizard extends Composite {
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+
+public class GroupWizard extends Composite implements WizardCommandI  {
 	private String HELPURL = "http://docs.mongodb.org/manual/reference/method/db.collection.group/";
 	private Text textGroupKey;
 	private Text textGroupReduce;
@@ -248,6 +253,58 @@ public class GroupWizard extends Composite {
 		}catch (Exception e) {
 			EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 		}
+	}
+
+	@Override
+	public boolean onWizardCommand(MongoCommand cmd, BasicDBObject dbo) {
+		if ( !cmd.getClass().getName().equals( GroupMongoCommand.class.getName() ) )
+			return false;
+		
+		if ( !dbo.containsField("groupArg") )
+			return false;
+		
+		DBObject	gmap	= (DBObject)dbo.get("groupArg");
+
+		if ( gmap.containsField("cond") ){
+			textGroupCondition.setText( JSONFormatter.format(gmap.get("cond")) );
+		}else{
+			textGroupCondition.setText("");
+		}
+
+		if ( gmap.containsField("initial") ){
+			textGroupInitial.setText( JSONFormatter.format(gmap.get("initial")) );
+		}else{
+			textGroupInitial.setText("");
+		}
+
+		if ( gmap.containsField("key") ){
+			textGroupKey.setText( JSONFormatter.format(gmap.get("key")) );
+		}else{
+			textGroupKey.setText("");
+		}
+
+		if ( gmap.containsField("keyf") ){
+			org.bson.types.Code c = (org.bson.types.Code)gmap.get("key");
+			textGroupKeyF.setText( c.toString() );
+		}else{
+			textGroupKeyF.setText("");
+		}
+
+		if ( gmap.containsField("reduce") ){
+			org.bson.types.Code c = (org.bson.types.Code)gmap.get("reduce");
+			textGroupReduce.setText( c.toString() );
+		}else{
+			textGroupReduce.setText("");
+		}
+
+		if ( gmap.containsField("finalize") ){
+			org.bson.types.Code c = (org.bson.types.Code)gmap.get("finalize");
+			textGroupFinalize.setText( c.toString() );
+		}else{
+			textGroupFinalize.setText("");
+		}
+		
+		return true;
 	}
 
 }
