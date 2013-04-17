@@ -43,19 +43,21 @@ import com.mongodb.BasicDBObject;
 public class AggregateWizard extends Composite implements WizardCommandI {
 	
 	private Text textPipe;
-
+	private TabFolder tabFolder;
+	private Button btnRemovePipe;
+	
 	public AggregateWizard(Composite parent, int style) {
 		super(parent, style);
 		
 		setLayout(new GridLayout(5, false));
 
-		TabFolder tabFolder_1 = new TabFolder(this, SWT.NONE);
-		tabFolder_1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
+		tabFolder = new TabFolder(this, SWT.NONE);
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
 
-		TabItem tbtmPipe = new TabItem(tabFolder_1, SWT.NONE);
+		TabItem tbtmPipe = new TabItem(tabFolder, SWT.NONE);
 		tbtmPipe.setText("Pipe#1");
 
-		textPipe = new Text(tabFolder_1, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textPipe = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
 		tbtmPipe.setControl(textPipe);
 
 		Label lblHttpdocs = new Label(this, SWT.NONE);
@@ -68,28 +70,70 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 		btnAddPipeline.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				onAddTab();
 			}
 		});
 		btnAddPipeline.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnAddPipeline.setText("+pipe");
 
-		Button btnRemovePipe = new Button(this, SWT.NONE);
+		btnRemovePipe = new Button(this, SWT.NONE);
 		btnRemovePipe.setEnabled(false);
 		btnRemovePipe.setText("-pipe");
+		btnRemovePipe.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				onRemoveTab();
+			}
+		});
 
 		Button btnExecuteAggregation = new Button(this, SWT.NONE);
 		btnExecuteAggregation.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnExecuteAggregation.setText("execute");
+		btnExecuteAggregation.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				onExecute();
+			}
+		});
+	}
 
+
+	protected void onExecute() {
+				
+		TabItem[] tabs = tabFolder.getItems();
+		for ( int x=0; x < tabs.length; x++ ){
+			((Text)tabs[x].getControl()).getText();
+		}
+	
+	}
+
+
+	protected void onRemoveTab() {
+		if ( tabFolder.getItemCount() == 1 )
+			return;
 		
+		TabItem tab = tabFolder.getItem( tabFolder.getItemCount()-1 );
+		tab.dispose();
+		
+		if ( tabFolder.getItemCount() == 1 )
+			btnRemovePipe.setEnabled(false);
+	}
+
+
+	protected void onAddTab() {
+		TabItem tbtmPipe = new TabItem(tabFolder, SWT.NONE);
+		tbtmPipe.setText("Pipe#" + (tabFolder.getItemCount()) );
+		Text textPipe = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		tbtmPipe.setControl(textPipe);
+		btnRemovePipe.setEnabled(true);
 	}
 
 
 	@Override
 	public boolean onWizardCommand(MongoCommand cmd, BasicDBObject dbo) {
-		return false;
 		
-		// http://www.eclipse.org/forums/index.php/mv/tree/126725/#page_top
+		
+		return false;
 		
 	}
 
