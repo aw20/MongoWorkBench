@@ -31,6 +31,7 @@ import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.util.JSONFormatter;
+import org.aw20.util.MSwtUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -74,7 +75,7 @@ public class GroupWizard extends Composite implements WizardCommandI  {
 		tbtmCondition2.setControl(composite_15);
 		composite_15.setLayout(new GridLayout(1, false));
 
-		textGroupCondition = new Text(composite_15, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textGroupCondition = MSwtUtil.createText( composite_15 );
 		textGroupCondition.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		Label lblHelp_6 = new Label(composite_15, SWT.NONE);
@@ -89,7 +90,7 @@ public class GroupWizard extends Composite implements WizardCommandI  {
 		tbtmInitial2.setControl(composite_13);
 		composite_13.setLayout(new GridLayout(1, false));
 
-		textGroupInitial = new Text(composite_13, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textGroupInitial = MSwtUtil.createText( composite_13 );
 		textGroupInitial.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		textGroupInitial.setText("{\r\n\r\n}");
 
@@ -105,7 +106,7 @@ public class GroupWizard extends Composite implements WizardCommandI  {
 		tbtmKey.setControl(composite_11);
 		composite_11.setLayout(new GridLayout(1, false));
 
-		textGroupKey = new Text(composite_11, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textGroupKey = MSwtUtil.createText( composite_11 );
 		textGroupKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		Label lblHelp_2 = new Label(composite_11, SWT.NONE);
@@ -120,7 +121,7 @@ public class GroupWizard extends Composite implements WizardCommandI  {
 		tbtmKeyF2.setControl(composite_14);
 		composite_14.setLayout(new GridLayout(1, false));
 
-		textGroupKeyF = new Text(composite_14, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textGroupKeyF = MSwtUtil.createText( composite_14 );
 		textGroupKeyF.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		textGroupKeyF.setText("function(doc){\r\n\r\n}");
 
@@ -136,7 +137,7 @@ public class GroupWizard extends Composite implements WizardCommandI  {
 		tbtmReduce.setControl(composite_12);
 		composite_12.setLayout(new GridLayout(1, false));
 
-		textGroupReduce = new Text(composite_12, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textGroupReduce = MSwtUtil.createText( composite_12 );
 		textGroupReduce.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		textGroupReduce.setText("function(curr,result){\r\n\r\n\r\n}");
 		
@@ -152,7 +153,7 @@ public class GroupWizard extends Composite implements WizardCommandI  {
 		tbtmFinalize2.setControl(composite_16);
 		composite_16.setLayout(new GridLayout(1, false));
 
-		textGroupFinalize = new Text(composite_16, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textGroupFinalize = MSwtUtil.createText( composite_16 );
 		textGroupFinalize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		textGroupFinalize.setText("function(result){\r\n\r\n\r\n}");
 		

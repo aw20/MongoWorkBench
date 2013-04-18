@@ -32,6 +32,7 @@ import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.Activator;
+import org.aw20.util.MSwtUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -40,7 +41,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.wb.swt.SWTResourceManager;
 
 public class MCommandConsole extends MAbstractView {
 	private Action executeAction;
@@ -87,12 +87,10 @@ public class MCommandConsole extends MAbstractView {
 
 		SashForm sashForm = new SashForm(parent, SWT.NONE);
 
-		ConsoleArea1 = new Text(sashForm, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
-		ConsoleArea2 = new Text(sashForm, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		ConsoleArea1 = MSwtUtil.createText(sashForm);
+		ConsoleArea2 = MSwtUtil.createText(sashForm);
 		sashForm.setWeights(new int[] { 1, 1 });
 
-		ConsoleArea1.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
-		ConsoleArea1.setTabs(2);
 		ConsoleArea1.setText(Activator.getDefault().getWorkBench(1));
 
 		ConsoleArea1.addKeyListener(new KeyAdapter() {
@@ -104,8 +102,6 @@ public class MCommandConsole extends MAbstractView {
 			}
 		});
 
-		ConsoleArea2.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
-		ConsoleArea2.setTabs(2);
 		ConsoleArea2.setText(Activator.getDefault().getWorkBench(2));
 
 		ConsoleArea2.addKeyListener(new KeyAdapter() {

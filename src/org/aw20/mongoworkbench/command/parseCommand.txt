@@ -13,6 +13,16 @@ a.aggregate = function(){
 	return this;
 };
 
+a.mapReduce = function(){
+	this.invoked.push('mapreduce');
+	this.mapreduceArgs	= [];
+	
+	for( var i = 0; i < arguments.length; ++i )	{
+		this.mapreduceArgs[i] = arguments[i];
+	}
+	return this;
+};
+
 a.group = function(){
 	this.invoked.push('group');
 	this.groupArg = arguments[0];

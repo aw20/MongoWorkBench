@@ -37,6 +37,7 @@ import java.util.Set;
 import org.aw20.mongoworkbench.command.AggregateMongoCommand;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.GroupMongoCommand;
+import org.aw20.mongoworkbench.command.MapReduceMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
@@ -79,6 +80,7 @@ public class MongoFactory extends Thread {
 		commandMap.put("^db\\.[^\\(]+\\.update\\(.*", UpdateMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.group\\(.*", GroupMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.aggregate\\(.*", AggregateMongoCommand.class);
+		commandMap.put("^db\\.[^\\(]+\\.mapReduce\\(.*", MapReduceMongoCommand.class);
 		commandMap.put("^use\\s+.*", UseMongoCommand.class);
 
 		setName( "MongoFactory" );

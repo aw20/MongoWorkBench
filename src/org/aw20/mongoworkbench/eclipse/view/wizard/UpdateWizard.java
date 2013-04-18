@@ -31,6 +31,7 @@ import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.UpdateMongoCommand;
 import org.aw20.util.JSONFormatter;
+import org.aw20.util.MSwtUtil;
 import org.aw20.util.StringUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -69,11 +70,11 @@ public class UpdateWizard extends Composite implements WizardCommandI {
 		lblUpdate.setToolTipText("This is the update document to apply.  Should be { }");
 		new Label(this, SWT.NONE);
 
-		textUpdateQuery = new Text(this, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textUpdateQuery = MSwtUtil.createText( this );
 		textUpdateQuery.setToolTipText("asdasdas");
 		textUpdateQuery.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 2));
 
-		textUpdateUpdate = new Text(this, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textUpdateUpdate = MSwtUtil.createText( this );
 		textUpdateUpdate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 2));
 
 		btnUpdateUpsert  = new Button(this, SWT.CHECK);

@@ -33,6 +33,7 @@ import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.AggregateMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.util.JSONFormatter;
+import org.aw20.util.MSwtUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -69,7 +70,7 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 		TabItem tbtmPipe = new TabItem(tabFolder, SWT.NONE);
 		tbtmPipe.setText("Pipe#1");
 
-		textPipe = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textPipe = MSwtUtil.createText( tabFolder ); 
 		tbtmPipe.setControl(textPipe);
 
 		Label lblHttpdocs = new Label(this, SWT.NONE);
@@ -184,7 +185,7 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 	protected void onAddTab() {
 		TabItem tbtmPipe = new TabItem(tabFolder, SWT.NONE);
 		tbtmPipe.setText("Pipe#" + (tabFolder.getItemCount()) );
-		Text textPipe = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		Text textPipe = MSwtUtil.createText( tabFolder );
 		tbtmPipe.setControl(textPipe);
 		btnRemovePipe.setEnabled(true);
 	}
@@ -210,7 +211,7 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 		for ( int x=0; x < args.size(); x++ ){
 			TabItem tbtmPipe = new TabItem(tabFolder, SWT.NONE);
 			tbtmPipe.setText("Pipe#" + (x+1) );
-			Text textPipe = new Text(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+			Text textPipe = MSwtUtil.createText( tabFolder );
 			textPipe.setText( JSONFormatter.format(args.get(x)) );
 			tbtmPipe.setControl(textPipe);
 		}

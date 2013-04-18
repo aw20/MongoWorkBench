@@ -9,7 +9,7 @@ Connection
 
 
 Map Reduce
-- Create a view for MapReduce
+- Display the output for the results when inline
 
 
 GridFS

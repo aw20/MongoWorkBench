@@ -24,6 +24,7 @@
  */
 package org.aw20.util;
 
+
 import java.io.InputStream;
 
 import org.aw20.io.StreamUtil;
@@ -34,13 +35,23 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class MSwtUtil extends Object {
 
+	public static Text createText( Composite comp ){
+		Text txt = new Text(comp, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		txt.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
+		txt.setTabs(2);
+		return txt;
+	}
+	
 	public static void addListenerToMenuItems(Menu menu, Listener listener) {
 		MenuItem[] itemArray = menu.getItems();
 		for (int i = 0; i < itemArray.length; ++i) {
