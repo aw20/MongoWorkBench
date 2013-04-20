@@ -49,6 +49,7 @@ public class QueryData extends Object {
 	private String[]	columns;
 	private	List<Map>	data = null;
 	private Set<String>	rightJustified;
+	private int count = 0;
 	
 	private FindMongoCommand	findCommand = null;
 
@@ -69,6 +70,7 @@ public class QueryData extends Object {
 			return;
 		
 		findCommand	= fmcmd;
+		count	= findCommand.getCount();
 		
 		rightJustified	= new HashSet<String>();
 		Set<String>	columnSet = new HashSet<String>();
@@ -87,6 +89,7 @@ public class QueryData extends Object {
 
 	private void init(List<Map> data, String firstColumn) {
 		this.data = data;
+		count	= this.data.size();
 
 		rightJustified = new HashSet<String>();
 		Set<String> columnSet = new HashSet<String>();
@@ -117,6 +120,10 @@ public class QueryData extends Object {
 		
 	}
 
+	public int getCount(){
+		return count;
+	}
+	
 	public int size() {
 		return (data == null) ? 0 : data.size();
 	}

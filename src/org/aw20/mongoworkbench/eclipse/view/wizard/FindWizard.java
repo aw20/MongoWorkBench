@@ -5,8 +5,10 @@ import java.io.IOException;
 import org.aw20.mongoworkbench.Event;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.WizardParentI;
+import org.aw20.util.JSONFormatter;
 import org.aw20.util.MSwtUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -21,7 +23,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class FindWizard extends Composite {
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+
+public class FindWizard extends Composite implements WizardCommandI {
 	private Text textQuery;
 	private Text textKeys;
 	private Text textSort;
@@ -103,18 +108,17 @@ public class FindWizard extends Composite {
 		if ( queryText.length() == 0 )
 			return;
 		
-		String keysText  = textKeys.getText().trim();
-		if ( keysText.length() == 0 )
-			return;
-		
 		String sortText  = textSort.getText().trim();
+		String keysText  = textKeys.getText().trim();
 		
 		if (queryText.charAt(0) != '{' || queryText.charAt(queryText.length() - 1) != '}') {
 			return;
 		}
 		
-		if (keysText.charAt(0) != '{' || keysText.charAt(keysText.length() - 1) != '}') {
-			return;
+		if (keysText.length() != 0){
+			if (keysText.charAt(0) != '{' || keysText.charAt(keysText.length() - 1) != '}') {
+				return;
+			}
 		}
 		
 		if (sortText.length() != 0){
@@ -127,10 +131,14 @@ public class FindWizard extends Composite {
 		sb.append("db.")
 			.append( wizardparent.getActiveCollection() )
 			.append(".find(")
-			.append( keysText )
-			.append(", ")
-			.append( queryText )
-			.append(")");
+			.append( queryText );
+		
+		if ( keysText.length() > 0 ){
+			sb.append(",")
+				.append( keysText );
+		}
+			
+		sb.append(")");
 		
 		if (sortText.length() != 0){
 			sb.append(".sort(");
@@ -146,10 +154,38 @@ public class FindWizard extends Composite {
 		}catch (Exception e) {
 			EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 		}
-			
-		
-		
+
 	}
 
+
+	@Override
+	public boolean onWizardCommand(MongoCommand cmd, BasicDBObject dbo) {
+		if ( !cmd.getClass().getName().equals( FindMongoCommand.class.getName() ) )
+			return false;
+
+		if ( !dbo.containsField("findArg") )
+			return false;
+
+		BasicDBList dbList	= (BasicDBList)dbo.get("findArg");
+		
+		if ( dbList.size() == 1 ){
+			textKeys.setText("");
+			textQuery.setText( JSONFormatter.format( dbList.get(0)) );
+		}else if ( dbList.size() == 2 ){
+			textKeys.setText( JSONFormatter.format( dbList.get(1)) );
+			textQuery.setText( JSONFormatter.format( dbList.get(0)) );
+		}else{
+			textKeys.setText("");
+			textQuery.setText("");
+		}
+		
+		if ( dbo.containsField("sort") ){
+			textSort.setText( JSONFormatter.format( dbo.get("sort")) );
+		}else{
+			textSort.setText("");
+		}
+		
+		return true;
+	}
 
 }

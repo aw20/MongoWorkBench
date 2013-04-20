@@ -73,7 +73,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 		tabFolder = new TabFolder(parent, SWT.NONE);
 
 		TabItem tbtmTable = new TabItem(tabFolder, SWT.NONE);
-		tbtmTable.setText("Table");
+		tbtmTable.setText("Total #");
 		
 		table = new Table(tabFolder, SWT.BORDER | SWT.FULL_SELECTION);
 		tbtmTable.setControl(table);
@@ -197,6 +197,10 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 				
 				if ( tabFolder.getSelectionIndex() == 0 )
 					table.setVisible(true);
+				
+				// Set the counts
+				TabItem[] tabs = tabFolder.getItems();
+				tabs[0].setText("Total #" + queryData.getCount() );
 
 				setActionStatus(enableButtons);
 			}

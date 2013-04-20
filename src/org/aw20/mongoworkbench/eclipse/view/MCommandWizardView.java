@@ -71,7 +71,6 @@ public class MCommandWizardView extends MAbstractView implements EventWorkBenchL
 		tbtmFind.setText("db.col.find()");
 		tbtmFind.setControl(new FindWizard(this, tabFolder, SWT.NONE));
 	
-
 		TabItem tbtmUpdate = new TabItem(tabFolder, SWT.NONE);
 		tbtmUpdate.setText("db.col.update()");
 		tbtmUpdate.setControl(new UpdateWizard(this, tabFolder, SWT.NONE));
