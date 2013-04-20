@@ -121,6 +121,16 @@ public class MapReduceMongoCommand extends FindMongoCommand {
 		// Run the actual mapreduce function
 		MapReduceOutput	mro	= collection.mapReduce(mrc);
 		
+
+		// Pull the inline results
+		if ( mro.getOutputCollection() == null ){
+			dbListResult	= new BasicDBList();
+			Iterable<DBObject> it = mro.results();
+			for ( DBObject dbo : it ){
+				dbListResult.add(dbo);
+			}
+		}
+		
 		BasicDBObject dbo = mro.getRaw();
 		StringBuilder sb = new StringBuilder();
 

@@ -9,7 +9,6 @@ Connection
 
 
 Map Reduce
-- Display the output for the results when inline
 
 
 GridFS
@@ -19,8 +18,10 @@ GridFS
 Javascript
 - Mechanism for storing and loading files
 
+
 DocumentEditor
 - Add in a Refresh button to reload the active document
+
 
 DocumentView
 - Update the tab with the document count

@@ -203,12 +203,9 @@ public class MapReduceWizard extends Composite implements WizardCommandI {
 		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblType.setText("Type");
 
-		combo = new Combo(composite_9, SWT.NONE | SWT.READ_ONLY );
+		combo = new Combo(composite_9, SWT.DROP_DOWN | SWT.READ_ONLY );
 		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		combo.add("inline");
-		combo.add("replace");
-		combo.add("merge");
-		combo.add("reduce");
+		combo.setItems( new String[]{ "inline","replace","merge","reduce" });
 		combo.select(0);
 		
 		Label lblCollection = new Label(composite_9, SWT.NONE);
