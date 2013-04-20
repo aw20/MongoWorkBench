@@ -88,9 +88,7 @@ public class FindWizard extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				onExecute();
 			}
-		});
-		
-		
+		});		
 	}
 
 
