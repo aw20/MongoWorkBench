@@ -22,19 +22,20 @@
  *  https://github.com/aw20/MongoWorkBench
  */
 
-package org.aw20.mongoworkbench.eclipse.view.wizard;
+package org.aw20.mongoworkbench.eclipse.view;
 
-import org.aw20.mongoworkbench.command.MongoCommand;
-
-import com.mongodb.BasicDBObject;
-
-public interface WizardCommandI {
+public interface WizardParentI {
 
 	/**
-	 * Called when the wizard has been triggered and we need to set the UI with that data
-	 * 
-	 * @param cmd
+	 * Returns the active DB
+	 * @return
 	 */
-	public boolean onWizardCommand( MongoCommand cmd, BasicDBObject dbo );
-
+	public String getActiveDB();
+	
+	/**
+	 * Returns the active collection
+	 * @return
+	 */
+	public String getActiveCollection();
+	
 }

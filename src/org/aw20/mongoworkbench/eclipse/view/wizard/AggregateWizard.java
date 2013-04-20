@@ -32,6 +32,7 @@ import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.AggregateMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.eclipse.view.WizardParentI;
 import org.aw20.util.JSONFormatter;
 import org.aw20.util.MSwtUtil;
 import org.eclipse.swt.SWT;
@@ -58,10 +59,12 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 	private Text textPipe;
 	private TabFolder tabFolder;
 	private Button btnRemovePipe;
+	private WizardParentI wizardparent;
 	
-	public AggregateWizard(Composite parent, int style) {
+	public AggregateWizard(WizardParentI wizardparent, Composite parent, int style) {
 		super(parent, style);
 		
+		this.wizardparent = wizardparent;
 		setLayout(new GridLayout(5, false));
 
 		tabFolder = new TabFolder(this, SWT.NONE);
@@ -137,7 +140,7 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 		// Build up the command
 		StringBuilder	sb = new StringBuilder();
 		sb.append("db.")
-			.append( MongoFactory.getInst().getActiveCollection() )
+			.append( wizardparent.getActiveCollection() )
 			.append(".aggregate( ");
 
 		
@@ -163,7 +166,7 @@ public class AggregateWizard extends Composite implements WizardCommandI {
 		try {
 			MongoCommand	mcmd	= MongoFactory.getInst().createCommand(sb.toString());
 			if ( mcmd != null )
-				MongoFactory.getInst().submitExecution( mcmd.setConnection( MongoFactory.getInst().getActiveServer(), MongoFactory.getInst().getActiveDB() ) );
+				MongoFactory.getInst().submitExecution( mcmd.setConnection( MongoFactory.getInst().getActiveServer(), wizardparent.getActiveDB() ) );
 		}catch (Exception e) {
 			EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 		}

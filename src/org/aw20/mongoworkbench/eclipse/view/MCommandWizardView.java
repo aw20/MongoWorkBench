@@ -32,6 +32,7 @@ import org.aw20.mongoworkbench.Event;
 import org.aw20.mongoworkbench.EventWorkBenchListener;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.EventWrapper;
+import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.wizard.AggregateWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.GroupWizard;
@@ -46,9 +47,10 @@ import org.eclipse.swt.widgets.TabItem;
 
 import com.mongodb.BasicDBObject;
 
-public class MCommandWizardView extends MAbstractView implements EventWorkBenchListener {
+public class MCommandWizardView extends MAbstractView implements EventWorkBenchListener, WizardParentI {
 	
 	private TabFolder tabFolder;
+	private String activeDB = null, activeColl = null;
 	
 	public MCommandWizardView() {
 		EventWorkBenchManager.getInst().registerListener(this);
@@ -66,19 +68,19 @@ public class MCommandWizardView extends MAbstractView implements EventWorkBenchL
 
 		TabItem tbtmUpdate = new TabItem(tabFolder, SWT.NONE);
 		tbtmUpdate.setText("db.col.update()");
-		tbtmUpdate.setControl(new UpdateWizard(tabFolder, SWT.NONE));
+		tbtmUpdate.setControl(new UpdateWizard(this, tabFolder, SWT.NONE));
 		
 		TabItem tbtmGroupItem = new TabItem(tabFolder, SWT.NONE);
 		tbtmGroupItem.setText("db.col.group()");
-		tbtmGroupItem.setControl(new GroupWizard(tabFolder, SWT.NONE));
+		tbtmGroupItem.setControl(new GroupWizard(this, tabFolder, SWT.NONE));
 
 		TabItem tbtmAggregate = new TabItem(tabFolder, SWT.NONE);
 		tbtmAggregate.setText("db.col.aggregate()");
-		tbtmAggregate.setControl(new AggregateWizard(tabFolder, SWT.NONE));
+		tbtmAggregate.setControl(new AggregateWizard(this, tabFolder, SWT.NONE));
 		
 		TabItem tbtmMapReduce = new TabItem(tabFolder, SWT.NONE);
 		tbtmMapReduce.setText("db.col.mapReduce()");
-		tbtmMapReduce.setControl( new MapReduceWizard(tabFolder, SWT.NONE));
+		tbtmMapReduce.setControl( new MapReduceWizard(this, tabFolder, SWT.NONE));
 	}
 
 	@Override
@@ -96,13 +98,30 @@ public class MCommandWizardView extends MAbstractView implements EventWorkBenchL
 				for ( int x=0; x < childControls.length; x++ ){
 					if ( ((WizardCommandI)childControls[x]).onWizardCommand(cmd, dbo) ){
 						tabFolder.setSelection(x);
-						return;
+						activeDB 		= cmd.getDB();
+						activeColl 	= cmd.getCollection();
+						break;
 					}
 				}
 				
+				// Set the tabitems
+				TabItem[] tabItems = tabFolder.getItems();
+				tabItems[0].setText("db." + activeColl + ".update()");
+				tabItems[1].setText("db." + activeColl + ".group()");
+				tabItems[2].setText("db." + activeColl + ".aggregate()");
+				tabItems[3].setText("db." + activeColl + ".mapReduce()");
 			}
 		});
 
 	}
 
+	@Override
+	public String getActiveDB() {
+		return ( activeDB == null ) ? MongoFactory.getInst().getActiveDB() : activeDB;
+	}
+
+	@Override
+	public String getActiveCollection() {
+		return ( activeColl == null ) ? MongoFactory.getInst().getActiveCollection() : activeColl;
+	}
 }
