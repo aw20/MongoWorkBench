@@ -35,6 +35,7 @@ import org.aw20.mongoworkbench.EventWrapper;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.wizard.AggregateWizard;
+import org.aw20.mongoworkbench.eclipse.view.wizard.FindWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.GroupWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.MapReduceWizard;
 import org.aw20.mongoworkbench.eclipse.view.wizard.UpdateWizard;
@@ -65,6 +66,11 @@ public class MCommandWizardView extends MAbstractView implements EventWorkBenchL
 		parent.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		tabFolder = new TabFolder(parent, SWT.NONE);
+		
+		TabItem tbtmFind = new TabItem(tabFolder, SWT.NONE);
+		tbtmFind.setText("db.col.find()");
+		tbtmFind.setControl(new FindWizard(this, tabFolder, SWT.NONE));
+	
 
 		TabItem tbtmUpdate = new TabItem(tabFolder, SWT.NONE);
 		tbtmUpdate.setText("db.col.update()");
@@ -106,10 +112,11 @@ public class MCommandWizardView extends MAbstractView implements EventWorkBenchL
 				
 				// Set the tabitems
 				TabItem[] tabItems = tabFolder.getItems();
-				tabItems[0].setText("db." + activeColl + ".update()");
-				tabItems[1].setText("db." + activeColl + ".group()");
-				tabItems[2].setText("db." + activeColl + ".aggregate()");
-				tabItems[3].setText("db." + activeColl + ".mapReduce()");
+				tabItems[0].setText("db." + activeColl + ".find()");
+				tabItems[1].setText("db." + activeColl + ".update()");
+				tabItems[2].setText("db." + activeColl + ".group()");
+				tabItems[3].setText("db." + activeColl + ".aggregate()");
+				tabItems[4].setText("db." + activeColl + ".mapReduce()");
 			}
 		});
 
