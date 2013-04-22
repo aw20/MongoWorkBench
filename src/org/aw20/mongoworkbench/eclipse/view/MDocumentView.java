@@ -25,20 +25,29 @@
 package org.aw20.mongoworkbench.eclipse.view;
 
 
+import java.io.File;
+import java.util.Map;
+
 import org.aw20.mongoworkbench.Event;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.mongoworkbench.command.AggregateMongoCommand;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
+import org.aw20.mongoworkbench.command.GridFSGetFileCommand;
+import org.aw20.mongoworkbench.command.GridFSPutFileCommand;
+import org.aw20.mongoworkbench.command.GridFSRemoveFileCommand;
 import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MapReduceMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.RemoveMongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.table.QueryData;
 import org.aw20.mongoworkbench.eclipse.view.table.TableManager;
+import org.bson.types.ObjectId;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
@@ -47,7 +56,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 public class MDocumentView extends MAbstractView implements MongoCommandListener {
 	public static enum NAVITEM {
-		REFRESH, PAGE_BACK, PAGE_FORWARD, PAGE_START, PAGE_END
+		REFRESH, PAGE_BACK, PAGE_FORWARD, PAGE_START, PAGE_END, PUTFILE, GETFILE
 	};
 	
 	private Table table;
@@ -57,6 +66,9 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	private TableManager	tableManager;
 	private QueryData	queryData;
 	private Action backAction, forwardAction, startAction, endAction, refreshAction;
+	private Action putFileAction, getFileAction;
+	
+	private String lastSaveDirectory	= "/", lastOpenDirectory = "/";
 	
 	public MDocumentView(){
 		MongoFactory.getInst().registerListener(this);
@@ -90,6 +102,24 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 		tbtmJson.setControl(textJson);
 
 		
+		getFileAction = new Action() {
+			public void run() {
+				onAction( NAVITEM.GETFILE );
+			}
+		};
+		getFileAction.setText("Download File");
+		getFileAction.setToolTipText("Download Selected File from GridFS Collection");
+		initAction(getFileAction, "folder_table.png", null);
+
+		putFileAction = new Action() {
+			public void run() {
+				onAction( NAVITEM.PUTFILE );
+			}
+		};
+		putFileAction.setText("Upload File");
+		putFileAction.setToolTipText("Upload File to GridFS Collection");
+		initAction(putFileAction, "folder_add.png", null);
+
 		refreshAction = new Action() {
 			public void run() {
 				onAction( NAVITEM.REFRESH );
@@ -137,16 +167,19 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 		initAction(endAction, "control_end.png", null);
 		
 		
-		setActionStatus( false );
+		setActionStatus( false, false );
 	}
 
 	
-	private void setActionStatus(boolean b) {
+	private void setActionStatus(boolean b, boolean bGridFS) {
 		refreshAction.setEnabled(b);
 		backAction.setEnabled(b);
 		forwardAction.setEnabled(b);
 		startAction.setEnabled(b);
 		endAction.setEnabled(b);
+		
+		getFileAction.setEnabled(bGridFS);
+		putFileAction.setEnabled(bGridFS);
 	}
 
 	/**
@@ -154,17 +187,72 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	 * @param refresh
 	 */
 	protected void onAction(NAVITEM refresh) {
-		String cmd	= queryData.getCommand( refresh );
-		if ( cmd == null )
-			return;
 		
-		try {
-			setActionStatus(false);
-			MongoCommand mcmd = MongoFactory.getInst().createCommand(cmd);
-			mcmd.setConnection( queryData.getActiveName(), queryData.getActiveDB() );
-			MongoFactory.getInst().submitExecution(mcmd);
-		} catch (Exception e) {
-			EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+		if ( refresh == NAVITEM.GETFILE ){
+			if ( table.getSelectionCount() == 0 )
+				return;
+			
+			Map	rowMap	= queryData.get(table.getSelectionIndex());
+			if ( rowMap != null ){
+				FileDialog fd = new FileDialog( shell, SWT.SAVE);
+        fd.setText("Save GridFS file ...");
+        fd.setFilterPath( lastSaveDirectory );
+        fd.setFileName( (String)rowMap.get("filename") );
+        fd.setFilterExtensions( new String[]{"*.*"} );
+        String selected = fd.open();
+        if ( selected == null )
+        	return;
+        
+        File	saveFile	= new File( selected );
+        lastSaveDirectory	= saveFile.getParent();
+        
+        try {
+  				setActionStatus(false, false);
+  				MongoCommand mcmd = new GridFSGetFileCommand( saveFile, (ObjectId)rowMap.get("_id") );
+  				mcmd.setConnection( queryData.getActiveName(), queryData.getActiveDB(), queryData.getActiveColl() );
+  				MongoFactory.getInst().submitExecution(mcmd);
+  			} catch (Exception e) {
+  				EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+  			}
+			}
+			
+		} else if ( refresh == NAVITEM.PUTFILE ){
+			
+			FileDialog fd = new FileDialog(shell, SWT.OPEN);
+      fd.setText("Upload to GridFS");
+      fd.setFilterPath( lastOpenDirectory );
+      fd.setFilterExtensions( new String[]{"*.*"} );
+      String selected = fd.open();
+      if ( selected == null )
+      	return;
+      
+      File	getFile	= new File( selected );
+      lastOpenDirectory	= getFile.getParent();
+      
+      try {
+				setActionStatus(false, false);
+				MongoCommand mcmd = new GridFSPutFileCommand( getFile );
+				mcmd.setConnection( queryData.getActiveName(), queryData.getActiveDB(), queryData.getActiveColl() );
+				MongoFactory.getInst().submitExecution(mcmd);
+			} catch (Exception e) {
+				EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+			}
+			
+		} else {
+		
+			String cmd	= queryData.getCommand( refresh );
+			if ( cmd == null )
+				return;
+			
+			try {
+				setActionStatus(false, queryData.isGridFS());
+				MongoCommand mcmd = MongoFactory.getInst().createCommand(cmd);
+				mcmd.setConnection( queryData.getActiveName(), queryData.getActiveDB() );
+				MongoFactory.getInst().submitExecution(mcmd);
+			} catch (Exception e) {
+				EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+			}
+		
 		}
 	}
 
@@ -174,13 +262,43 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 	@Override
 	public void onMongoCommandFinished(MongoCommand mcmd) {
 		if ( mcmd.getClass().getName().equals( FindMongoCommand.class.getName() ) ){
+			
 			onCommand( new QueryData( ((FindMongoCommand)mcmd) ), true );
+			
 		}	else if ( mcmd.getClass().getName().equals( GroupMongoCommand.class.getName() )
 				|| mcmd.getClass().getName().equals( AggregateMongoCommand.class.getName() ) ){
+			
 			onCommand( new QueryData( ((GroupMongoCommand)mcmd).getResults(), null ), false );
+			
 		}else if ( mcmd.getClass().getName().equals( MapReduceMongoCommand.class.getName() ) ){
+			
 			if ( ((MapReduceMongoCommand)mcmd).getResults() != null )
 				onCommand( new QueryData( ((MapReduceMongoCommand)mcmd).getResults(), null ), false );
+			
+		}else if ( mcmd.getClass().getName().equals( GridFSGetFileCommand.class.getName() ) ){
+			
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					setActionStatus(true, queryData.isGridFS() );
+				}
+			});
+			
+		}else if ( mcmd.getClass().getName().equals( GridFSPutFileCommand.class.getName() ) ){
+			
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					setActionStatus(true, queryData.isGridFS() );
+					onAction( NAVITEM.REFRESH );
+				}
+			});
+			
+		} else if ( mcmd.getClass().getName().equals( RemoveMongoCommand.class.getName() ) 
+				|| mcmd.getClass().getName().equals( GridFSRemoveFileCommand.class.getName() ) ){
+
+			if ( queryData != null &&  mcmd.getCollection().equals(queryData.getActiveColl()) ){
+				onAction( NAVITEM.REFRESH );
+			}
+
 		}
 	}
 
@@ -202,7 +320,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 				TabItem[] tabs = tabFolder.getItems();
 				tabs[0].setText("Total #" + queryData.getCount() );
 
-				setActionStatus(enableButtons);
+				setActionStatus(enableButtons, queryData.isGridFS() );
 			}
 		});
 

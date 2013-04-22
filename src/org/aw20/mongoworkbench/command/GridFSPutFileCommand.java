@@ -20,83 +20,53 @@
  *  resulting work. 
  *  
  *  https://github.com/aw20/MongoWorkBench
- *  Original fork: https://github.com/Kanatoko/MonjaDB
+ *  April 2013
  */
 package org.aw20.mongoworkbench.command;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.io.File;
+
+import javax.activation.MimetypesFileTypeMap;
 
 import org.aw20.mongoworkbench.MongoFactory;
 
 import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSInputFile;
 
-public class ShowCollectionsMongoCommand extends MongoCommand {
+public class GridFSPutFileCommand extends MongoCommand {
 
-	private List<String>	colNames = null, jsNames = null, gridfsNames = null;
+	private File getFile;
 	
+	public GridFSPutFileCommand(File getFile) {
+		this.getFile	= getFile;
+	}
+
 	@Override
 	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
-
+		
 		if ( mdb == null )
 			throw new Exception("no server selected");
 		
 		if ( sDb == null )
 			throw new Exception("no database selected");
-
+		
 		MongoFactory.getInst().setActiveDB(sDb);
 		DB db	= mdb.getDB(sDb);
-		Set<String>	colSet	= db.getCollectionNames();
 		
-		colNames		= new ArrayList<String>(colSet.size());
-		jsNames			= new ArrayList<String>(1);
-		gridfsNames	= new ArrayList<String>(1);
+		GridFS	gfs	= new GridFS( db, sColl.substring(0,sColl.lastIndexOf(".")) );
 		
+		GridFSInputFile gridFSInputFile = gfs.createFile(getFile);
+		gridFSInputFile.setContentType( MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(getFile) );
+		gridFSInputFile.save();
 		
-		Iterator<String> it = colSet.iterator();
-		while ( it.hasNext() ){
-			String colName = it.next();
-			
-			if ( colName.equals("system.js") ){
-
-				DBCollection col = db.getCollection("system.js");
-				DBCursor	cursor	= col.find();
-				while ( cursor.hasNext() ){
-					jsNames.add( cursor.next().get("_id").toString() );						
-				}
-				
-			}else if ( colName.endsWith(".chunks") )
-				gridfsNames.add( colName.substring(0, colName.lastIndexOf(".") ) );
-			else if ( colName.endsWith(".files") || colName.endsWith("system.indexes") )
-				;
-			else
-				colNames.add( colName );
-		}
-		
-		setMessage("# Collections=" + colNames.size() + "; GridFS=" + gridfsNames.size() + "; Javascript=" + jsNames.size() );
+		setMessage( "fileLoaded=" + getFile + "; size=" + getFile.length() );
 	}
 
-	@Override
 	public String getCommandString() {
-		return "show collections";
+		return "aw20.gridfs." + sColl.substring(0,sColl.lastIndexOf(".")) + ".put(\"" + getFile + "\")";
 	}
 	
-	public List<String>	getCollectionNames(){
-		return colNames;
-	}
-	
-	public List<String>	getGridFSNames(){
-		return gridfsNames;
-	}
-	
-	public List<String>	getJSNames(){
-		return jsNames;
-	}
-
 }

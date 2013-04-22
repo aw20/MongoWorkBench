@@ -4,24 +4,10 @@ UI
 - When find make sure the view is in focus
 - Make sorting more intelligent
 
-
-Connection
-
-
-Map Reduce
-
-
 GridFS
-- Mechanism for uploading and downloading files
-
 
 Javascript
-- Mechanism for storing and loading files
-
+- Plumb in the MSystemJavaScript class
 
 DocumentEditor
 - Add in a Refresh button to reload the active document
-
-
-DocumentView
-- Update the tab with the document count

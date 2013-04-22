@@ -33,6 +33,7 @@ import org.aw20.mongoworkbench.EventWorkBenchListener;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.EventWrapper;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.GridFSRemoveFileCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.table.TreeRender;
 import org.eclipse.swt.SWT;
@@ -168,13 +169,27 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
     int response = messageBox.open();
     if (response == SWT.YES){
 	
-			try {
-				MongoCommand mcmd = MongoFactory.getInst().createCommand("db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".remove({_id:ObjectId(\"" + id + "\")},true)");
-				mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME));
-				MongoFactory.getInst().submitExecution(mcmd);
-			} catch (Exception e) {
-				EventWorkBenchManager.getInst().onEvent(Event.EXCEPTION, e);
-			}
+    	if ( activeDocumentMap.get(EventWrapper.ACTIVE_COLL).toString().endsWith(".files") ){
+
+    		try {
+					MongoCommand mcmd = new GridFSRemoveFileCommand(id);
+					mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME),  (String)activeDocumentMap.get(EventWrapper.ACTIVE_DB),  (String)activeDocumentMap.get(EventWrapper.ACTIVE_COLL));
+					MongoFactory.getInst().submitExecution(mcmd);
+				} catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent(Event.EXCEPTION, e);
+				}
+    		
+    	}else{
+    	
+				try {
+					MongoCommand mcmd = MongoFactory.getInst().createCommand("db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".remove({_id:ObjectId(\"" + id + "\")})");
+					mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME));
+					MongoFactory.getInst().submitExecution(mcmd);
+				} catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent(Event.EXCEPTION, e);
+				}
+			
+    	}
     }
 	}
 	

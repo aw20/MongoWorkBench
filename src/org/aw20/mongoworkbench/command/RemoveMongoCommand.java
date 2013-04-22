@@ -21,82 +21,76 @@
  *  
  *  https://github.com/aw20/MongoWorkBench
  *  Original fork: https://github.com/Kanatoko/MonjaDB
+ *  
+ *  April 2013
  */
 package org.aw20.mongoworkbench.command;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.Date;
+import java.util.Map;
 
+import org.aw20.mongoworkbench.Event;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.MongoFactory;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
+import com.mongodb.util.JSON;
 
-public class ShowCollectionsMongoCommand extends MongoCommand {
 
-	private List<String>	colNames = null, jsNames = null, gridfsNames = null;
-	
+public class RemoveMongoCommand extends FindMongoCommand {
+
 	@Override
 	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
-
+		
 		if ( mdb == null )
 			throw new Exception("no server selected");
 		
 		if ( sDb == null )
 			throw new Exception("no database selected");
-
+		
 		MongoFactory.getInst().setActiveDB(sDb);
+		
 		DB db	= mdb.getDB(sDb);
-		Set<String>	colSet	= db.getCollectionNames();
+		BasicDBObject cmdMap	= parseMongoCommandString(db, cmd);
 		
-		colNames		= new ArrayList<String>(colSet.size());
-		jsNames			= new ArrayList<String>(1);
-		gridfsNames	= new ArrayList<String>(1);
+		if ( !cmdMap.containsField("removeArgs") )
+			throw new Exception("no remove document");
 		
+		DBCollection	collection	= db.getCollection(sColl);
 		
-		Iterator<String> it = colSet.iterator();
-		while ( it.hasNext() ){
-			String colName = it.next();
-			
-			if ( colName.equals("system.js") ){
-
-				DBCollection col = db.getCollection("system.js");
-				DBCursor	cursor	= col.find();
-				while ( cursor.hasNext() ){
-					jsNames.add( cursor.next().get("_id").toString() );						
-				}
+		BasicDBList	args = (BasicDBList)cmdMap.get("removeArgs");
 				
-			}else if ( colName.endsWith(".chunks") )
-				gridfsNames.add( colName.substring(0, colName.lastIndexOf(".") ) );
-			else if ( colName.endsWith(".files") || colName.endsWith("system.indexes") )
-				;
-			else
-				colNames.add( colName );
+		// Run the command
+		db.requestStart();
+		WriteResult writeresult;
+		try{
+			writeresult	= collection.remove( (DBObject)args.get(0), WriteConcern.JOURNAL_SAFE );
+		}finally{
+			db.requestDone();
 		}
+
+		// Get the result
+		Map mwriteresult	= (Map)JSON.parse( writeresult.toString() );
+		mwriteresult.put("exeDate", new Date() );
 		
-		setMessage("# Collections=" + colNames.size() + "; GridFS=" + gridfsNames.size() + "; Javascript=" + jsNames.size() );
+		EventWorkBenchManager.getInst().onEvent( Event.WRITERESULT, mwriteresult );
+		
+		setMessage( "Removed" );
 	}
-
+	
 	@Override
-	public String getCommandString() {
-		return "show collections";
+	public void parseCommandStr() throws Exception {
+		sColl = getCollNameFromAction(cmd, "remove");
+		
+		if ( sColl == null || sColl.length() == 0 )
+			throw new Exception("failed to determine collection from command");
 	}
-	
-	public List<String>	getCollectionNames(){
-		return colNames;
-	}
-	
-	public List<String>	getGridFSNames(){
-		return gridfsNames;
-	}
-	
-	public List<String>	getJSNames(){
-		return jsNames;
-	}
-
 }

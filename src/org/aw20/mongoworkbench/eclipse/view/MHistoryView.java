@@ -391,7 +391,7 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 				item.setText( COLUMN_ORDER, String.valueOf( table.getItemCount() ) );
 				item.setText( COLUMN_TIME, DateUtil.getDateString( System.currentTimeMillis(), "HH:mm:ss") );
 				item.setText( COLUMN_DATABASE, "" );
-				item.setText( COLUMN_ACTION, exception.getMessage() );
+				item.setText( COLUMN_ACTION, (exception == null || exception.getMessage() == null ) ? "" : exception.getMessage() );
 				item.setText( COLUMN_MESSAGE, "Exception" );
 				item.setText( COLUMN_MS, "" );
 				

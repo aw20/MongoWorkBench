@@ -23,6 +23,16 @@ a.mapReduce = function(){
 	return this;
 };
 
+a.remove = function(){
+	this.invoked.push('remove');
+	this.removeArgs	= [];
+	
+	for( var i = 0; i < arguments.length; ++i )	{
+		this.removeArgs[i] = arguments[i];
+	}
+	return this;
+};
+
 a.group = function(){
 	this.invoked.push('group');
 	this.groupArg = arguments[0];

@@ -40,6 +40,7 @@ import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MapReduceMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.PassThruMongoCommand;
+import org.aw20.mongoworkbench.command.RemoveMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
 import org.aw20.mongoworkbench.command.UpdateMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
@@ -78,6 +79,7 @@ public class MongoFactory extends Thread {
 		commandMap.put("^db\\.[^\\(]+\\.find\\(.*", FindMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.save\\(.*", SaveMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.update\\(.*", UpdateMongoCommand.class);
+		commandMap.put("^db\\.[^\\(]+\\.remove\\(.*", RemoveMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.group\\(.*", GroupMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.aggregate\\(.*", AggregateMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.mapReduce\\(.*", MapReduceMongoCommand.class);

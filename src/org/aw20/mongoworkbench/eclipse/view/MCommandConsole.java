@@ -127,7 +127,7 @@ public class MCommandConsole extends MAbstractView {
 
 		executeAction.setToolTipText("Execute selected (or all) as a MongoDB command (SHIFT+ENTER)");
 		executeAction.setText("Execute");
-		setActionImage(executeAction, "bullet_go.png");
+		setActionImage(executeAction, "lightning.png");
 		addActionToToolBar(executeAction);
 		executeAction.setEnabled(true);
 		menuManager.add(executeAction);

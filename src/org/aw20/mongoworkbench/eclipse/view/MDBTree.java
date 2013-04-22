@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.EventWrapper;
 import org.aw20.mongoworkbench.MongoCommandListener;
@@ -45,6 +44,8 @@ import org.aw20.mongoworkbench.command.DBStatsMongoCommand;
 import org.aw20.mongoworkbench.command.DBserverStatsMongoCommand;
 import org.aw20.mongoworkbench.command.DropCollectionMongoCommand;
 import org.aw20.mongoworkbench.command.DropDbsMongoCommand;
+import org.aw20.mongoworkbench.command.GridFSCreateBucketCommand;
+import org.aw20.mongoworkbench.command.GridFSRemoveBucketCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.ShowCollectionsMongoCommand;
 import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
@@ -135,6 +136,20 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 				String sColl	= selectedItem.getText();
 				try {
 					MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db." + sColl + ".find()");
+					if ( mcmd != null )
+						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
+				}catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+				}
+
+			} else if ( nodeType == NodeType.GRIDFS ){
+
+				Activator.getDefault().showView("org.aw20.mongoworkbench.eclipse.view.MDocumentView");
+				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
+				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+				String sColl	= selectedItem.getText();
+				try {
+					MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db." + sColl + ".files.find()");
 					if ( mcmd != null )
 						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
 				}catch (Exception e) {
@@ -248,16 +263,22 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 	private int	ACTION_COLLECTIONMETADATA_NAME		= 11;
 	private int	ACTION_COLLECTIONMETADATA_CREATE	= 12;
 	private int	ACTION_COLLECTIONMETADATA_REFRESH	= 13;
-	private int	ACTION_COLLECTION_NAME				= 14;
-	private int	ACTION_COLLECTION_EMPTY				= 15;
-	private int	ACTION_COLLECTION_DROP				= 16;
-	private int	ACTION_COLLECTION_COUNT				= 17;
-	private int	ACTION_SERVER_ADD							= 18;
-	private int	ACTION_COLLECTION_STATS				= 19;
+	private int	ACTION_COLLECTION_NAME						= 14;
+	private int	ACTION_COLLECTION_EMPTY						= 15;
+	private int	ACTION_COLLECTION_DROP						= 16;
+	private int	ACTION_COLLECTION_COUNT						= 17;
+	private int	ACTION_SERVER_ADD									= 18;
+	private int	ACTION_COLLECTION_STATS						= 19;
+	private int ACTION_SYSTEMJAVASCRIPT_ADD				= 20;
+	private int ACTION_SYSTEMJAVASCRIPT_DELETE		= 21;
+	private int ACTION_SYSTEMJAVASCRIPT_RELOAD		= 22;
+
+	private int ACTION_GRIDFS_CREATE							= 23;
+	private int ACTION_GRIDFS_DELETE							= 24;
 
 	private void createActions(){
 	
-		actionList	= new Action[20];
+		actionList	= new Action[25];
 		
 		// Server
 		actionList[ACTION_SERVER_ADD] = new Action() {public void run() {actionRun(ACTION_SERVER_ADD);}	};
@@ -334,6 +355,20 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 		actionList[ACTION_COLLECTION_COUNT] = new Action() {public void run() {actionRun(ACTION_COLLECTION_COUNT);}	};
 		actionList[ACTION_COLLECTION_COUNT].setText("Count Collection");
 		
+		actionList[ACTION_SYSTEMJAVASCRIPT_ADD]	 	= new Action() {public void run() {actionRun(ACTION_SYSTEMJAVASCRIPT_ADD);}	};
+		actionList[ACTION_SYSTEMJAVASCRIPT_ADD].setText( "Create System JavaScript" );
+		
+		actionList[ACTION_SYSTEMJAVASCRIPT_DELETE]	= new Action() {public void run() {actionRun(ACTION_SYSTEMJAVASCRIPT_DELETE);}	};
+		actionList[ACTION_SYSTEMJAVASCRIPT_DELETE].setText( "Delete JavaScript" );
+		
+		actionList[ACTION_SYSTEMJAVASCRIPT_RELOAD]	= new Action() {public void run() {actionRun(ACTION_SYSTEMJAVASCRIPT_RELOAD);}	};
+		actionList[ACTION_SYSTEMJAVASCRIPT_RELOAD].setText( "Load JavaScript to DB" );
+		
+		actionList[ACTION_GRIDFS_CREATE]	= new Action() {public void run() {actionRun(ACTION_GRIDFS_CREATE);}	};
+		actionList[ACTION_GRIDFS_CREATE].setText( "Create a new GridFS Collection" );
+		
+		actionList[ACTION_GRIDFS_DELETE]	= new Action() {public void run() {actionRun(ACTION_GRIDFS_DELETE);}	};
+		actionList[ACTION_GRIDFS_DELETE].setText( "Delete GridFS Collection" );
 	}
 	
 	
@@ -375,6 +410,22 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			menuManager.add( actionList[ACTION_COLLECTIONMETADATA_REFRESH] );
 			menuManager.add( actionList[ACTION_COLLECTIONMETADATA_CREATE] );
 
+			
+		} else if ( nodeType == NodeType.METADATA && selectedItem.getText().equals("GridFS") ) {
+			
+			actionList[ACTION_COLLECTIONMETADATA_NAME].setText( selectedItem.getParentItem().getText() );
+			menuManager.add( actionList[ACTION_COLLECTIONMETADATA_NAME] );
+			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_GRIDFS_CREATE] );
+
+		} else if ( nodeType == NodeType.METADATA && selectedItem.getText().equals("Stored Javascript") ) {
+			
+			actionList[ACTION_COLLECTIONMETADATA_NAME].setText( selectedItem.getParentItem().getText() );
+			menuManager.add( actionList[ACTION_COLLECTIONMETADATA_NAME] );
+			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_SYSTEMJAVASCRIPT_ADD] );
+			menuManager.add( actionList[ACTION_SYSTEMJAVASCRIPT_RELOAD] );
+
 		} else if ( nodeType == NodeType.COLLECTION ) {
 			
 			actionList[ACTION_COLLECTION_NAME].setText( selectedItem.getText() );
@@ -383,7 +434,21 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			menuManager.add( actionList[ACTION_COLLECTION_COUNT] );
 			menuManager.add( actionList[ACTION_COLLECTION_EMPTY] );
 			menuManager.add( actionList[ACTION_COLLECTION_DROP] );
-		
+			
+		} else if ( nodeType == NodeType.GRIDFS ) {
+			
+			actionList[ACTION_COLLECTION_NAME].setText( selectedItem.getText() );
+			menuManager.add( actionList[ACTION_COLLECTION_NAME] );
+			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_GRIDFS_DELETE] );
+			
+		} else if ( nodeType == NodeType.JAVASCRIPT ) {
+				
+			actionList[ACTION_COLLECTION_NAME].setText( selectedItem.getText() );
+			menuManager.add( actionList[ACTION_COLLECTION_NAME] );
+			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_SYSTEMJAVASCRIPT_DELETE] );
+				
 		}
 		
 	}
@@ -542,9 +607,113 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
       }
       
 		}else if ( type == ACTION_SERVER_ADD ){
-			onConnectSelect( new HashMap() );		
-		}
 
+			onConnectSelect( new HashMap() );
+			
+		}else if ( type == ACTION_SYSTEMJAVASCRIPT_ADD ){
+			
+			TextInputPopup	popup	= new TextInputPopup(parent.getShell(), "Create System JavaScript");
+			String newJSName	= popup.open("JavaScript:");
+			if ( newJSName != null ){
+				TreeItem	selectedItem	= tree.getSelection()[0];
+	    	
+				String sName	= selectedItem.getParentItem().getParentItem().getText();
+				String sDb		=	selectedItem.getParentItem().getText();
+	
+				try {
+					MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db.system.js.save({'_id':'" + newJSName + "', value: function(){} })");
+					if ( mcmd != null ){
+						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
+						MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
+					}
+				}catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+				}
+
+			}
+
+		}else if ( type == ACTION_SYSTEMJAVASCRIPT_DELETE ){
+
+			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+      messageBox.setMessage("Do you really want to delete this JavaScript?\r\n\r\n     " + tree.getSelection()[0].getText() );
+      messageBox.setText("Delete JavaScript Confirmation");
+      int response = messageBox.open();
+      if (response == SWT.YES){
+  			TreeItem	selectedItem	= tree.getSelection()[0];
+      	
+  			String sName	= selectedItem.getParentItem().getParentItem().getParentItem().getText();
+  			String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+
+  			try {
+					MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db.system.js.remove({'_id':'" + selectedItem.getText() + "'})");
+					if ( mcmd != null ){
+						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
+						MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
+					}
+				}catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+				}
+  			
+      }
+			
+		}else if ( type == ACTION_SYSTEMJAVASCRIPT_RELOAD ){
+
+			TreeItem	selectedItem	= tree.getSelection()[0];
+    	
+			String sName	= selectedItem.getParentItem().getParentItem().getText();
+			String sDb		=	selectedItem.getParentItem().getText();
+			
+			try {
+				MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db.loadServerScripts()");
+				if ( mcmd != null ){
+					MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
+				}
+			}catch (Exception e) {
+				EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+			}
+			
+		}else if ( type == ACTION_GRIDFS_CREATE ){
+			
+			TextInputPopup	popup	= new TextInputPopup(parent.getShell(), "Create GridFS Collection");
+			String newGridFS	= popup.open("GridFS:");
+			if ( newGridFS != null ){
+				TreeItem	selectedItem	= tree.getSelection()[0];
+	    	
+				String sName	= selectedItem.getParentItem().getParentItem().getText();
+				String sDb		=	selectedItem.getParentItem().getText();
+	
+				try {
+					MongoCommand	mcmd	= new GridFSCreateBucketCommand();
+					if ( mcmd != null ){
+						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb, newGridFS) );
+						MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
+					}
+				}catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+				}
+
+			}
+			
+		}else if ( type == ACTION_GRIDFS_DELETE ){
+			
+			MessageBox messageBox = new MessageBox(parent.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+      messageBox.setMessage("Do you really want drop this GridFS?\r\n\r\n     " + tree.getSelection()[0].getText() );
+      messageBox.setText("Drop Collection Confirmation");
+      int response = messageBox.open();
+      if (response == SWT.YES){
+  			TreeItem	selectedItem	= tree.getSelection()[0];
+      	
+  			String sName	= selectedItem.getParentItem().getParentItem().getParentItem().getText();
+  			String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+  			String sColl	=	selectedItem.getText();
+
+  			MongoFactory.getInst().setActiveServerDB( sName, sDb );
+  			MongoFactory.getInst().submitExecution( new GridFSRemoveBucketCommand().setConnection(sName, sDb, sColl) );
+  			MongoFactory.getInst().submitExecution( new ShowCollectionsMongoCommand().setConnection(sName, sDb) );
+      }
+
+		}
+		
 	}
 	
 	

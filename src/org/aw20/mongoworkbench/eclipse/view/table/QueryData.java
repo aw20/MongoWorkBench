@@ -26,6 +26,7 @@ package org.aw20.mongoworkbench.eclipse.view.table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.eclipse.swt.SWT;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.gridfs.GridFSDBFile;
 
 public class QueryData extends Object {
 	private static int MAX_CHAR_WIDTH = 24;
@@ -80,7 +82,26 @@ public class QueryData extends Object {
 		while ( cursor.hasNext() ){
 			DBObject dbo	= cursor.next();
 			columnSet.addAll( dbo.keySet() );
-			data.add( dbo.toMap() );
+			
+			if ( dbo instanceof GridFSDBFile ){
+				Map map	= new HashMap();
+				map.put("_id", ((GridFSDBFile)dbo).getId() );
+				map.put("chunkSize", ((GridFSDBFile)dbo).getChunkSize() );
+				map.put("md5", ((GridFSDBFile)dbo).getMD5() );
+				map.put("length", ((GridFSDBFile)dbo).getLength() );
+				map.put("filename", ((GridFSDBFile)dbo).getFilename() );
+				map.put("contentType", ((GridFSDBFile)dbo).getContentType() );
+				
+				if ( ((GridFSDBFile)dbo).getAliases() != null )
+					map.put("aliases", ((GridFSDBFile)dbo).getAliases() );
+				
+				if ( ((GridFSDBFile)dbo).getMetaData() != null )
+					map.put("metadata", ((GridFSDBFile)dbo).getMetaData() );
+				
+				map.put("uploadDate", ((GridFSDBFile)dbo).getUploadDate() );
+				data.add( map );
+			}else
+				data.add( dbo.toMap() );
 		}
 
 		findCommand.close();
@@ -118,6 +139,10 @@ public class QueryData extends Object {
 			}
 		}
 		
+	}
+	
+	public boolean isGridFS(){
+		return ( findCommand != null && findCommand.getCollection().endsWith(".files") );
 	}
 
 	public int getCount(){
