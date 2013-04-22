@@ -11,7 +11,7 @@
             allowMultiple="false"
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MDBTree"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/database_gear.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/database_gear.png"
             id="org.aw20.mongoworkbench.eclipse.view.MDBTree"
             name="DB Tree"
             restorable="true">
@@ -20,7 +20,7 @@
             allowMultiple="false"
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MCommandConsole"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
             id="org.aw20.mongoworkbench.eclipse.view.MCommandConsole"
             name="Cmd Console"
             restorable="true">
@@ -29,7 +29,7 @@
             allowMultiple="false"
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MCommandWizardView"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
             id="org.aw20.mongoworkbench.eclipse.view.MCommandWizardView"
             name="Cmd Wizards"
             restorable="true">
@@ -38,7 +38,7 @@
             allowMultiple="false"
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MHistoryView"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/cog_start.png"
             id="org.aw20.mongoworkbench.eclipse.view.MHistoryView"
             name="Cmd History"
             restorable="true">
@@ -47,7 +47,7 @@
             allowMultiple="false"
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MDBShowStatistics"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/database.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/database.png"
             id="org.aw20.mongoworkbench.eclipse.view.MDBShowStatistics"
             name="Server Statistics"
             restorable="true">
@@ -56,7 +56,7 @@
             allowMultiple="false"
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MCollectionShowStatus"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/table_multiple.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/table_multiple.png"
             id="org.aw20.mongoworkbench.eclipse.view.MCollectionShowStatus"
             name="Collection List"
             restorable="true">
@@ -64,7 +64,7 @@
       <view
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MDocumentView"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/table.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/table.png"
             id="org.aw20.mongoworkbench.eclipse.view.MDocumentView"
             name="Query Output"
             restorable="true">
@@ -72,7 +72,7 @@
       <view
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MJavaScriptView"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/database_go.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/database_go.png"
             id="org.aw20.mongoworkbench.eclipse.view.MJavaScriptView"
             name="JavaScript"
             restorable="true">
@@ -88,7 +88,7 @@
 			<view
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MEditor"
-            icon="src/org/aw20/mongoworkbench/eclipse/resources/table_edit.png"
+            icon="bin/org/aw20/mongoworkbench/eclipse/resources/table_edit.png"
             id="org.aw20.mongoworkbench.eclipse.view.MEditor"
             name="Editor"
             restorable="true">

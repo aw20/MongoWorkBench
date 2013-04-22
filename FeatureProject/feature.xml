@@ -2,18 +2,17 @@
 <feature
       id="MongoWorkBenchFeature"
       label="MongoWorkBenchFeature"
-      version="0.9.0"
+      version="0.9.2"
       provider-name="aw2.0"
       plugin="org.aw20.MongoWorkBench">
 
    <description url="https://github.com/aw20/MongoWorkBench">
       Mongo Workbench is a powerful GPL Eclipse plugin MySQL/SQLServer
-Workbench style client tool for interacting with MongoDB. Based
-and forked from the popular MonjaDB Eclipse plugin.
+Workbench style client tool for interacting with MongoDB.
    </description>
 
    <copyright url="https://github.com/aw20/MongoWorkBench">
-      Copyright
+      Copyright aw2.0 Ltd
    </copyright>
 
    <license url="https://github.com/aw20/MongoWorkBench">
@@ -639,6 +638,10 @@ copy of the Program in return for a fee.
 
                      END OF TERMS AND CONDITIONS
    </license>
+
+   <url>
+      <update label="aw2.0 Eclipse" url="http://eclipse.aw20.net/"/>
+   </url>
 
    <requires>
       <import plugin="org.eclipse.ui"/>
