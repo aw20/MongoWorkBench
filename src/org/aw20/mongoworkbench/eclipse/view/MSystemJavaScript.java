@@ -27,45 +27,56 @@ package org.aw20.mongoworkbench.eclipse.view;
 
 import java.io.IOException;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Text;
+import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.MongoCommandListener;
+import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.SystemJavaScriptReadCommand;
+import org.aw20.mongoworkbench.command.SystemJavaScriptValidateCommand;
+import org.aw20.mongoworkbench.command.SystemJavaScriptWriteCommand;
+import org.aw20.util.MSwtUtil;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
-public class MSystemJavaScript extends Composite {
+public class MSystemJavaScript extends MAbstractView implements MongoCommandListener {
 	private Text textBox;
 	private String HELPURL = "http://docs.mongodb.org/manual/tutorial/store-javascript-function-on-server/";
 
-	/**
-	 * Create the composite.
-	 * @param parent
-	 * @param style
-	 */
-	public MSystemJavaScript(Composite parent, int style) {
-		super(parent, style);
-		GridLayout gridLayout = new GridLayout(4, true);
-		setLayout(gridLayout);
+	private Button btnValidate, btnSave;
+	private SystemJavaScriptReadCommand readCommand;
+	
+	public MSystemJavaScript() {
+		MongoFactory.getInst().registerListener(this);
+	}
 		
-		textBox = new Text(this, SWT.BORDER);
-		GridData gd_textBox = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
-		gd_textBox.widthHint = 1340;
-		gd_textBox.heightHint = 236;
-		textBox.setLayoutData(gd_textBox);
-		new Label(this, SWT.NONE);
+	public void dispose() {
+		MongoFactory.getInst().deregisterListener(this);
+		super.dispose();
+	}
+
+	
+	public void init2() {
+		parent.setLayout(new GridLayout(3, false));
 		
-		Label urlLabel = new Label(this, SWT.WRAP);
-		urlLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		textBox = MSwtUtil.createText(parent);
+		GridData gd_text = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
+		gd_text.widthHint = 438;
+		textBox.setLayoutData(gd_text);
+		
+		Label urlLabel = new Label(parent, SWT.NONE);
+		urlLabel.setText("url");
 		urlLabel.setText(HELPURL);
-		urlLabel.setToolTipText("click here to visit the java documentation");
-		urlLabel.setCursor( new Cursor( this.getDisplay(), SWT.CURSOR_HAND ) );
+		urlLabel.setToolTipText("click here to visit the MongoDB documentation");
+		urlLabel.setCursor( new Cursor( parent.getDisplay(), SWT.CURSOR_HAND ) );
 		urlLabel.addMouseListener(new MouseListener() {
 
 			@Override
@@ -83,38 +94,80 @@ public class MSystemJavaScript extends Composite {
 			
 		});
 		
-		Button btnValidate = new Button(this, SWT.NONE);
-		btnValidate.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		
+		btnValidate = new Button(parent, SWT.NONE);
+		btnValidate.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 		btnValidate.setText("validate");
+		btnValidate.setEnabled(false);
 		btnValidate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onValidate();
 			}
-
 		});
 		
-		Button btnSave = new Button(this, SWT.NONE);
+		
+		btnSave = new Button(parent, SWT.NONE);
+		btnSave.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnSave.setText("save");
+		btnSave.setEnabled(false);
 		btnSave.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onSave();
 			}
 		});
-		
-
 	}
+	
 	private void onValidate() {
-		
+		try {
+			MongoCommand	mcmd	= new SystemJavaScriptValidateCommand(readCommand.getJSName(), textBox.getText());
+			MongoFactory.getInst().submitExecution( mcmd.setConnection(readCommand.getName(), readCommand.getDB()) );
+			btnSave.setEnabled(false);
+			btnValidate.setEnabled(false);
+		}catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+		}
 	}
 	
 	private void onSave() {
-		
+		try {
+			MongoCommand	mcmd	= new SystemJavaScriptWriteCommand(readCommand.getJSName(), textBox.getText());
+			MongoFactory.getInst().submitExecution( mcmd.setConnection(readCommand.getName(), readCommand.getDB()) );
+			btnSave.setEnabled(false);
+			btnValidate.setEnabled(false);
+		}catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+		}
 	}
 
 	@Override
-	protected void checkSubclass() {
-		// Disable the check that prevents subclassing of SWT components
+	public void onMongoCommandStart(MongoCommand mcmd) {}
+
+	@Override
+	public void onMongoCommandFinished(MongoCommand mcmd) {
+		if ( mcmd instanceof SystemJavaScriptReadCommand ){
+			readCommand	= (SystemJavaScriptReadCommand)mcmd;
+			final String jsCode = readCommand.getCode();
+			
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					textBox.setText(jsCode);
+					btnSave.setEnabled(true);
+					btnValidate.setEnabled(true);
+				}
+			});
+			
+		} else if ( mcmd instanceof SystemJavaScriptWriteCommand || mcmd instanceof SystemJavaScriptValidateCommand ){
+			
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					btnSave.setEnabled(true);
+					btnValidate.setEnabled(true);
+				}
+			});
+			
+		}
 	}
+
 }

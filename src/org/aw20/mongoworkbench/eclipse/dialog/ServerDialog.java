@@ -183,7 +183,7 @@ public class ServerDialog extends Dialog {
 		if ( attributes.containsKey("sshhost") )
 			textSSH.setText( (String)attributes.get("sshhost") );
 		
-		if ( attributes.containsKey("direct") ){
+		if ( !attributes.containsKey("sshhost") ){
 			btnDirectConnection.setSelection(true);
 			btnSshConnection.setSelection(false);
 			textSSH.setEnabled(false);
@@ -338,6 +338,7 @@ public class ServerDialog extends Dialog {
 			}
 		});
 		btnSshConnection.setText("SSH Connection");
+		btnSshConnection.setEnabled(false);
 		new Label(grpConnection, SWT.NONE);
 		
 		Label lblPrivateKeyFile = new Label(grpConnection, SWT.NONE);

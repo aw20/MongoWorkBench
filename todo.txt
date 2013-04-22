@@ -4,10 +4,8 @@ UI
 - When find make sure the view is in focus
 - Make sorting more intelligent
 
-GridFS
-
-Javascript
-- Plumb in the MSystemJavaScript class
-
 DocumentEditor
 - Add in a Refresh button to reload the active document
+
+Connection
+- SSH handling

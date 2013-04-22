@@ -49,6 +49,7 @@ import org.aw20.mongoworkbench.command.GridFSRemoveBucketCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.ShowCollectionsMongoCommand;
 import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
+import org.aw20.mongoworkbench.command.SystemJavaScriptReadCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
 import org.aw20.mongoworkbench.eclipse.Activator;
 import org.aw20.mongoworkbench.eclipse.dialog.ServerDialog;
@@ -152,6 +153,19 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db." + sColl + ".files.find()");
 					if ( mcmd != null )
 						MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
+				}catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
+				}
+			
+			} else if ( nodeType == NodeType.JAVASCRIPT ){
+
+				Activator.getDefault().showView("org.aw20.mongoworkbench.eclipse.view.MSystemJavaScript");
+				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
+				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+				String jsName	= selectedItem.getText();
+				try {
+					MongoCommand	mcmd	= new SystemJavaScriptReadCommand( jsName );
+					MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb) );
 				}catch (Exception e) {
 					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
 				}

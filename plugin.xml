@@ -77,7 +77,15 @@
             name="JavaScript"
             restorable="true">
       </view>
-     <view
+      <view
+            category="MongoWorkBench.category1"
+            class="org.aw20.mongoworkbench.eclipse.view.MSystemJavaScript"
+            icon="src/org/aw20/mongoworkbench/eclipse/resources/script_edit.png"
+            id="org.aw20.mongoworkbench.eclipse.view.MSystemJavaScript"
+            name="System JavaScript"
+            restorable="true">
+      </view>
+			<view
             category="MongoWorkBench.category1"
             class="org.aw20.mongoworkbench.eclipse.view.MEditor"
             icon="src/org/aw20/mongoworkbench/eclipse/resources/table_edit.png"
