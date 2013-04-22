@@ -11,7 +11,14 @@ Released under the GNU General Public License v3.0.
 Installation
 ==
 
-To follow
+From your Eclipse:  "Help" -> "Install New Software..." -> "Add.."
+
+Then put in:
+
+MongoWorkBench
+http://eclipse.aw20.net/site.xml
+
+Eclipse will walk you through the installation.
 
 Features
 ==
@@ -23,6 +30,8 @@ Features
 * JSON viewer for documents
 * Command History to quickly repeat commands
 * Database and Collection statistics
+* GridFS support (uploading/download files)
+* System JavaScript support
 
 Project History
 ==
