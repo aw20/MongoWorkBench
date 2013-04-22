@@ -15,10 +15,12 @@ From your Eclipse:  "Help" -> "Install New Software..." -> "Add.."
 
 Then put in:
 
-MongoWorkBench
-http://eclipse.aw20.net/site.xml
+Name: MongoWorkBench
+URL: http://eclipse.aw20.net/site.xml
 
 Eclipse will walk you through the installation.
+
+If you do not have Eclipse, then you can download the latest version here: http://www.eclipse.org/downloads/
 
 Features
 ==
