@@ -33,6 +33,11 @@ Features
 * GridFS support (uploading/download files)
 * System JavaScript support
 
+Release History
+==
+
+* 0.9.2 April 2013
+
 Project History
 ==
 
