@@ -42,6 +42,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -243,6 +244,7 @@ public class MapReduceWizard extends Composite implements WizardCommandI {
 		Label lblNewLabel_2 = new Label(this, SWT.NONE);
 		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblNewLabel_2.setText(HELPURL);
+		lblNewLabel_2.setCursor( new Cursor( this.getDisplay(), SWT.CURSOR_HAND ) );
 		lblNewLabel_2.addMouseListener(new MouseListener() {
 
 			@Override
