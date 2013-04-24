@@ -42,6 +42,8 @@ import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.RemoveMongoCommand;
 import org.aw20.mongoworkbench.command.SaveMongoCommand;
+import org.aw20.mongoworkbench.command.ShowCollectionsMongoCommand;
+import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
 import org.aw20.mongoworkbench.command.UpdateMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
 import org.aw20.mongoworkbench.eclipse.Activator;
@@ -84,6 +86,8 @@ public class MongoFactory extends Thread {
 		commandMap.put("^db\\.[^\\(]+\\.aggregate\\(.*", AggregateMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.mapReduce\\(.*", MapReduceMongoCommand.class);
 		commandMap.put("^use\\s+.*", UseMongoCommand.class);
+		commandMap.put("^show dbs", ShowDbsMongoCommand.class);
+		commandMap.put("^show collections", ShowCollectionsMongoCommand.class);
 
 		setName( "MongoFactory" );
 		start();

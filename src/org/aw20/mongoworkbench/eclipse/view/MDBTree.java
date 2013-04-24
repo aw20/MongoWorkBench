@@ -876,6 +876,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					
 					// Show the server item
 					tree.showItem( item );
+					item.setExpanded(true);
 					
 				} catch (Exception e) {
 					EventWorkBenchManager.getInst().onEvent( org.aw20.mongoworkbench.Event.EXCEPTION, e );
@@ -941,7 +942,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					item.setImage(imageCollection);
 					item.setData( EventWrapper.createMap(KEY_TYPE, NodeType.COLLECTION) );
 				}
-				
+				coll.setExpanded(true);
 
 				TreeItem	js	= new TreeItem( dbItem, SWT.None );
 				js.setText("Stored Javascript");
@@ -955,6 +956,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					item.setImage(imageCollection);
 					item.setData( EventWrapper.createMap(KEY_TYPE, NodeType.JAVASCRIPT) );
 				}
+				js.setExpanded(true);
 				
 				
 				TreeItem gridfs = new TreeItem( dbItem, SWT.None );
@@ -969,6 +971,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 					item.setImage(imageCollection);
 					item.setData( EventWrapper.createMap(KEY_TYPE, NodeType.GRIDFS) );
 				}
+				gridfs.setExpanded(true);
 				
 				tree.showItem(coll);
 			}
