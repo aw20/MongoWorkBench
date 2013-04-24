@@ -55,7 +55,7 @@ public class DBserverStatsMongoCommand extends MongoCommand {
 		Object obj = dbM.eval( "db.serverStatus()", (Object[])null );
 		if ( obj instanceof Map ){
 			map	= (Map)obj;
-			setMessage("");	
+			setMessage("Server Status - version=" + map.get("version") + "; localTime=" + map.get("localTime"));	
 		}else{
 			map = null;
 			setMessage("invalid result returned");	

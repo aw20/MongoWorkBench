@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aw20.mongoworkbench.command.AggregateMongoCommand;
+import org.aw20.mongoworkbench.command.DBStatsMongoCommand;
+import org.aw20.mongoworkbench.command.DBserverStatsMongoCommand;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MapReduceMongoCommand;
@@ -88,6 +90,8 @@ public class MongoFactory extends Thread {
 		commandMap.put("^use\\s+.*", UseMongoCommand.class);
 		commandMap.put("^show dbs", ShowDbsMongoCommand.class);
 		commandMap.put("^show collections", ShowCollectionsMongoCommand.class);
+		commandMap.put("^db\\.serverStatus\\(.*", DBserverStatsMongoCommand.class);
+		commandMap.put("^db\\.getStats\\(.*", DBStatsMongoCommand.class);
 
 		setName( "MongoFactory" );
 		start();
