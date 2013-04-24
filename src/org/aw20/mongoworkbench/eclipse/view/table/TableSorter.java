@@ -83,9 +83,12 @@ public class TableSorter {
 					for ( int x=0; x < values.length; x++ )
 						values[x]	= items[i].getText(x);
 
-					items[i].dispose();
 					TableItem item = new TableItem(table, SWT.NONE, j);
 					item.setText(values);
+					item.setData( items[i].getData() );
+
+					items[i].dispose();
+
 					items = table.getItems();
 					break;
 				}

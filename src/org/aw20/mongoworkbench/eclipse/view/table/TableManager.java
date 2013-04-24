@@ -69,7 +69,6 @@ public class TableManager implements Listener {
 	public void redraw(QueryData queryData) {
 		clear();
 
-		
 		this.queryData = queryData;
 
 		if ( queryData.size() == 0 )
@@ -87,6 +86,7 @@ public class TableManager implements Listener {
 		for ( int r=0; r < queryData.size(); r++ ){
 			Map	rowMap	= queryData.get(r);
 			TableItem	item	= new TableItem( table, SWT.NONE );
+			item.setData(r);
 			
 			for (int i = 0; i < columns.length; ++i) {
 				item.setText(i, queryData.getString( rowMap, columns[i] ) );
@@ -109,7 +109,7 @@ public class TableManager implements Listener {
 				break;
 			case SWT.Selection:
 
-				Map	rowMap	= queryData.get(table.getSelectionIndex());
+				Map	rowMap	= queryData.get( (Integer)table.getItem(table.getSelectionIndex()).getData() );
 				if ( rowMap != null ){
 					Map eventMap	= EventWrapper.createMap( 
 							EventWrapper.ACTIVE_NAME, queryData.getActiveName(), 
