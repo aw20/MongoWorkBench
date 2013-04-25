@@ -134,9 +134,9 @@ public class TreeRender {
 
 			TreeItem newItem; 
 			if ( parentItem == null )
-				newItem = new TreeItem(tree, SWT.NONE);
+				newItem = new TreeItem(tree, SWT.SINGLE);
 			else
-				newItem = new TreeItem(parentItem, SWT.NONE);
+				newItem = new TreeItem(parentItem, SWT.SINGLE);
 
 			String fieldName = parentFieldName + "." + key;
 			if ( fieldName.startsWith(".") )
@@ -144,7 +144,6 @@ public class TreeRender {
 			
 			newItem.setData("fieldName", fieldName);
 			newItem.setData("value", value);
-			//fieldNameTreeItemMap.put(fieldName, newItem);
 
 			if (value == null) {
 				newItem.setText(key);
@@ -153,10 +152,12 @@ public class TreeRender {
 			} else if (value instanceof Map) {
 				newItem.setText(key);
 				newItem.setImage(mapImage);
+				newItem.setData("class", Map.class );
 				drawItem(fieldName, newItem, (Map) value, expand);
 			} else if (value instanceof List) {
 				newItem.setText(key);
 				newItem.setImage(listImage);
+				newItem.setData("class", List.class );
 				drawItem(fieldName, newItem, (List) value, expand);
 			} else {
 				setItemInfo(newItem, key, value);
@@ -173,7 +174,7 @@ public class TreeRender {
 	
 	private void drawItem(String parentFieldName, TreeItem parentItem, List data, boolean expand) {
 		for (int i = 0; i < data.size(); ++i) {
-			TreeItem newItem = new TreeItem(parentItem, SWT.NONE);
+			TreeItem newItem = new TreeItem(parentItem, SWT.SINGLE);
 			Object value = data.get(i);
 
 			String fieldName = parentFieldName + "." + i;
@@ -182,15 +183,20 @@ public class TreeRender {
 			
 			newItem.setData("fieldName", fieldName);
 			newItem.setData("value", value);
-			//fieldNameTreeItemMap.put(fieldName, newItem);
 
-			if (value instanceof Map) {
+			if (value == null) {
+				newItem.setText("[" + i + "]");
+				newItem.setImage(nullImage);
+				setItemInfo(newItem, "[" + i + "]", value);
+			} else if (value instanceof Map) {
 				newItem.setText("[" + i + "]");
 				newItem.setImage(mapImage);
+				newItem.setData("class", Map.class );
 				drawItem(fieldName, newItem, (Map) value, expand);
 			} else if (value instanceof List) {
 				newItem.setText("[" + i + "]");
 				newItem.setImage(listImage);
+				newItem.setData("class", List.class );
 				drawItem(fieldName, newItem, (List) value, expand);
 			} else {
 				setItemInfo(newItem, "[" + i + "]", value);
@@ -213,35 +219,45 @@ public class TreeRender {
 		if (value instanceof Integer) {
 			treeItem.setImage(intImage);
 			treeItem.setText(2, "int32" );	
+			treeItem.setData("class", Integer.class );
 		} else if (value instanceof Double) {
 			treeItem.setImage(doubleImage);
 			treeItem.setText(2, "double" );	
+			treeItem.setData("class", Double.class );
 		} else if (value instanceof Long) {
 			treeItem.setImage(longImage);
 			treeItem.setText(2, "int64" );
+			treeItem.setData("class", Long.class );
 		} else if (value instanceof Date) {
 			treeItem.setImage(dateImage);
 			treeItem.setText(2, "date" );
 			treeItem.setText(1, DateUtil.getSQLDate( (Date)value ) );
+			treeItem.setData("class", Date.class );
 		} else if (value instanceof String) {
 			treeItem.setImage(stringImage);
 			treeItem.setText(2, "string" );
+			treeItem.setData("class", String.class );
 		} else if (value instanceof ObjectId) {
 			treeItem.setImage(oidImage);
 			treeItem.setText(2, "objectId" );
+			treeItem.setData("class", ObjectId.class );
 		} else if (value instanceof Boolean) {
 			treeItem.setImage(boolImage);
 			treeItem.setText(2, "boolean" );
+			treeItem.setData("class", Boolean.class );
 		} else if (value instanceof Code) {
 			treeItem.setImage(jsImage);
 			treeItem.setText(2, "code" );
+			treeItem.setData("class", Code.class );
 		} else if (value instanceof Pattern) {
 			treeItem.setImage(jsImage);
 			treeItem.setText(2, "regex" );
+			treeItem.setData("class", Pattern.class );
 		} else if ( value instanceof byte[] ){
 			treeItem.setImage(jsImage);
 			treeItem.setText(2, "binary" );
 			treeItem.setText(1, "[bin " + ((byte[])value).length + " bytes]" );
+			treeItem.setData("class", Byte.class );
 		}
 	}
 }
