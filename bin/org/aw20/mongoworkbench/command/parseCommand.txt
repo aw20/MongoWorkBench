@@ -3,6 +3,16 @@ var a =	{
 	findArg : []
 };
 
+a.findOne = function(){
+	this.invoked.push('findone');
+	this.findOneArg	= [];
+	
+	for( var i = 0; i < arguments.length; ++i )	{
+		this.findOneArg[i] = arguments[i];
+	}
+	return this;
+};
+
 a.aggregate = function(){
 	this.invoked.push('aggregate');
 	this.aggregateArg	= [];

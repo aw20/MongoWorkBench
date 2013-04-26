@@ -38,6 +38,7 @@ import org.aw20.mongoworkbench.command.AggregateMongoCommand;
 import org.aw20.mongoworkbench.command.DBStatsMongoCommand;
 import org.aw20.mongoworkbench.command.DBserverStatsMongoCommand;
 import org.aw20.mongoworkbench.command.FindMongoCommand;
+import org.aw20.mongoworkbench.command.FindOneMongoCommand;
 import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MapReduceMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
@@ -81,6 +82,7 @@ public class MongoFactory extends Thread {
 
 		// Register the Commands
 		commandMap.put("^db\\.[^\\(]+\\.find\\(.*", FindMongoCommand.class);
+		commandMap.put("^db\\.[^\\(]+\\.findOne\\(.*", FindOneMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.save\\(.*", SaveMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.update\\(.*", UpdateMongoCommand.class);
 		commandMap.put("^db\\.[^\\(]+\\.remove\\(.*", RemoveMongoCommand.class);
@@ -253,7 +255,6 @@ public class MongoFactory extends Thread {
 				}catch(Exception e){
 					EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
 				}
-				
 			}
 			
 		}

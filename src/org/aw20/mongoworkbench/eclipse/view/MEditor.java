@@ -33,11 +33,16 @@ import java.util.regex.Pattern;
 import org.aw20.mongoworkbench.EventWorkBenchListener;
 import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.EventWrapper;
+import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.FindOneMongoCommand;
 import org.aw20.mongoworkbench.command.GridFSRemoveFileCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.SaveMongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.table.TreeRender;
+import org.aw20.mongoworkbench.eclipse.view.table.TreeWalker;
 import org.aw20.util.DateUtil;
+import org.aw20.util.JSONFormatter;
 import org.aw20.util.StringUtil;
 import org.bson.types.Code;
 import org.bson.types.ObjectId;
@@ -67,11 +72,12 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.mongodb.DB;
 
-public class MEditor extends MAbstractView implements EventWorkBenchListener {
+public class MEditor extends MAbstractView implements EventWorkBenchListener, MongoCommandListener {
 	private String[] allTypes = new String[]{"string","boolean","int32","int64","double","date","objectid","code","regex","binary"};
 	
 	private Text textJSON;
 	
+	private TabFolder tabFolder;
 	private Tree tree;
 	private TreeRender treeRender;
 	
@@ -91,10 +97,12 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 	
 	public MEditor() {
 		EventWorkBenchManager.getInst().registerListener(this);
+		MongoFactory.getInst().registerListener(this);
 	}
 
 	public void dispose() {
 		EventWorkBenchManager.getInst().deregisterListener(this);
+		MongoFactory.getInst().deregisterListener(this);
 		super.dispose();
 	}
 
@@ -102,8 +110,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		GridLayout gridLayout = new GridLayout(2, true);
 		parent.setLayout(gridLayout);
 
-
-		TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
+		tabFolder = new TabFolder(parent, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		TabItem tbtmTreeItem = new TabItem(tabFolder, SWT.NONE);
@@ -326,18 +333,20 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 			} else if ( nodeClass == Pattern.class ){
 				item.setText( Pattern.compile(newtext).toString() );
 			} else if ( nodeClass == Byte.class ){
-				
+			//TODO
 			}
 			
 		}else if (column == 2){
 			/**
 			 * Changing the type of the object; we need to make sure it is valid and we change the value to this type
 			 */
-			newtext	= newtext.toLowerCase().trim();
-			if ( !isValidType(newtext) )
+			String newtype	= newtext.toLowerCase().trim();
+			if ( !isValidType(newtype) )
 				return;
 			
 			
+			
+			//TODO
 		}
 		
 	}
@@ -436,20 +445,8 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
     	}
     }
 	}
-	
-	private void onUpdate() {
-		if (activeDocumentMap == null)
-			return;
-		
-		try {
-			MongoCommand mcmd = MongoFactory.getInst().createCommand("db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".save(" + textJSON.getText() + ")");
-			mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME));
-			MongoFactory.getInst().submitExecution(mcmd);
-		} catch (Exception e) {
-			EventWorkBenchManager.getInst().onEvent(org.aw20.mongoworkbench.Event.EXCEPTION, e);
-		}
-	}
 
+	
 	private void redraw(Map data) {
 		btnNewButton.setEnabled(false);
 		btnNewButton_1.setEnabled(false);
@@ -474,4 +471,86 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener {
 		}
 	}
 
+	
+	private void onUpdate() {
+		if (activeDocumentMap == null)
+			return;
+
+		if ( tabFolder.getSelectionIndex() == 0 ){
+			Object	obj	= TreeWalker.toObject(tree);
+			saveDocument( JSONFormatter.format(obj) );
+		}else if ( tabFolder.getSelectionIndex() == 1 ){
+			saveDocument(textJSON.getText());
+		}
+	}
+	
+	
+	private void saveDocument(String json){
+		try {
+			MongoCommand mcmd = MongoFactory.getInst().createCommand("db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".save(" + json + ")");
+			mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME));
+			MongoFactory.getInst().submitExecution(mcmd);
+		} catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent(org.aw20.mongoworkbench.Event.EXCEPTION, e);
+		}
+	}
+
+	@Override
+	public void onMongoCommandStart(MongoCommand mcmd) {}
+
+	@Override
+	public void onMongoCommandFinished(MongoCommand inmcmd) {
+		if ( inmcmd instanceof SaveMongoCommand ){
+			Object id 	= ((Map)activeDocumentMap.get(EventWrapper.DOC_DATA)).get("_id");
+			Object sid	= ((SaveMongoCommand)inmcmd).getObjectId();
+			
+			if ( id.equals(sid) ){
+
+				/*
+				 * This is the save command; we want to make sure this is our SAVE command so we can trigger a reload
+				 */
+				
+				String queryJson;
+				if ( sid instanceof ObjectId ){
+					queryJson	= "ObjectId(\"" + sid.toString() + "\")";
+				}else{
+					queryJson = "\"" + sid.toString() + "\"";
+				}
+
+				try {
+					MongoCommand mcmd = MongoFactory.getInst().createCommand("db." + activeDocumentMap.get(EventWrapper.ACTIVE_COLL) + ".findOne({_id:" + queryJson + "})");
+					mcmd.setConnection((String) activeDocumentMap.get(EventWrapper.ACTIVE_NAME));
+					MongoFactory.getInst().submitExecution(mcmd);
+				} catch (Exception e) {
+					EventWorkBenchManager.getInst().onEvent(org.aw20.mongoworkbench.Event.EXCEPTION, e);
+				}
+			}
+			
+		} else if ( inmcmd instanceof FindOneMongoCommand ){
+			
+			/*
+			 * This is the FindOneMongoCommand that we triggered on the savecommand; however we want to make sure we are reloading
+			 * the one that was editing in this particular one and not one from a command console.
+			 */
+			Object id 	= ((Map)activeDocumentMap.get(EventWrapper.DOC_DATA)).get("_id");
+			Object sid	= ((FindOneMongoCommand)inmcmd).getDbObject().get("_id");
+			
+			if ( id.equals(sid) ){
+
+				final Map eventMap	= EventWrapper.createMap( 
+						EventWrapper.ACTIVE_NAME, inmcmd.getName(), 
+						EventWrapper.ACTIVE_DB, inmcmd.getDB(),
+						EventWrapper.ACTIVE_COLL, inmcmd.getCollection(),
+						EventWrapper.DOC_DATA, ((FindOneMongoCommand)inmcmd).getDbObject().toMap()
+						);
+				
+				shell.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						redraw(eventMap);
+					}
+				});
+			}
+
+		}
+	}
 }
