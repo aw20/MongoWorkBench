@@ -72,25 +72,26 @@ public class JSONFormatter extends Object {
 	
 	private void parseValue(Object _o, int _depth) {
 		
-		if (_o instanceof Map) {
+		if ( _o instanceof String || _o instanceof Character ){
+			sb.append("\"" + _o.toString() + "\"");
+		} else if (_o instanceof Map) {
 			sb.append("{");
 			parseObject((Map<String, Object>)_o, _depth + 1);
 			sb.append("}");
-
 		} else if (_o instanceof List) {
 			sb.append("[");
 			parseArray((List)_o, _depth + 1);
 			sb.append("]");
-
-		} else if (_o instanceof Integer || _o instanceof Long || _o instanceof Float || _o instanceof Double || _o instanceof Boolean) {
+		} else if (_o instanceof Float || _o instanceof Double) {
+			String d = String.valueOf(_o);
+			if ( d.endsWith(".0") )
+				sb.append(d.substring(0,d.length()-2));
+			else
+				sb.append(d);
+		} else if (_o instanceof Integer || _o instanceof Long || _o instanceof Boolean) {
 			sb.append(_o.toString());
-
 		} else if (_o == null) {
 			sb.append("null");
-
-		} else if (_o instanceof Character || _o instanceof String){
-			sb.append("\"" + _o.toString() + "\"");
-		
 		} else if ( _o instanceof Date ){
 			sb.append( "ISODate(\"" );
 			sb.append( DateUtil.getDateString( (Date)_o, "yyyy-MM-dd'T'HH:mm:ss.SSS") );

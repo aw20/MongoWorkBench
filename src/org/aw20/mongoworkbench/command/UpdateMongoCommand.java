@@ -77,18 +77,18 @@ public class UpdateMongoCommand extends FindMongoCommand {
 			
 			if ( argList.size() == 2 ){
 				
-				writeresult			= collection.update( (DBObject)argList.get(0), (DBObject)argList.get(1) );
+				writeresult			= collection.update( (DBObject)argList.get(0), fixNumbers( (BasicDBObject)argList.get(1) ) );
 				
 			}else if ( argList.size() == 3 ){
 				
 				boolean upsert 	= StringUtil.toBoolean( argList.get(2), false );
-				writeresult			= collection.update( (DBObject)argList.get(0), (DBObject)argList.get(1), upsert, false );
+				writeresult			= collection.update( (DBObject)argList.get(0), fixNumbers( (BasicDBObject)argList.get(1) ), upsert, false );
 				
 			}else if ( argList.size() == 4 ){
 				
 				boolean upsert 	= StringUtil.toBoolean( argList.get(2), false );
 				boolean multi 	= StringUtil.toBoolean( argList.get(3), false );
-				writeresult			= collection.update( (DBObject)argList.get(0), (DBObject)argList.get(1), upsert, multi );
+				writeresult			= collection.update( (DBObject)argList.get(0), fixNumbers( (BasicDBObject)argList.get(1) ), upsert, multi );
 				
 			}else
 				throw new Exception("too many parameters; db.collection.update(query, update, <upsert>, <multi>)");

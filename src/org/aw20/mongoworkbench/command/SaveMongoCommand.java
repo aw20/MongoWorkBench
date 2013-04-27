@@ -64,7 +64,7 @@ public class SaveMongoCommand extends FindMongoCommand {
 		if ( !cmdMap.containsField("saveArg") )
 			throw new Exception("no save document");
 		
-		DBObject	document				= (DBObject)cmdMap.get("saveArg");
+		DBObject	document				= fixNumbers( (BasicDBObject)cmdMap.get("saveArg") );
 		DBCollection	collection	= db.getCollection(sColl);
 		
 		// Run the command

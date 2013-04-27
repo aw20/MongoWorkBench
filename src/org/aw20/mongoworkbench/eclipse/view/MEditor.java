@@ -333,7 +333,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 			} else if ( nodeClass == Pattern.class ){
 				item.setText( Pattern.compile(newtext).toString() );
 			} else if ( nodeClass == Byte.class ){
-			//TODO
+				
 			}
 			
 		}else if (column == 2){
@@ -344,9 +344,70 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 			if ( !isValidType(newtype) )
 				return;
 			
-			
-			
-			//TODO
+			if ( newtype.equals("string") ){
+				
+				item.setData( "class", String.class );
+				item.setText(2,"string");
+				
+			} else if ( newtype.equals("boolean") ){
+
+				String d = item.getText(1);
+				if ( !d.equals("true") && !d.equals("false") ){
+					item.setText(1,"false");
+				}
+				item.setData( "class", Boolean.class );
+				item.setText(2,"boolean");
+				
+			} else if ( newtype.equals("int32") ){
+				
+				String d = item.getText(1);
+				if ( StringUtil.toInteger(d, Integer.MIN_VALUE) == Integer.MIN_VALUE ){
+					item.setText( 1, "0" );
+				}
+				item.setData( "class", Integer.class );
+				item.setText(2,"int32");
+				
+			} else if ( newtype.equals("int64") ){
+
+				String d = item.getText(1);
+				if ( StringUtil.toLong(d, Long.MIN_VALUE) == Long.MIN_VALUE ){
+					item.setText( 1, "0" );
+				}
+				item.setData( "class", Long.class );
+				item.setText(2,"int64");
+				
+			} else if ( newtype.equals("double") ){
+
+				String d = item.getText(1);
+				if ( StringUtil.toDouble(d, Double.MIN_VALUE) == Double.MIN_VALUE ){
+					item.setText( 1, "0.0" );
+				}
+				item.setData( "class", Double.class );
+				item.setText(2,"double");
+
+			} else if ( newtype.equals("date") ){
+				
+				String d = item.getText(1);
+				if ( DateUtil.parseDate(d, "yyyy-MM-dd HH:mm:ss") == null ){
+					item.setText( 1,  DateUtil.getSQLDate( new Date() ) );
+				}
+				item.setData( "class", Date.class );
+				item.setText(2,"date");
+				
+			} else if ( newtype.equals("code") ){
+				
+				item.setData( "class", String.class );
+				item.setText( 2,"code");
+				
+			} else if ( newtype.equals("regex") ){
+
+				item.setData( "class", Pattern.class );
+				item.setText( 2,"regex");
+
+			} else if ( nodeClass == Byte.class ){
+				
+			}
+
 		}
 		
 	}
@@ -509,7 +570,6 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 				/*
 				 * This is the save command; we want to make sure this is our SAVE command so we can trigger a reload
 				 */
-				
 				String queryJson;
 				if ( sid instanceof ObjectId ){
 					queryJson	= "ObjectId(\"" + sid.toString() + "\")";

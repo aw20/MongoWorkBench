@@ -220,14 +220,14 @@ public class TreeRender {
 			treeItem.setImage(intImage);
 			treeItem.setText(2, "int32" );	
 			treeItem.setData("class", Integer.class );
-		} else if (value instanceof Double) {
-			treeItem.setImage(doubleImage);
-			treeItem.setText(2, "double" );	
-			treeItem.setData("class", Double.class );
 		} else if (value instanceof Long) {
 			treeItem.setImage(longImage);
 			treeItem.setText(2, "int64" );
 			treeItem.setData("class", Long.class );
+		} else if (value instanceof Double) {
+			treeItem.setImage(doubleImage);
+			treeItem.setText(2, "double" );	
+			treeItem.setData("class", Double.class );
 		} else if (value instanceof Date) {
 			treeItem.setImage(dateImage);
 			treeItem.setText(2, "date" );

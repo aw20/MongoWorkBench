@@ -25,14 +25,17 @@
 package org.aw20.mongoworkbench.command;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.aw20.io.StreamUtil;
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.util.NumberUtil;
 import org.aw20.util.StringUtil;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
@@ -223,4 +226,37 @@ public abstract class MongoCommand extends Object {
 	}
 
 	
+	protected BasicDBObject	fixNumbers( BasicDBObject dbo ){
+		Iterator<String> it	= dbo.keySet().iterator();
+		while (it.hasNext()){
+			String field	= it.next();
+			Object o	= dbo.get(field);
+			if ( o instanceof Double ){
+				dbo.put(field, NumberUtil.fixDouble( (Double)o) );
+			}else if ( o instanceof BasicDBObject ){
+				dbo.put(field, fixNumbers((BasicDBObject)o) );
+			}else if ( o instanceof BasicDBList ){
+				dbo.put(field, fixNumbers((BasicDBList)o) );
+			}
+		}
+		
+		return dbo;
+	}
+	
+	
+	protected BasicDBList	fixNumbers( BasicDBList dbo ){
+		for ( int x=0; x < dbo.size(); x++ ){
+			Object o =	dbo.get(x);
+			
+			if ( o instanceof Double ){
+				dbo.set(x, NumberUtil.fixDouble( (Double)o) );
+			}else if ( o instanceof BasicDBObject ){
+				dbo.set(x, fixNumbers((BasicDBObject)o) );
+			}else if ( o instanceof BasicDBList ){
+				dbo.set(x, fixNumbers((BasicDBList)o) );
+			}
+		}
+
+		return dbo;
+	}
 }

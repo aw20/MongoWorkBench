@@ -177,6 +177,14 @@ public class QueryData extends Object {
 		else if ( obj instanceof Date )
 			return DateUtil.getSQLDate( (Date)obj );
 		else{
+			
+			if ( obj instanceof Double ){
+				Double d = (Double)obj;
+				
+				if ( (double)d.longValue() == d )
+					System.out.println( d.longValue() );
+			}
+			
 			String s = String.valueOf( obj );
 			if ( s.length() > MAX_CHAR_WIDTH )
 				return s.substring(0, MAX_CHAR_WIDTH);
