@@ -1,13 +1,7 @@
 Items to be done
 
 UI
-- When find make sure the view is in focus
 - Make sorting more intelligent
-
-DocumentEditor
-
-JavaScript Console
-- Do that one!
 
 Connection
 - SSH handling

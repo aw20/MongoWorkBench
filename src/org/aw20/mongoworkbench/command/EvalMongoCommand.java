@@ -20,7 +20,6 @@
  *  resulting work. 
  *  
  *  https://github.com/aw20/MongoWorkBench
- *  Original fork: https://github.com/Kanatoko/MonjaDB
  */
 package org.aw20.mongoworkbench.command;
 
@@ -29,52 +28,48 @@ import java.util.Map;
 
 import org.aw20.mongoworkbench.MongoFactory;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
-
-public class PassThruMongoCommand extends MongoCommand {
-	private Object resultObj;
+public class EvalMongoCommand extends MongoCommand {
 	
+	private Map<String,Object>	map;
+	private String eval;
+	
+	public EvalMongoCommand(String text) {
+		eval = text;
+	}
+
 	@Override
 	public void execute() throws Exception {
 		MongoClient mdb = MongoFactory.getInst().getMongo( sName );
+		
 		if ( mdb == null )
 			throw new Exception("no server selected");
-		
-		if ( sDb == null )
-			throw new Exception("no database selected");
-		
-		MongoFactory.getInst().setActiveDB(sDb);
-		DB db	= mdb.getDB(sDb);
-		
-		resultObj = db.eval( cmd, (Object[])null);
-	}
-	
-	public boolean isViewable(){
-		if ( resultObj == null )
-			return false;
-		else if ( resultObj instanceof List )
-			return true;
-		else
-			return false;
-	}
 
-	public BasicDBList getResults(){
-		BasicDBList list = (BasicDBList)resultObj;
+		String db;
+		List<String> listDBs = mdb.getDatabaseNames();
+		if ( listDBs.size() > 0 )
+			db	= listDBs.get(0);
+		else
+			db	= "admin";
 		
-		for ( int x=0; x < list.size(); x++ ){
-			Object o	= list.get(x);
-			if ( !(o instanceof DBObject) ){
-				BasicDBObject	dbo	= new BasicDBObject("1", o );
-				list.set(x, fixNumbers(dbo) );
-			}
+		DB dbM	= mdb.getDB( db );
+
+		Object obj = dbM.eval( eval, (Object[])null );
+		if ( obj instanceof Map ){
+			map	= (Map)obj;
 		}
 		
-		return list;
+		setMessage("eval() ran");
+	}
+
+	public Map<String,Object>	getStatus(){
+		return map;
 	}
 	
+	@Override
+	public String getCommandString() {
+		return "aw20.eval()";
+	}
 }

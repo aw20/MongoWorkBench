@@ -40,6 +40,7 @@ import org.aw20.mongoworkbench.command.GridFSRemoveFileCommand;
 import org.aw20.mongoworkbench.command.GroupMongoCommand;
 import org.aw20.mongoworkbench.command.MapReduceMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.mongoworkbench.command.PassThruMongoCommand;
 import org.aw20.mongoworkbench.command.RemoveMongoCommand;
 import org.aw20.mongoworkbench.eclipse.view.table.QueryData;
 import org.aw20.mongoworkbench.eclipse.view.table.TableManager;
@@ -299,6 +300,13 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 				onAction( NAVITEM.REFRESH );
 			}
 
+		} else if ( mcmd.getClass().getName().equals( PassThruMongoCommand.class.getName() ) ){
+			
+			PassThruMongoCommand	ptmc = (PassThruMongoCommand)mcmd;
+			if ( !ptmc.isViewable() )
+				return;
+			
+			onCommand( new QueryData( ptmc.getResults(), null ), false );
 		}
 	}
 

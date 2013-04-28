@@ -24,32 +24,40 @@
  */
 package org.aw20.mongoworkbench.eclipse.view;
 
+import java.util.Map;
+
+import org.aw20.mongoworkbench.EventWorkBenchManager;
+import org.aw20.mongoworkbench.MongoCommandListener;
+import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.command.EvalMongoCommand;
+import org.aw20.mongoworkbench.command.MongoCommand;
+import org.aw20.util.MSwtUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Text;
 
-public class MJavaScriptView extends MAbstractView {
+public class MJavaScriptView extends MAbstractView implements MongoCommandListener {
 	private Text text1, text2;
-	private Action executeAction;
-	private Action clearAction;
-	private SashForm sashForm;
-	private long initializedTime;
 
 	public MJavaScriptView() {
+		MongoFactory.getInst().registerListener(this);
 	}
 
+	public void dispose() {
+		MongoFactory.getInst().deregisterListener(this);
+		super.dispose();
+	}
+	
 	public void init2() {
 		parent.setLayout(new FormLayout());
 
-		sashForm = new SashForm(parent, SWT.SMOOTH | SWT.VERTICAL);
+		SashForm sashForm = new SashForm(parent, SWT.SMOOTH | SWT.VERTICAL);
 
 		FormData fd_sashForm1 = new FormData();
 		fd_sashForm1.top = new FormAttachment(0, 1);
@@ -58,17 +66,16 @@ public class MJavaScriptView extends MAbstractView {
 		fd_sashForm1.bottom = new FormAttachment(100, -1);
 		sashForm.setLayoutData(fd_sashForm1);
 
-		text1 = new Text(sashForm, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
-		text1.addControlListener(new ControlAdapter() {
-			public void controlResized(ControlEvent e) {
-				onSashResize();
+		text1 = MSwtUtil.createText(sashForm);//new Text(sashForm, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
+		text1.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.character == SWT.CR && e.stateMask == SWT.SHIFT) {
+					onExecute();
+					e.doit = false;
+				}
 			}
 		});
-		text1.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-
-			}
-		});
+		
 		FormData fd_text = new FormData();
 		fd_text.top = new FormAttachment(0, 1);
 		fd_text.left = new FormAttachment(0, 1);
@@ -84,42 +91,57 @@ public class MJavaScriptView extends MAbstractView {
 		fd_text2.right = new FormAttachment(100, -1);
 		text2.setLayoutData(fd_text2);
 
-		executeAction = new Action() {
-			public void run() {// -----------
+		Action executeAction = new Action() {
+			public void run() {
 				onExecute();
 			}
-		};// -----------
+		};
 		executeAction.setToolTipText("Execute JavaScript 'eval()' on MongoDB Server");
 		executeAction.setText("Execute");
-		initAction(executeAction, "database_go.png", null);
+		initAction(executeAction, "lightning.png", null);
 		executeAction.setEnabled(false);
 
-		clearAction = new Action() {
-			public void run() {// -----------
+		Action clearAction = new Action() {
+			public void run() {
 				text1.setText("");
 				text2.setText("");
 			}
-		};// -----------
+		};
 		clearAction.setToolTipText("Clear");
 		clearAction.setText("Clear");
 		initAction(clearAction, "bullet_delete.png", null);
 		clearAction.setEnabled(true);
-
-		initializedTime = System.currentTimeMillis();
-	}
-
-	private void onSashResize() {
-		if (System.currentTimeMillis() >= initializedTime + 3000) {
-		}
 	}
 
 	private void onExecute() {
+		try {
+			MongoCommand mcmd = new EvalMongoCommand( text1.getText() );
+			mcmd.setConnection( MongoFactory.getInst().getActiveServer(),  MongoFactory.getInst().getActiveDB() );
+			MongoFactory.getInst().submitExecution(mcmd);
+		} catch (Exception e) {
+			EventWorkBenchManager.getInst().onEvent(org.aw20.mongoworkbench.Event.EXCEPTION, e);
+		}
+		
 	}
 
-	public void setFocus() {
-	}
+	@Override
+	public void onMongoCommandStart(MongoCommand mcmd) {}
 
-	public void update(final Object e, final Object source) {
+	@Override
+	public void onMongoCommandFinished(MongoCommand mcmd) {
+		if ( mcmd instanceof EvalMongoCommand ){
+			final Map m = ((EvalMongoCommand)mcmd).getStatus();
+			
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					if ( m != null )
+						text2.setText( m.toString() );
+					else
+						text2.setText("");
+				}
+			});
+			
+		}
 	}
 
 }
