@@ -281,6 +281,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 	private int	ACTION_COLLECTION_EMPTY						= 15;
 	private int	ACTION_COLLECTION_DROP						= 16;
 	private int	ACTION_COLLECTION_COUNT						= 17;
+	private int	ACTION_COLLECTION_SHOWINDEXES			= 25;
 	private int	ACTION_SERVER_ADD									= 18;
 	private int	ACTION_COLLECTION_STATS						= 19;
 	private int ACTION_SYSTEMJAVASCRIPT_ADD				= 20;
@@ -292,7 +293,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 	private void createActions(){
 	
-		actionList	= new Action[25];
+		actionList	= new Action[26];
 		
 		// Server
 		actionList[ACTION_SERVER_ADD] = new Action() {public void run() {actionRun(ACTION_SERVER_ADD);}	};
@@ -365,6 +366,9 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 		actionList[ACTION_COLLECTION_EMPTY] = new Action() {public void run() {actionRun(ACTION_COLLECTION_EMPTY);}	};
 		actionList[ACTION_COLLECTION_EMPTY].setText("Empty Collection");
+
+		actionList[ACTION_COLLECTION_SHOWINDEXES] = new Action() {public void run() {actionRun(ACTION_COLLECTION_SHOWINDEXES);}	};
+		actionList[ACTION_COLLECTION_SHOWINDEXES].setText("Show Indexes");
 
 		actionList[ACTION_COLLECTION_COUNT] = new Action() {public void run() {actionRun(ACTION_COLLECTION_COUNT);}	};
 		actionList[ACTION_COLLECTION_COUNT].setText("Count Collection");
@@ -445,6 +449,7 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 			actionList[ACTION_COLLECTION_NAME].setText( selectedItem.getText() );
 			menuManager.add( actionList[ACTION_COLLECTION_NAME] );
 			menuManager.add( new Separator() );
+			menuManager.add( actionList[ACTION_COLLECTION_SHOWINDEXES] );
 			menuManager.add( actionList[ACTION_COLLECTION_COUNT] );
 			menuManager.add( actionList[ACTION_COLLECTION_EMPTY] );
 			menuManager.add( actionList[ACTION_COLLECTION_DROP] );
@@ -602,6 +607,21 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 			MongoFactory.getInst().setActiveServerDB( sName, sDb );
 			MongoFactory.getInst().submitExecution( new CollectionCountMongoCommand().setConnection(sName, sDb, sColl) );
+			
+		}else if ( type == ACTION_COLLECTION_SHOWINDEXES ){
+			
+			TreeItem	selectedItem	= tree.getSelection()[0];
+    	
+			String sName	= selectedItem.getParentItem().getParentItem().getParentItem().getText();
+			String sDb		=	selectedItem.getParentItem().getParentItem().getText();
+			String sColl	=	selectedItem.getText();
+
+			MongoCommand mcmd;
+			try {
+				mcmd = MongoFactory.getInst().createCommand("db." + sColl + ".getIndexes()");
+				MongoFactory.getInst().setActiveServerDB( sName, sDb );
+				MongoFactory.getInst().submitExecution( mcmd.setConnection(sName, sDb, sColl) );
+			} catch (Exception e) {}
 			
 		}else if ( type == ACTION_COLLECTION_EMPTY ){
 			

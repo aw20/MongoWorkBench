@@ -25,7 +25,6 @@
 package org.aw20.mongoworkbench.command;
 
 import java.util.List;
-import java.util.Map;
 
 import org.aw20.mongoworkbench.MongoFactory;
 
