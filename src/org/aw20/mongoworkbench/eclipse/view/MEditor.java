@@ -248,11 +248,12 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 	}
 	
 	private Action	actionList[];
-	private int	ACTION_INFO = 0;
+	private int	ACTION_INFO 	= 0;
 	private int ACTION_DELETE = 1;
+	private int ACTION_INSERT = 2;
 	
 	private void createActions() {
-		actionList	= new Action[2];
+		actionList	= new Action[3];
 		
 		actionList[ACTION_INFO] = new Action() {public void run() {actionRun(ACTION_INFO);}	};
 		actionList[ACTION_INFO].setText("");
@@ -261,6 +262,10 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		actionList[ACTION_DELETE] = new Action() {public void run() {actionRun(ACTION_DELETE);}	};
 		actionList[ACTION_DELETE].setText("remove key");
 		setActionImage(actionList[ACTION_DELETE], "bullet_delete.png");
+
+		actionList[ACTION_INSERT] = new Action() {public void run() {actionRun(ACTION_INSERT);}	};
+		actionList[ACTION_INSERT].setText("insert key");
+		setActionImage(actionList[ACTION_INSERT], "bullet_add.png");
 	}
 
 	protected void showContextMenu(TreeItem treeItem) {
@@ -269,6 +274,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		actionList[ACTION_INFO].setText( treeItem.getText(0) );
 		
 		menuManager.add( new Separator() );
+		menuManager.add( actionList[ACTION_INSERT] );
 		menuManager.add( actionList[ACTION_DELETE] );
 		menuManager.add( new Separator() );
 
@@ -317,6 +323,15 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
      	tree.getSelection()[0].removeAll();
      	tree.getSelection()[0].dispose();
      	enableButtons(true);
+		} else if ( actionId == ACTION_INSERT ){
+			
+			TreeItem newItem;
+			if ( tree.getSelection()[0].getParentItem() == null )
+				newItem = new TreeItem(tree, SWT.SINGLE);
+			else
+				newItem = new TreeItem(tree.getSelection()[0].getParentItem(), SWT.SINGLE);
+			
+			TreeRender.setItemInfo(newItem, "newkey", "newvalue");
 		}
 	}
 

@@ -43,20 +43,22 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 public class TreeRender {
+	
+	private static Image oidImage;
+	private static Image intImage;
+	private static Image doubleImage;
+	private static Image stringImage;
+	private static Image dateImage;
+	private static Image longImage;
+	private static Image boolImage;
+	private static Image listImage;
+	private static Image mapImage;
+	private static Image nullImage;
+	private static Image jsImage;
+
 	private Tree	tree;
 	
-	private Image oidImage;
-	private Image intImage;
-	private Image doubleImage;
-	private Image stringImage;
-	private Image dateImage;
-	private Image longImage;
-	private Image boolImage;
-	private Image listImage;
-	private Image mapImage;
-	private Image nullImage;
-	private Image jsImage;
-
+	
 	public TreeRender(Device device, Tree tree ){
 		this( device, tree, true );
 	}
@@ -64,17 +66,19 @@ public class TreeRender {
 	public TreeRender(Device device, Tree tree, boolean showType ){
 		this.tree = tree;
 		
-		oidImage 			= MSwtUtil.getImage(device, "bullet_star.png");
-		intImage 			= MSwtUtil.getImage(device, "bullet_blue.png");
-		longImage 		= MSwtUtil.getImage(device, "bullet_red.png");
-		doubleImage 	= MSwtUtil.getImage(device, "bullet_orange.png");
-		stringImage 	= MSwtUtil.getImage(device, "bullet_green.png");
-		dateImage 		= MSwtUtil.getImage(device, "bullet_white.png");
-		boolImage 		= MSwtUtil.getImage(device, "bullet_yellow.png");
-		listImage 		=	MSwtUtil.getImage(device, "stop_blue.png");
-		mapImage 			= MSwtUtil.getImage(device, "stop_green.png");
-		nullImage 		= MSwtUtil.getImage(device, "bullet_black.png");
-		jsImage 			= MSwtUtil.getImage(device, "bullet_right.png");
+		if ( oidImage == null ){
+			oidImage 			= MSwtUtil.getImage(device, "bullet_star.png");
+			intImage 			= MSwtUtil.getImage(device, "bullet_blue.png");
+			longImage 		= MSwtUtil.getImage(device, "bullet_red.png");
+			doubleImage 	= MSwtUtil.getImage(device, "bullet_orange.png");
+			stringImage 	= MSwtUtil.getImage(device, "bullet_green.png");
+			dateImage 		= MSwtUtil.getImage(device, "bullet_white.png");
+			boolImage 		= MSwtUtil.getImage(device, "bullet_yellow.png");
+			listImage 		=	MSwtUtil.getImage(device, "stop_blue.png");
+			mapImage 			= MSwtUtil.getImage(device, "stop_green.png");
+			nullImage 		= MSwtUtil.getImage(device, "bullet_black.png");
+			jsImage 			= MSwtUtil.getImage(device, "bullet_right.png");
+		}
 		
 		tree.setHeaderVisible(true);
 		tree.setLinesVisible(true);
@@ -142,7 +146,7 @@ public class TreeRender {
 			String fieldName = parentFieldName + "." + key;
 			if ( fieldName.startsWith(".") )
 				fieldName = fieldName.substring(1);
-			
+
 			newItem.setData("fieldName", fieldName);
 			newItem.setData("value", value);
 
@@ -213,7 +217,7 @@ public class TreeRender {
 	}
 
 	
-	private void setItemInfo(TreeItem treeItem, String key, Object value) {
+	public static void setItemInfo(TreeItem treeItem, String key, Object value) {
 		treeItem.setText(0, key);
 		treeItem.setText(1, String.valueOf(value) );
 		
