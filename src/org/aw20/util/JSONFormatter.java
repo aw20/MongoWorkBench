@@ -25,11 +25,10 @@
  */
 package org.aw20.util;
 
+import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
@@ -116,25 +115,23 @@ public class JSONFormatter extends Object {
 	private void parseObject(Map<String, Object> _map, int _depth) {
 		String margin = getMargin(_depth);
 		
-		boolean empty = true;
-
-		// Parse through a struct. First call to nextToken() gets the field, second gets the value
-		Set<String> keySet = _map.keySet();
-		Iterator<String> it = keySet.iterator();
-		while( it.hasNext() ) {
-			String key = it.next();
+		String[] keyArr = (String[])_map.keySet().toArray(new String[0]);
+		Arrays.sort(keyArr);
+		for ( String key : keyArr ){
 			Object value = _map.get(key);
 			
 			// Write out this key/value pair
-			sb.append(nl);
-			empty = false;
-			sb.append(margin + "\"" + key + "\" : ");
+			sb.append(nl)
+				.append(margin)
+				.append("\"")
+				.append( key )
+				.append("\" : ");
 			parseValue(value, _depth);
 			sb.append(",");
 		}
 		
 		// Remove final comma
-		if (!empty){
+		if ( sb.charAt(sb.length()-1) == ','){
 			sb.delete(sb.length() - 1, sb.length());
 			sb.append(nl).append(getMargin(_depth - 1));
 		} else {
@@ -161,9 +158,10 @@ public class JSONFormatter extends Object {
 	
 	// Gets the margin for the specified _depth level
 	private String getMargin(int _depth) {
-		String margin = "";
+		StringBuilder margin = new StringBuilder(32);
 		for (int i = 0; i < _depth; i++)
-			margin += this.tab;
-		return margin;
+			margin.append(this.tab);
+		
+		return margin.toString();
 	}
 }

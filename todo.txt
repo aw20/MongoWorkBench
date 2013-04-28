@@ -5,7 +5,13 @@ UI
 - Make sorting more intelligent
 
 DocumentEditor
-- Add in a Refresh button to reload the active document
+
+JavaScript Console
+- Do that one!
 
 Connection
 - SSH handling
+
+Nice To Have
+- Export query
+- Copy Query to Collection ,.    find().output(db, col)

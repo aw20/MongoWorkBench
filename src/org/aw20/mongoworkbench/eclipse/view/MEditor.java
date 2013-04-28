@@ -46,8 +46,15 @@ import org.aw20.util.JSONFormatter;
 import org.aw20.util.StringUtil;
 import org.bson.types.Code;
 import org.bson.types.ObjectId;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TreeEditor;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -62,6 +69,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -84,9 +92,9 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 	private Tree	wrTree;
 	private TreeRender	wrTreeRender;
 	
-	private Button btnNewButton;
+	private Button btnSave;
 	private Map activeDocumentMap;
-	private Button btnNewButton_1;
+	private Button btnDelete;
 
 	private Color black;
 	private TreeEditor treeeditor;
@@ -126,6 +134,30 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		textJSON = new Text(tabFolder, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		textJSON.setTabs(2);
 		textJSON.setFont(SWTResourceManager.getFont("Courier New", 9, SWT.NORMAL));
+		textJSON.addKeyListener( new KeyListener() {
+			
+			@Override
+			public void keyReleased(KeyEvent e) {}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if ( e.keyCode == SWT.RIGHT
+						|| e.keyCode == SWT.LEFT 
+						|| e.keyCode == SWT.UP 
+						|| e.keyCode == SWT.DOWN 
+						|| e.keyCode == SWT.PAGE_DOWN 
+						|| e.keyCode == SWT.PAGE_UP 
+						|| e.keyCode == SWT.END 
+						){
+					return;
+				}
+				
+				if (isEditable() && !btnSave.isEnabled() ){
+					enableButtons(true);
+				}
+			}
+			
+		});
 		tbtmJSONItem.setControl(textJSON);
 
 		tbtmTreeItem = new TabItem(tabFolder, SWT.NONE);
@@ -134,26 +166,27 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		tbtmTreeItem.setControl(wrTree);
 		wrTreeRender = new TreeRender(parent.getDisplay(), wrTree);
 		
-		btnNewButton_1 = new Button(parent, SWT.NONE);
-		btnNewButton_1.setText("delete document");
-		btnNewButton_1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-		btnNewButton_1.addSelectionListener(new SelectionAdapter() {
+		btnDelete = new Button(parent, SWT.NONE);
+		btnDelete.setText("delete document");
+		btnDelete.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onDelete();
 			}
 		});
 
-		btnNewButton = new Button(parent, SWT.NONE);
-		btnNewButton.setText("save document");
-		btnNewButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnNewButton.addSelectionListener(new SelectionAdapter() {
+		btnSave = new Button(parent, SWT.NONE);
+		btnSave.setText("save document");
+		btnSave.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		btnSave.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				onUpdate();
 			}
 		});
 		
+		enableButtons(false);
 
 		black  = parent.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		treeeditor = new TreeEditor(tree);
@@ -177,7 +210,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 					return;
 
 				for ( int x=0; x < tree.getColumnCount(); x++ ){
-					if ( item.getBounds(x).contains( e.x, e.y) ){
+					if ( isEditable() && item.getBounds(x).contains( e.x, e.y) ){
 
 						// don't let them edit the value/type for Map/List items
 						if ( x > 0 && nodeClass == Map.class || nodeClass == List.class )
@@ -190,7 +223,103 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 			}
 		});
 
+		
+		menuManager = new MenuManager();
+		menuManager.setRemoveAllWhenShown(true);
+		menuManager.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				if ( tree.getSelectionCount() != 0 )
+					showContextMenu( tree.getSelection()[0] );
+			}
+		});
+		
+		Menu contextMenu = menuManager.createContextMenu(tree);
+		tree.setMenu(contextMenu);
+		createActions();
 	}
+	
+	private boolean isEditable(){
+		return (activeDocumentMap.get(EventWrapper.ACTIVE_DB) != null);
+	}
+
+	private void enableButtons(boolean t){
+		btnSave.setEnabled(t);
+		btnDelete.setEnabled(t);
+	}
+	
+	private Action	actionList[];
+	private int	ACTION_INFO = 0;
+	private int ACTION_DELETE = 1;
+	
+	private void createActions() {
+		actionList	= new Action[2];
+		
+		actionList[ACTION_INFO] = new Action() {public void run() {actionRun(ACTION_INFO);}	};
+		actionList[ACTION_INFO].setText("");
+		actionList[ACTION_INFO].setEnabled(false);
+
+		actionList[ACTION_DELETE] = new Action() {public void run() {actionRun(ACTION_DELETE);}	};
+		actionList[ACTION_DELETE].setText("remove key");
+		setActionImage(actionList[ACTION_DELETE], "bullet_delete.png");
+	}
+
+	protected void showContextMenu(TreeItem treeItem) {
+		
+		menuManager.add( actionList[ACTION_INFO] );
+		actionList[ACTION_INFO].setText( treeItem.getText(0) );
+		
+		menuManager.add( new Separator() );
+		menuManager.add( actionList[ACTION_DELETE] );
+		menuManager.add( new Separator() );
+
+		// we are not allowing the main ObjectId to be messed around with
+		Class nodeClass = (Class)treeItem.getData("class");
+		if ( nodeClass == ObjectId.class || nodeClass == Map.class || nodeClass == List.class )
+			return;
+
+		Action action;
+		for (int x=0; x < allTypes.length; x++ ){
+			final int y = x;
+			
+			if ( allTypes[x].equals("objectid") || allTypes[x].equals("binary") )
+				continue;
+
+			action = new Action() {public void run() {actionRun(100+y);}	};
+			action.setText( allTypes[x] );
+			
+			if ( nodeClass == String.class && allTypes[x].equals("string") )
+				setActionImage(action, "tick.png");
+			else if ( nodeClass == Double.class && allTypes[x].equals("double") )
+				setActionImage(action, "tick.png");
+			else if ( nodeClass == Integer.class && allTypes[x].equals("int32") )
+				setActionImage(action, "tick.png");
+			else if ( nodeClass == Long.class && allTypes[x].equals("int64") )
+				setActionImage(action, "tick.png");
+			else if ( nodeClass == Date.class && allTypes[x].equals("date") )
+				setActionImage(action, "tick.png");
+			else if ( nodeClass == Code.class && allTypes[x].equals("code") )
+				setActionImage(action, "tick.png");
+			else if ( nodeClass == Pattern.class && allTypes[x].equals("regex") )
+				setActionImage(action, "tick.png");
+			else if ( nodeClass == Boolean.class && allTypes[x].equals("boolean") )
+				setActionImage(action, "tick.png");
+			
+			menuManager.add(action);
+		}
+	}
+
+
+	protected void actionRun(int actionId) {
+		if ( actionId >= 100 ){
+			TreeItem	item	= tree.getSelection()[0];
+			setCellValue( item, 2, allTypes[actionId-100] );
+		} else if ( actionId == ACTION_DELETE ){
+     	tree.getSelection()[0].removeAll();
+     	tree.getSelection()[0].dispose();
+     	enableButtons(true);
+		}
+	}
+
 	
 	protected void setupCellEditor(final TreeItem item, final int column) {
 		compositeEditor = new Composite(tree, SWT.NONE);
@@ -202,7 +331,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		compositeEditor.addListener (SWT.Resize, new Listener () {
 			public void handleEvent (Event e) {
 				Rectangle rect = compositeEditor.getClientArea();
-				cellEditorText.setBounds (rect.x + 1, rect.y + 1, rect.width - 1 * 2, rect.height - 1 * 2);
+				cellEditorText.setBounds(rect.x + 1, rect.y + 1, rect.width - 1 * 2, rect.height - 1 * 2);
 			}
 		});
 
@@ -277,6 +406,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		if ( nodeClass == ObjectId.class || nodeClass == Map.class || nodeClass == List.class )
 			return;
 		
+		enableButtons(true);
 		
 		if ( column == 0 ){	
 			/**
@@ -409,7 +539,6 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 			}
 
 		}
-		
 	}
 	
 	
@@ -509,8 +638,8 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 
 	
 	private void redraw(Map data) {
-		btnNewButton.setEnabled(false);
-		btnNewButton_1.setEnabled(false);
+		btnSave.setEnabled(false);
+		btnDelete.setEnabled(false);
 
 		// Update the JSON
 		textJSON.setText("");
@@ -526,10 +655,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		Map map = (Map) activeDocumentMap.get(EventWrapper.DOC_DATA);
 		treeRender.render(map);
 
-		if ( activeDocumentMap.get(EventWrapper.ACTIVE_DB) != null ){
-			btnNewButton.setEnabled(true);
-			btnNewButton_1.setEnabled(true);
-		}
+		enableButtons(false);
 	}
 
 	

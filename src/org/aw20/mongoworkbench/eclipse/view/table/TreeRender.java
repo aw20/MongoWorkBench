@@ -25,12 +25,11 @@
  */
 package org.aw20.mongoworkbench.eclipse.view.table;
 
+import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 
 import org.aw20.util.DateUtil;
 import org.aw20.util.MSwtUtil;
@@ -124,9 +123,11 @@ public class TreeRender {
 	
 	
 	private void drawItem(String parentFieldName, TreeItem parentItem, Map data, boolean expand) {
-		Iterator p = data.keySet().iterator();
-		while (p.hasNext()) {
-			String key = (String) p.next();
+		
+		String[] keyArr = (String[])data.keySet().toArray(new String[0]);
+		Arrays.sort(keyArr);
+		
+		for ( String key : keyArr ){
 			if (!data.containsKey(key))
 				continue;
 
