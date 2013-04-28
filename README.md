@@ -36,6 +36,7 @@ Features
 Release History
 ==
 
+* 0.9.3 April 2013
 * 0.9.2 April 2013
 
 Project History
