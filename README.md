@@ -11,6 +11,12 @@ Released under the GNU General Public License v3.0.
 Installation
 ==
 
+Two methods for installation.  If you do not have Eclipse already installed, you can download a pre-configured Eclipse that is ready to unzip and run.  Windows 32bit only.
+
+http://eclipse.aw20.net/eclipse-juno-mongoworkbench.zip
+
+If you have Eclipse already installed you can add it to your existing plugins.
+
 From your Eclipse:  "Help" -> "Install New Software..." -> "Add.."
 
 Then put in:
