@@ -138,6 +138,7 @@ public class ServerDialog extends Dialog {
 
 		attributes.put("username", textUsername.getText().trim() );
 		attributes.put("password", textPassword.getText().trim() );
+		attributes.put("database", textDatabase.getText().trim() );
 
 		attributes.put("sshprivatekey", textPrivateKeyFile.getText().trim() );
 		attributes.put("textSSH", textUsername.getText().trim() );

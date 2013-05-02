@@ -24,9 +24,12 @@
  */
 package org.aw20.mongoworkbench.command;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.aw20.mongoworkbench.MongoFactory;
+import org.aw20.mongoworkbench.eclipse.Activator;
 
 import com.mongodb.MongoClient;
 
@@ -47,7 +50,23 @@ public class ShowDbsMongoCommand extends MongoCommand {
 	}
 	
 	protected void setDBNames(MongoClient mdb){
-		dbNames = mdb.getDatabaseNames();
+		try{
+			dbNames = mdb.getDatabaseNames();
+		}catch(com.mongodb.MongoException e){
+			if ( e.getMessage().indexOf("unauthorized") > 0 ){
+				// Check to see if they have given us a mongo database
+				Map m = Activator.getDefault().getServerMap(sName);
+				if ( m != null ){
+					String db = (String)m.get("database");
+					if ( db != null && db.length() > 0 ){
+						dbNames = new ArrayList<String>(1);
+						dbNames.add(db);
+						return;
+					}
+				}
+			}
+			throw e;
+		}
 	}
 
 	@Override
