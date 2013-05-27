@@ -154,6 +154,10 @@ public class FindMongoCommand extends MongoCommand {
 		cursor = null;
 	}
 	
+	public boolean hasQueryData(){
+		return true;
+	}
+	
 	/**
 	 * db.service.find() -> service
 	 * 

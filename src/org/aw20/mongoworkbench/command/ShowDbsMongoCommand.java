@@ -25,6 +25,7 @@
 package org.aw20.mongoworkbench.command;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,7 @@ public class ShowDbsMongoCommand extends MongoCommand {
 	protected void setDBNames(MongoClient mdb){
 		try{
 			dbNames = mdb.getDatabaseNames();
+			Collections.sort(dbNames);
 		}catch(com.mongodb.MongoException e){
 			if ( e.getMessage().indexOf("unauthorized") > 0 ){
 				// Check to see if they have given us a mongo database

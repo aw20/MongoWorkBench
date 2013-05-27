@@ -55,13 +55,10 @@ public class MPerspectiveFactory1 implements IPerspectiveFactory {
 
 		bodyright.addView(org.aw20.mongoworkbench.eclipse.view.MEditor.class.getName());
 
-		bodyleft.addView(org.aw20.mongoworkbench.eclipse.view.MDocumentView.class.getName());
-		bodyleft.addView(org.aw20.mongoworkbench.eclipse.view.MDBShowStatistics.class.getName());
-		bodyleft.addView(org.aw20.mongoworkbench.eclipse.view.MCollectionShowStatus.class.getName());
-		bodyleft.addView(org.aw20.mongoworkbench.eclipse.view.MSystemJavaScript.class.getName());
-
+		bodyleft.addPlaceholder( org.aw20.mongoworkbench.eclipse.view.MDocumentView.class.getName() + ":*" );
+		bodyleft.addPlaceholder( org.aw20.mongoworkbench.eclipse.view.MCollectionShowStatus.class.getName() + ":*" );
+		bodyleft.addPlaceholder( org.aw20.mongoworkbench.eclipse.view.MDBShowStatistics.class.getName() + ":*" );
+		
 		bottomleft.addView(org.aw20.mongoworkbench.eclipse.view.MHistoryView.class.getName());
-
-		//bodyleft.addPlaceholder( org.aw20.mongoworkbench.eclipse.view.MDocumentView.class.getName() + ":*" );
 	}
 }

@@ -63,6 +63,13 @@ public abstract class MAbstractView extends ViewPart implements MConstants, List
 		action.setImageDescriptor(ImageDescriptor.createFromImage(image));
 	}
 
+	public String getViewTitle(){
+		return getPartName();
+	}
+	
+	public void setViewTitle(String t){
+		setPartName(t);
+	}
 	
 	protected void addActionToDropDownMenu(Action action) {
 		dropDownMenu.add(action);

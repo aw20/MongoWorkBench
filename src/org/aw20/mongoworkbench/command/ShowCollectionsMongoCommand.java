@@ -25,6 +25,7 @@
 package org.aw20.mongoworkbench.command;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -78,6 +79,8 @@ public class ShowCollectionsMongoCommand extends MongoCommand {
 			else
 				colNames.add( colName );
 		}
+		
+		Collections.sort(colNames);
 		
 		setMessage("# Collections=" + colNames.size() + "; GridFS=" + gridfsNames.size() + "; Javascript=" + jsNames.size() );
 	}

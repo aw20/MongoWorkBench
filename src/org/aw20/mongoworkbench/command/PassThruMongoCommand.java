@@ -53,6 +53,10 @@ public class PassThruMongoCommand extends MongoCommand {
 		resultObj = db.eval( cmd, (Object[])null);
 	}
 	
+	public boolean hasQueryData(){
+		return isViewable();
+	}
+	
 	public boolean isViewable(){
 		if ( resultObj == null )
 			return false;

@@ -262,10 +262,11 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 
 	@Override
 	public void onMongoCommandFinished(MongoCommand mcmd) {
+		
 		if ( mcmd.getClass().getName().equals( FindMongoCommand.class.getName() ) ){
-			
+		
 			onCommand( new QueryData( ((FindMongoCommand)mcmd) ), true );
-			
+
 		}	else if ( mcmd.getClass().getName().equals( GroupMongoCommand.class.getName() )
 				|| mcmd.getClass().getName().equals( AggregateMongoCommand.class.getName() ) ){
 			
@@ -312,7 +313,7 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 
 	private void onCommand(QueryData data, final boolean enableButtons ) {
 		queryData	= data;
-
+		
 		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if ( tabFolder.getSelectionIndex() == 0 )
@@ -326,7 +327,13 @@ public class MDocumentView extends MAbstractView implements MongoCommandListener
 				
 				// Set the counts
 				TabItem[] tabs = tabFolder.getItems();
-				tabs[0].setText("Total #" + queryData.getCount() );
+				
+				if ( queryData.getFindMongoCommand() == null )
+					tabs[0].setText("Total #" + queryData.getCount() );
+				else{
+					FindMongoCommand fmc	= queryData.getFindMongoCommand();
+					tabs[0].setText("count( " + fmc.getCount() + " ).skip( " + fmc.getExecutedSkip() + " ).limit( " + fmc.getExecutedLimit() + " )" );
+				}
 
 				setActionStatus(enableButtons, queryData.isGridFS() );
 			}

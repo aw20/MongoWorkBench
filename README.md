@@ -38,6 +38,7 @@ Features
 * Database and Collection statistics
 * GridFS support (uploading/download files)
 * System JavaScript support
+* Multiple Document View windows per collection
 
 Release History
 ==

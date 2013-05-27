@@ -81,6 +81,10 @@ public class FindOneMongoCommand extends MongoCommand {
 		return dbo;
 	}
 	
+	public boolean hasQueryData(){
+		return true;
+	}
+	
 	protected String getCollNameFromAction(String actionStr, String actionName) {
 		return getMatchIgnoreCase("^db\\.([^\\(]+)\\." + actionName + "\\(", actionStr);
 	}

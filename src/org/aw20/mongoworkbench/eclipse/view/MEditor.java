@@ -102,6 +102,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 	private Text cellEditorText;
 	private boolean reSized = false;
 
+	private TabItem tbtmTreeItem;
 	
 	public MEditor() {
 		EventWorkBenchManager.getInst().registerListener(this);
@@ -121,7 +122,7 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		tabFolder = new TabFolder(parent, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
-		TabItem tbtmTreeItem = new TabItem(tabFolder, SWT.NONE);
+		tbtmTreeItem = new TabItem(tabFolder, SWT.NONE);
 		tbtmTreeItem.setText("Document");
 
 		tree = new Tree(tabFolder, SWT.BORDER | SWT.FULL_SELECTION);

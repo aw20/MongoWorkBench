@@ -67,6 +67,7 @@
             icon="bin/org/aw20/mongoworkbench/eclipse/resources/table.png"
             id="org.aw20.mongoworkbench.eclipse.view.MDocumentView"
             name="Query Output"
+            allowMultiple="true"
             restorable="true">
       </view>
       <view

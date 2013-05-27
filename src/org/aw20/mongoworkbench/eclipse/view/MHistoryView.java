@@ -32,7 +32,6 @@ import org.aw20.mongoworkbench.EventWorkBenchManager;
 import org.aw20.mongoworkbench.EventWrapper;
 import org.aw20.mongoworkbench.MongoCommandListener;
 import org.aw20.mongoworkbench.MongoFactory;
-import org.aw20.mongoworkbench.command.FindMongoCommand;
 import org.aw20.mongoworkbench.command.MongoCommand;
 import org.aw20.mongoworkbench.eclipse.Activator;
 import org.aw20.util.DateUtil;
@@ -263,11 +262,6 @@ public class MHistoryView extends MAbstractView implements MongoCommandListener,
 			if (cmd != null) {
 				cmd.setConnection( (String)row.getData(PROP_NAME), (String)row.getData(PROP_DB) );
 				MongoFactory.getInst().submitExecution(cmd);
-				
-				if ( cmd instanceof FindMongoCommand ){
-					Activator.getDefault().showView("org.aw20.mongoworkbench.eclipse.view.MDocumentView");		
-				}
-
 			} else
 				throw new Exception("command not found");
 

@@ -50,6 +50,7 @@ import org.aw20.mongoworkbench.command.ShowDbsMongoCommand;
 import org.aw20.mongoworkbench.command.UpdateMongoCommand;
 import org.aw20.mongoworkbench.command.UseMongoCommand;
 import org.aw20.mongoworkbench.eclipse.Activator;
+import org.aw20.mongoworkbench.eclipse.view.MDocumentView;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
@@ -66,7 +67,10 @@ public class MongoFactory extends Thread {
 	}
 	
 	private Map<String,MongoClient>	mongoMap;
+	
 	private Set<MongoCommandListener>	mongoListeners;
+	private Set<MDocumentView>	documentViewListeners;
+	
 	private List<MongoCommand>	commandQueue;
 	private Map<String, Class>	commandMap;
 	private boolean bRun = true;
@@ -75,10 +79,11 @@ public class MongoFactory extends Thread {
 	private String activeServer = null, activeDB = null, activeCollection = null;
 	
 	public MongoFactory(){
-		mongoMap				= new HashMap<String,MongoClient>();
-		commandQueue		=	new ArrayList<MongoCommand>(); 
-		mongoListeners	= new HashSet<MongoCommandListener>();
-		commandMap			= new HashMap<String,Class>();
+		mongoMap							= new HashMap<String,MongoClient>();
+		commandQueue					=	new ArrayList<MongoCommand>(); 
+		mongoListeners				= new HashSet<MongoCommandListener>();
+		documentViewListeners	= new HashSet<MDocumentView>();
+		commandMap						= new HashMap<String,Class>();
 
 		// Register the Commands
 		commandMap.put("^db\\.[^\\(]+\\.find\\(.*", FindMongoCommand.class);
@@ -100,11 +105,17 @@ public class MongoFactory extends Thread {
 	}
 	
 	public void registerListener(MongoCommandListener listener){
-		mongoListeners.add(listener);
+		if ( listener instanceof MDocumentView )
+			documentViewListeners.add( (MDocumentView)listener );
+		else
+			mongoListeners.add(listener);
 	}
 	
 	public void deregisterListener(MongoCommandListener listener){
-		mongoListeners.remove(listener);
+		if ( listener instanceof MDocumentView )
+			documentViewListeners.remove( (MDocumentView)listener );
+		else
+			mongoListeners.remove(listener);
 	}
 		
 	public void removeMongo(String sName){
@@ -223,14 +234,8 @@ public class MongoFactory extends Thread {
 
 
 			// Now let the listeners know we are about to start
-			Iterator<MongoCommandListener>	it	= mongoListeners.iterator();
-			while ( it.hasNext() ){
-				try{
-					it.next().onMongoCommandStart(cmd);
-				}catch(Exception e){
-					EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
-				}
-			}
+			alertDocumentViewsOnMongoCommandStart(cmd);
+			alertListenersOnMongoCommandStart(cmd);
 			
 			// Execute the command
 			long startTime	= System.currentTimeMillis();
@@ -248,15 +253,8 @@ public class MongoFactory extends Thread {
 			
 
 			// Now let the listeners know we have finished
-			it	= mongoListeners.iterator();
-			while ( it.hasNext() ){
-				try{
-					it.next().onMongoCommandFinished(cmd);
-				}catch(Exception e){
-					EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
-				}
-			}
-			
+			alertDocumentViewsOnMongoCommandFinished(cmd);
+			alertListenersOnMongoCommandFinished(cmd);
 		}
 	}
 
@@ -267,5 +265,70 @@ public class MongoFactory extends Thread {
 
 	public String getActiveCollection() {
 		return activeCollection;
+	}
+	
+	
+	private void alertListenersOnMongoCommandStart( MongoCommand cmd ){
+		Iterator<MongoCommandListener>	it	= mongoListeners.iterator();
+		while ( it.hasNext() ){
+			try{
+				it.next().onMongoCommandStart(cmd);
+			}catch(Exception e){
+				EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+			}
+		}
+	}
+	
+	private void alertListenersOnMongoCommandFinished( MongoCommand cmd ){
+		Iterator<MongoCommandListener>	it	= mongoListeners.iterator();
+		while ( it.hasNext() ){
+			try{
+				it.next().onMongoCommandFinished(cmd);
+			}catch(Exception e){
+				EventWorkBenchManager.getInst().onEvent( Event.EXCEPTION, e);
+			}
+		}
+	}
+	
+	
+	private void alertDocumentViewsOnMongoCommandStart( MongoCommand cmd ){}
+	
+	private void alertDocumentViewsOnMongoCommandFinished( MongoCommand cmd ){
+		if ( !cmd.hasQueryData() )
+			return;
+		
+		findDocumentView(cmd);
+	}
+	
+	private void findDocumentView(final MongoCommand cmd){
+		Iterator<MDocumentView>	it	= documentViewListeners.iterator();
+		
+		final String id	= ( cmd.getDB() != null ? cmd.getDB() : "DB" ) + "-" + ( cmd.getCollection() != null ? cmd.getCollection() : "Output" );
+		
+		while ( it.hasNext() ){
+			MDocumentView view = it.next();
+			
+			if ( view.getViewTitle().equals(id) ){
+				final MDocumentView finalView = view;
+				Activator.getDefault().getShell().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						Activator.getDefault().showView("org.aw20.mongoworkbench.eclipse.view.MDocumentView", id );
+						((MDocumentView)finalView).onMongoCommandFinished(cmd);
+					}
+				});
+				return;
+			}
+		}
+		
+		
+		/* Need to create a new one */
+		Activator.getDefault().getShell().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				Object view = Activator.getDefault().showView("org.aw20.mongoworkbench.eclipse.view.MDocumentView", id );
+				if ( view != null && view instanceof MDocumentView )
+					((MDocumentView)view).onMongoCommandFinished(cmd);
+			}
+		});
+		
 	}
 }

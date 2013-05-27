@@ -37,21 +37,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
 import org.aw20.io.StreamUtil;
 import org.aw20.mongoworkbench.eclipse.pref.MPrefManager;
+import org.aw20.mongoworkbench.eclipse.view.MAbstractView;
+import org.aw20.mongoworkbench.eclipse.view.MDocumentView;
 import org.aw20.util.FileUtil;
 import org.aw20.util.StringUtil;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -71,11 +74,32 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 	}
 
 	public void showView( String viewname ){
+		showView(viewname, null);
+	}
+	
+	public Object showView( String viewname, String id ){
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-			.showView( viewname, null, IWorkbenchPage.VIEW_VISIBLE );
-		} catch (PartInitException e) {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			
+			IWorkbenchWindow wbw = null;
+			if ( wb.getActiveWorkbenchWindow() == null ){
+				wbw	= wb.getWorkbenchWindows()[0];
+			}else{
+				wbw	= wb.getActiveWorkbenchWindow();
+			}
+			
+			Object v = (MAbstractView)wbw
+					.getActivePage()
+					.showView( viewname, id, IWorkbenchPage.VIEW_VISIBLE );
+			
+			if ( id != null && v instanceof MDocumentView )
+				((MDocumentView)v).setViewTitle( id );
+
+			return v;
+			
+		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 	
@@ -149,22 +173,8 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 		return plugin;
 	}
 
-	public void saveWorkBench(int type, String text) {
-		try {
-			File cmdFile = new File( commandFile.getParent(), type + commandFile.getName() );
-			FileUtil.writeToFile(cmdFile, text);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public String getWorkBench(int type) {
-		try {
-			File cmdFile = new File( commandFile.getParent(), type + commandFile.getName() );
-			return FileUtil.readToString(cmdFile);
-		} catch (IOException e) {
-			return "";
-		}
+	public File	getScratchPadsFile(){
+		return new File( commandFile.getParent(), "scratchpads.bin" );
 	}
 
 	public List<Map> getServerList() {
@@ -207,7 +217,25 @@ public class Activator extends AbstractUIPlugin implements MConstants {
 		if ( props == null )
 			return null;
 		
-		return new MongoClient( (String)props.get("host"), StringUtil.toInteger(props.get("port"), 27017) );
+		
+		if ( props.containsKey("username") && props.get("username").toString().length() > 0 
+				&& props.containsKey("password") && props.get("password").toString().length() > 0){
+			StringBuilder sb = new StringBuilder(32);
+			sb.append("mongodb://")
+				.append(props.get("username") )
+				.append(":")
+				.append(props.get("password"))
+				.append("@")
+				.append(props.get("host"))
+				.append(":")
+				.append( StringUtil.toInteger(props.get("port"), 27017) );
+			
+			if ( props.containsKey("database") && props.get("database").toString().length() > 0 )
+				sb.append("/").append(props.get("database"));
+		
+			return new MongoClient( new MongoClientURI(sb.toString()) );
+		}else
+			return new MongoClient( (String)props.get("host"), StringUtil.toInteger(props.get("port"), 27017) );
 	}
 	
 	

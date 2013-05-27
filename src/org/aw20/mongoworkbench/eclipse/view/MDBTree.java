@@ -131,10 +131,10 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 			} else if ( nodeType == NodeType.COLLECTION ){
 
-				Activator.getDefault().showView("org.aw20.mongoworkbench.eclipse.view.MDocumentView");
 				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
 				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
 				String sColl	= selectedItem.getText();
+				
 				try {
 					MongoCommand	mcmd	= MongoFactory.getInst().createCommand("db." + sColl + ".find()");
 					if ( mcmd != null )
@@ -145,7 +145,6 @@ public class MDBTree extends MAbstractView implements MongoCommandListener {
 
 			} else if ( nodeType == NodeType.GRIDFS ){
 
-				Activator.getDefault().showView("org.aw20.mongoworkbench.eclipse.view.MDocumentView");
 				String sName	= (String)((Map)selectedItem.getParentItem().getParentItem().getParentItem().getData()).get("name");
 				String sDb		=	selectedItem.getParentItem().getParentItem().getText();
 				String sColl	= selectedItem.getText();

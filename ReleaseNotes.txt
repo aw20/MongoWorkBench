@@ -1,0 +1,16 @@
+ __  __                      __        __         _    ____                  _     
+|  \/  | ___  _ __   __ _  __\ \      / /__  _ __| | _| __ )  ___ _ __   ___| |__  
+| |\/| |/ _ \| '_ \ / _` |/ _ \ \ /\ / / _ \| '__| |/ /  _ \ / _ \ '_ \ / __| '_ \ 
+| |  | | (_) | | | | (_| | (_) \ V  V / (_) | |  |   <| |_) |  __/ | | | (__| | | |
+|_|  |_|\___/|_| |_|\__, |\___/ \_/\_/ \___/|_|  |_|\_\____/ \___|_| |_|\___|_| |_|
+                    |___/ by aw2.0 Ltd http://aw20.is/
+
+
+2013 May 26th
+- Command View replaced with custom named tabbed pads
+- Support for multiple QueryDocument views
+- Removed the unnecessary views that are created on startup
+- Updated the view title to reflect the current query status
+
+2013 April 10th
+- 0.9.3 Release

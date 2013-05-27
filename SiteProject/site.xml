@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/MongoWorkBenchFeature_0.9.3.jar" id="MongoWorkBenchFeature" version="0.9.3">
+   <feature url="features/MongoWorkBenchFeature_0.9.4.jar" id="MongoWorkBenchFeature" version="0.9.4">
       <category name="Database"/>
    </feature>
    <category-def name="Database" label="Database"/>

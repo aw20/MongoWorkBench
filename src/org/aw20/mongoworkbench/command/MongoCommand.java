@@ -91,6 +91,10 @@ public abstract class MongoCommand extends Object {
 	public boolean isSuccess() {
 		return lastException == null;
 	}
+	
+	public boolean hasQueryData(){
+		return false;
+	}
 
 	public boolean hasRun() {
 		return hasRun;
