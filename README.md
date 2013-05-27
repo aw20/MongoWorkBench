@@ -43,6 +43,9 @@ Features
 Release History
 ==
 
+https://github.com/aw20/MongoWorkBench/blob/master/ReleaseNotes.txt
+
+* 0.9.4 May 26th 2013
 * 0.9.3 April 2013
 * 0.9.2 April 2013
 
