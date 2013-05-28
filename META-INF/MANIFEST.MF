@@ -12,7 +12,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: bin/,
  lib/jsch-0.1.46.jar,
  lib/mongo-2.10.1.jar,
- lib/swing2swt.jar
+ lib/swing2swt.jar,
+ lib/js.jar
 Export-Package: com.jcraft.jsch,
  com.jcraft.jsch.jce,
  com.jcraft.jsch.jcraft,

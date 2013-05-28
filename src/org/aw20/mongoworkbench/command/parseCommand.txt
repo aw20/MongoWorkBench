@@ -93,4 +93,3 @@ a.sort = function()	{
 };
 
 //_QUERY_
-return a;

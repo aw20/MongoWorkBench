@@ -24,8 +24,10 @@
  */
 package org.aw20.mongoworkbench.command;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +36,11 @@ import org.aw20.io.StreamUtil;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.util.NumberUtil;
 import org.aw20.util.StringUtil;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.IdScriptableObject;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -205,14 +212,19 @@ public abstract class MongoCommand extends Object {
 	}
 	
 	
-	protected BasicDBObject parseMongoCommandString(DB db, String cmd) throws IOException {
+	protected BasicDBObject parseMongoCommandString(DB db, String cmd) throws Exception {
+		
 		String newCmd = cmd.replaceFirst("db." + sColl, "a");
-
 		String jsStr = StreamUtil.readToString( this.getClass().getResourceAsStream("parseCommand.txt") ); 
 		jsStr = StringUtil.tokenReplace(jsStr, new String[]{"//_QUERY_"}, new String[]{newCmd} );
 
-		BasicDBObject cmdMap = (BasicDBObject)db.eval(jsStr, (Object[])null);
-
+		Context cx = Context.enter();
+		cx.setLanguageVersion(Context.VERSION_1_7);
+		Scriptable scope = cx.initStandardObjects();
+		Object returnObj = cx.evaluateString(scope, jsStr, "CustomJS", 1, null);
+		
+		Map cmdMap = (Map) jsConvert2cfData( (IdScriptableObject)returnObj );
+		
 		// Remove the helper methods
 		cmdMap.remove("find");
 		cmdMap.remove("findOne");
@@ -225,8 +237,59 @@ public abstract class MongoCommand extends Object {
 		cmdMap.remove("limit");
 		cmdMap.remove("skip");
 		cmdMap.remove("sort");
+		
+		return new BasicDBObject( cmdMap );
+	}
 
-		return cmdMap;
+	
+	public static Object jsConvert2cfData(IdScriptableObject obj) throws Exception {
+
+		if (obj instanceof NativeObject) {
+			Map struct = new HashMap();
+
+			NativeObject nobj = (NativeObject) obj;
+			Object[] elements = nobj.getAllIds();
+
+			Object cfdata;
+			
+			for (int x = 0; x < elements.length; x++) {
+				Object jsObj = nobj.get(elements[x]);
+
+				if (jsObj == null)
+					cfdata = null;
+				else if (jsObj instanceof NativeObject || jsObj instanceof NativeArray)
+					cfdata = jsConvert2cfData((IdScriptableObject) jsObj);
+				else
+					cfdata = jsObj;
+
+				struct.put((String) elements[x], cfdata);
+			}
+
+			return struct;
+		} else if (obj instanceof NativeArray) {
+			List array = new ArrayList();
+
+			NativeArray nobj = (NativeArray) obj;
+			Object cfdata;
+			int len = (int) nobj.getLength();
+
+			for (int x = 0; x < len; x++) {
+				Object jsObj = nobj.get(x);
+
+				if (jsObj == null)
+					cfdata = null;
+				else if (jsObj instanceof NativeObject || jsObj instanceof NativeArray)
+					cfdata = jsConvert2cfData((IdScriptableObject) jsObj);
+				else
+					cfdata = jsObj;
+				
+				array.add(cfdata);
+			}
+
+			return array;
+		} else {
+			return null;
+		}
 	}
 
 	

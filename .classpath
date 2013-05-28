@@ -7,5 +7,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/jsch-0.1.46.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mongo-2.10.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swing2swt.jar"/>
+	<classpathentry kind="lib" path="lib/js.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
