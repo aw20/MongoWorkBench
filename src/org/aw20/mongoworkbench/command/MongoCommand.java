@@ -36,11 +36,9 @@ import org.aw20.io.StreamUtil;
 import org.aw20.mongoworkbench.MongoFactory;
 import org.aw20.util.NumberUtil;
 import org.aw20.util.StringUtil;
-import org.mozilla.javascript.Context;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.Scriptable;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -218,12 +216,17 @@ public abstract class MongoCommand extends Object {
 		String jsStr = StreamUtil.readToString( this.getClass().getResourceAsStream("parseCommand.txt") ); 
 		jsStr = StringUtil.tokenReplace(jsStr, new String[]{"//_QUERY_"}, new String[]{newCmd} );
 
+		BasicDBObject cmdMap = (BasicDBObject)db.eval(jsStr, (Object[])null);
+		
+		/*
+		 * Using JavaScript Engine
 		Context cx = Context.enter();
 		cx.setLanguageVersion(Context.VERSION_1_7);
 		Scriptable scope = cx.initStandardObjects();
 		Object returnObj = cx.evaluateString(scope, jsStr, "CustomJS", 1, null);
 		
 		Map cmdMap = (Map) jsConvert2cfData( (IdScriptableObject)returnObj );
+		*/
 		
 		// Remove the helper methods
 		cmdMap.remove("find");

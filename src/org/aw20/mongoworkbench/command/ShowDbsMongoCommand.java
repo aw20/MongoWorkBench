@@ -52,7 +52,7 @@ public class ShowDbsMongoCommand extends MongoCommand {
 	
 	protected void setDBNames(MongoClient mdb){
 		try{
-			dbNames = mdb.getDatabaseNames();
+			dbNames = new ArrayList<String>( mdb.getDatabaseNames() );
 			Collections.sort(dbNames);
 		}catch(com.mongodb.MongoException e){
 			if ( e.getMessage().indexOf("unauthorized") > 0 ){

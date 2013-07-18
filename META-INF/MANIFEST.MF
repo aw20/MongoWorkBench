@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: MongoWorkBench
 Bundle-SymbolicName: org.aw20.MongoWorkBench;singleton:=true
-Bundle-Version: 0.9.4
+Bundle-Version: 0.9.5
 Bundle-Activator: org.aw20.mongoworkbench.eclipse.Activator
 Bundle-Vendor: aw2.0
 Require-Bundle: org.eclipse.ui,
@@ -11,7 +11,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: bin/,
  lib/jsch-0.1.46.jar,
- lib/mongo-2.10.1.jar,
+ lib/mongo-java-driver-3.0.0-SNAPSHOT-all.jar,
  lib/swing2swt.jar,
  lib/js.jar
 Export-Package: com.jcraft.jsch,
@@ -20,15 +20,8 @@ Export-Package: com.jcraft.jsch,
  com.jcraft.jsch.jgss,
  com.mongodb,
  com.mongodb.gridfs,
- com.mongodb.io,
- com.mongodb.tools,
- com.mongodb.util,
- com.mongodb.util.management,
- com.mongodb.util.management.jmx,
- org.bson,
  org.bson.io,
  org.bson.types,
  org.bson.util,
- org.bson.util.annotations,
  swing2swt.layout
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

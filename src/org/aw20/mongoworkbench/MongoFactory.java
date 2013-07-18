@@ -241,8 +241,8 @@ public class MongoFactory extends Thread {
 			long startTime	= System.currentTimeMillis();
 			try{
 				cmd.execute();
-			}catch(Exception e){
-				cmd.setException( e );
+			}catch(Throwable t){
+				t.printStackTrace();
 			}finally{
 				cmd.setExecTime( System.currentTimeMillis() - startTime );
 				cmd.hasRun();

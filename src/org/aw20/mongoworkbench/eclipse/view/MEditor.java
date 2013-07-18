@@ -78,8 +78,6 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.mongodb.DB;
-
 public class MEditor extends MAbstractView implements EventWorkBenchListener, MongoCommandListener {
 	private String[] allTypes = new String[]{"string","boolean","int32","int64","double","date","objectid","code","regex","binary"};
 	
@@ -663,8 +661,9 @@ public class MEditor extends MAbstractView implements EventWorkBenchListener, Mo
 		activeDocumentMap = data;
 
 		if (activeDocumentMap.get(EventWrapper.DOC_DATA) instanceof Map || activeDocumentMap.get(EventWrapper.DOC_DATA) instanceof List) {
-			DB db = MongoFactory.getInst().getMongoActiveDB();
-			textJSON.setText((String) db.eval("tojson(arguments[0])", new Object[] { activeDocumentMap.get(EventWrapper.DOC_DATA) }));
+			//DB db = MongoFactory.getInst().getMongoActiveDB();
+			//textJSON.setText((String) db.eval("tojson(arguments[0])", new Object[] { activeDocumentMap.get(EventWrapper.DOC_DATA) }));
+			textJSON.setText( JSONFormatter.format(activeDocumentMap.get(EventWrapper.DOC_DATA)) );
 		}
 
 		// Update the tree

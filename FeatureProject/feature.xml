@@ -2,7 +2,7 @@
 <feature
       id="MongoWorkBenchFeature"
       label="MongoWorkBenchFeature"
-      version="0.9.4"
+      version="0.9.5"
       provider-name="aw2.0"
       plugin="org.aw20.MongoWorkBench">
 
